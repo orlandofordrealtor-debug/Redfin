@@ -1,0 +1,1765 @@
+<title>Weekend MOD Studio</title>
+<meta name="description" content="Build, brand and send the weekend Manager on Duty email for Redfin Powered by Rocket.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: a workbench. Left rail of numbered build steps, right a live inbox preview pinned in view. */
+:root{
+  --red:#DE3341; --red-deep:#B9232F; --red-tint:#FDECEE; --red-ink:#B9232F;
+  --ink:#151417; --ink-2:#3D3A40; --muted:#6C6870; --line:#E8E4E6; --line-2:#D8D3D6;
+  --bg:#F5F2F2; --surface:#FFFFFF; --surface-2:#FAF8F8; --surface-3:#F1EDEE;
+  --ok:#1E8556; --ok-tint:#E5F4EC; --warn:#A8670F; --warn-tint:#FFF3DC;
+  --shadow:0 1px 2px rgba(40,10,15,.05),0 10px 30px -12px rgba(40,10,15,.14);
+  --shadow-lg:0 30px 80px -20px rgba(40,10,15,.35);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:14px; --r-sm:10px;
+  --logo-light:block; --logo-dark:none;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --red:#FF4F5E; --red-deep:#DE3341; --red-tint:#3A181D; --red-ink:#FF8C96;
+  --ink:#F5F2F3; --ink-2:#D9D3D6; --muted:#A39CA2; --line:#2C282C; --line-2:#3A353A;
+  --bg:#0F0D0F; --surface:#181619; --surface-2:#1D1B1F; --surface-3:#242126;
+  --ok:#4CC28A; --ok-tint:#17291F; --warn:#F0B451; --warn-tint:#2D2312;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6);
+  --shadow-lg:0 30px 80px -20px rgba(0,0,0,.8);
+  --logo-light:none; --logo-dark:block; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --red:#FF4F5E; --red-deep:#DE3341; --red-tint:#3A181D; --red-ink:#FF8C96;
+  --ink:#F5F2F3; --ink-2:#D9D3D6; --muted:#A39CA2; --line:#2C282C; --line-2:#3A353A;
+  --bg:#0F0D0F; --surface:#181619; --surface-2:#1D1B1F; --surface-3:#242126;
+  --ok:#4CC28A; --ok-tint:#17291F; --warn:#F0B451; --warn-tint:#2D2312;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6);
+  --shadow-lg:0 30px 80px -20px rgba(0,0,0,.8);
+  --logo-light:none; --logo-dark:block; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--red-ink)}
+h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.app{max-width:1480px;margin:0 auto;padding-inline:clamp(16px,2.4vw,32px);padding-block:0 64px}
+
+/* Top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:14px 0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand .logo{height:34px;width:auto}
+.brand .logo-light{display:var(--logo-light)} .brand .logo-dark{display:var(--logo-dark)}
+.brand-sep{width:1px;height:28px;background:var(--line-2)}
+.brand-name{font-weight:800;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.brand-name small{display:block;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--surface-3);border-radius:999px;margin-left:auto;overflow-x:auto;max-width:100%}
+.tab{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s}
+.tab:hover{color:var(--ink)}
+.tab.is-active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.tab-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--warn-tint);color:var(--warn);font-size:11px;font-weight:800;display:inline-grid;place-items:center}
+.who{display:flex;align-items:center;gap:10px;font-size:13px}
+.who img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.role{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--red-tint);color:var(--red-ink)}
+.banner{margin:14px 0 0;padding:12px 16px;border-radius:var(--r-sm);background:var(--warn-tint);color:var(--ink);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.banner b{color:var(--warn)}
+
+/* Build hero */
+.build-hero{display:flex;gap:24px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;padding:30px 0 22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red-ink);display:flex;align-items:center;gap:8px}
+.live{position:relative;width:10px;height:10px;border-radius:50%;background:var(--red);flex:none;margin-left:5px}
+.live::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--red);opacity:0;animation:ping 1.8s ease-out infinite}
+@keyframes ping{0%{transform:scale(.4);opacity:.8}100%{transform:scale(1.5);opacity:0}}
+.build-hero h1{font-size:clamp(30px,4.2vw,50px);font-weight:900;line-height:1.02;letter-spacing:-.035em;margin-top:8px}
+.build-hero h1 em{font-style:normal;color:var(--red)}
+.build-hero p{color:var(--muted);margin-top:8px;max-width:60ch}
+.progress{min-width:min(100%,300px);display:grid;gap:8px}
+.progress-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.bar{height:8px;border-radius:999px;background:var(--surface-3);overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--red-deep),var(--red));border-radius:inherit;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.progress-chips{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Build grid */
+.build-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}
+@media (min-width:1080px){.build-grid{grid-template-columns:minmax(380px,470px) minmax(0,1fr)}}
+.steps{display:grid;gap:14px;min-width:0}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0;animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.step:nth-child(2){animation-delay:.04s}.step:nth-child(3){animation-delay:.08s}.step:nth-child(4){animation-delay:.12s}.step:nth-child(5){animation-delay:.16s}.step:nth-child(6){animation-delay:.2s}.step:nth-child(7){animation-delay:.24s}
+@keyframes rise{from{opacity:.35;transform:translateY(10px)}to{opacity:1;transform:none}}
+.step-head{display:flex;align-items:center;gap:12px;padding:16px 18px 0}
+.step-num{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:500;background:var(--surface-3);color:var(--ink-2);flex:none;transition:background .3s,color .3s}
+.step.is-done .step-num{background:var(--red);color:#fff}
+.step-head h3{font-size:16px;font-weight:800}
+.step-head .hint{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+.step-body{padding:14px 18px 18px;display:grid;gap:12px;min-width:0}
+
+/* Forms */
+.field{display:grid;gap:6px;min-width:0}
+.field>span,.lbl{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.01em}
+.field small{font-size:12px;color:var(--muted)}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.input,.select,.textarea{width:100%;min-width:0;border:1px solid var(--line-2);background:var(--surface-2);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;transition:border-color .2s,box-shadow .2s,background .2s}
+.textarea{min-height:84px;resize:vertical;line-height:1.45}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 18%,transparent);background:var(--surface)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;transition:transform .15s,background .2s,border-color .2s,box-shadow .2s;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 8px 20px -10px var(--red)}
+.btn-primary:hover{background:var(--red-deep);border-color:var(--red-deep)}
+.btn-dark{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn-ghost:hover{background:var(--surface-3);border-color:transparent}
+.btn-sm{padding:6px 12px;font-size:13px}
+.btn-xs{padding:4px 10px;font-size:12px}
+.btn-danger{color:#C4202E;border-color:color-mix(in srgb,#C4202E 35%,var(--line-2))}
+.btn-danger.is-armed{background:#C4202E;border-color:#C4202E;color:#fff}
+.btn-lg{padding:13px 22px;font-size:15px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface-3);color:var(--ink-2);white-space:nowrap}
+.chip.red{background:var(--red-tint);color:var(--red-ink)}
+.chip.ok{background:var(--ok-tint);color:var(--ok)}
+.chip.warn{background:var(--warn-tint);color:var(--warn)}
+.chip-btn{cursor:pointer;border:1px solid var(--line-2);background:var(--surface)}
+.chip-btn:hover{border-color:var(--red)}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.switch-row:last-child{border-bottom:0}
+.switch-row b{font-size:14px;font-weight:700}
+.switch-row small{display:block;color:var(--muted);font-size:12px}
+.switch{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:999px;background:var(--line-2);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.switch:checked{background:var(--red)}
+.switch:checked::after{transform:translateX(18px)}
+.range{width:100%;accent-color:var(--red)}
+
+/* Pickers */
+.mgr-list{display:flex;gap:8px;flex-wrap:wrap}
+.mgr{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:700;font-size:13px;transition:border-color .2s,box-shadow .2s}
+.mgr img,.mgr .ini{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none}
+.ini{display:grid;place-items:center;background:var(--red-tint);color:var(--red-ink);font-size:11px;font-weight:800}
+.mgr.is-active{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 16%,transparent)}
+.hs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px}
+.hs{position:relative;aspect-ratio:1;border-radius:50%;overflow:hidden;border:3px solid transparent;cursor:pointer;padding:0;background:var(--surface-3);transition:transform .2s,border-color .2s}
+.hs img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block}
+.hs:hover{transform:scale(1.04)}
+.hs.is-active{border-color:var(--red)}
+.hs .tick{position:absolute;right:4px;bottom:4px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;display:none;place-items:center;font-weight:900}
+.hs.is-active .tick{display:grid}
+.add-tile{aspect-ratio:1;border-radius:50%;border:2px dashed var(--line-2);display:grid;place-items:center;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;background:transparent;text-align:center;line-height:1.2;padding:6px}
+.add-tile:hover{border-color:var(--red);color:var(--red-ink)}
+.crop-box{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;padding:12px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--line)}
+.crop-box canvas{width:96px;height:96px;border-radius:50%;background:var(--surface-3)}
+.sp-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sp-opt{position:relative;text-align:left;border:1px solid var(--line-2);background:var(--surface);border-radius:12px;overflow:hidden;cursor:pointer;padding:0;display:flex;flex-direction:column;transition:border-color .2s,transform .2s,box-shadow .2s}
+.sp-opt:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.sp-opt .thumb{aspect-ratio:3/2;background:var(--surface-3) center/cover no-repeat}
+.sp-opt .t{padding:8px 10px 10px;font-size:13px;font-weight:700;line-height:1.3}
+.sp-opt .t small{display:block;font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.sp-opt .badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:var(--red);color:#fff;display:none}
+.sp-opt.is-featured{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 16%,transparent)}
+.sp-opt.is-featured .badge,.sp-opt.is-extra .badge{display:block}
+.sp-opt.is-extra{border-color:var(--ink-2)}
+.sp-opt.is-extra .badge{background:var(--ink);color:var(--bg)}
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.style-opt{border:1px solid var(--line-2);background:var(--surface);border-radius:12px;padding:8px;cursor:pointer;text-align:left;display:grid;gap:8px;transition:border-color .2s,transform .2s}
+.style-opt:hover{transform:translateY(-2px)}
+.style-opt.is-active{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 16%,transparent)}
+.mini{height:92px;border-radius:8px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;padding:6px;gap:5px}
+.mini .h{border-radius:5px;height:40px;display:flex;align-items:center;gap:5px;padding:0 6px}
+.mini .h i{width:16px;height:16px;border-radius:50%;flex:none}
+.mini .h b{height:5px;border-radius:3px;flex:1;opacity:.85}
+.mini .c{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.mini .c span{border-radius:4px}
+.style-opt strong{font-size:13px}
+.style-opt small{display:block;color:var(--muted);font-size:11.5px;line-height:1.35}
+.send-panel{display:grid;gap:12px}
+.checklist{display:grid;gap:6px;font-size:13px}
+.checklist div{display:flex;gap:8px;align-items:flex-start}
+.checklist .ok{color:var(--ok);font-weight:900}
+.checklist .no{color:var(--warn);font-weight:900}
+.howto{font-size:13px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.howto ol{margin:6px 0 0;padding-left:18px;display:grid;gap:3px}
+
+/* Preview */
+.preview-col{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);min-width:0}
+.preview-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.pv-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.pv-dots{display:flex;gap:5px}.pv-dots i{width:10px;height:10px;border-radius:50%;background:var(--line-2)}
+.pv-meta{min-width:0;flex:1;font-size:12.5px;line-height:1.3}
+.pv-meta b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-meta span{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--surface-3);gap:2px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer}
+.seg button.is-active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.pv-stage{height:clamp(560px,calc(100vh - 190px),1500px);background:var(--surface-3);display:flex;justify-content:center;padding:0;position:relative}
+.pv-stage iframe{border:0;width:100%;height:100%;background:#fff;transition:opacity .25s}
+.pv-stage.phone{padding:18px 0}
+.pv-stage.phone iframe{width:390px;max-width:calc(100% - 24px);border-radius:34px;border:9px solid #141214;box-shadow:var(--shadow-lg)}
+.pv-stage.is-updating iframe{opacity:.55}
+.pv-note{font-size:12px;color:var(--muted);padding:8px 12px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+
+/* Library + core + brand */
+.page-head{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;padding:30px 0 18px}
+.page-head h2{font-size:clamp(26px,3.2vw,38px);font-weight:900;letter-spacing:-.03em;line-height:1.05}
+.page-head p{color:var(--muted);margin-top:6px;max-width:68ch}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.subtab{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink-2)}
+.subtab.is-active{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.lib-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow);min-width:0;animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.lib-card .img{aspect-ratio:3/2;background:var(--surface-3) center/cover no-repeat;position:relative}
+.lib-card .img .chip{position:absolute;left:10px;top:10px;background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.lib-card .body{padding:14px 16px;display:grid;gap:6px;flex:1;align-content:start}
+.lib-card h4{font-size:16px;font-weight:800;line-height:1.25}
+.lib-card p{font-size:13.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.lib-card .foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:10px 16px 14px;border-top:1px solid var(--line)}
+.lib-card .foot .by{font-size:12px;color:var(--muted);margin-right:auto}
+.empty{border:2px dashed var(--line-2);border-radius:16px;padding:34px 20px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
+.empty b{color:var(--ink);font-size:16px}
+.mgr-block{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:grid;gap:12px;min-width:0}
+.mgr-block-head{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.mgr-block-head .ini,.mgr-block-head img{width:44px;height:44px;border-radius:50%;object-fit:cover;font-size:14px}
+.mgr-block-head h4{font-size:16px;font-weight:800}
+.mgr-block-head .meta{font-size:13px;color:var(--muted)}
+.hs-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.hs-card{display:grid;gap:6px;font-size:12px;min-width:0}
+.hs-card .ph{aspect-ratio:4/5;border-radius:12px;background:var(--surface-3) 50% 25%/cover no-repeat;position:relative}
+.hs-card.is-default .ph{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--red)}
+.hs-card .ph .chip{position:absolute;left:6px;top:6px;font-size:10px;padding:2px 7px}
+.hs-card .lab{font-weight:700;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hs-card .acts{display:flex;gap:4px;flex-wrap:wrap;min-height:28px;align-items:center}
+.core-list{display:grid;gap:12px}
+.core-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 18px;box-shadow:var(--shadow);min-width:0}
+.core-card.is-hidden{opacity:.6}
+.core-card h4{font-size:17px;font-weight:800;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.core-card .need{font-size:13.5px;color:var(--muted);margin-top:2px}
+.core-lines{display:grid;gap:4px;margin-top:10px;font-size:13.5px}
+.core-lines div{display:grid;grid-template-columns:minmax(84px,150px) minmax(0,1fr);gap:4px 10px}
+.core-lines span{color:var(--muted)}
+.core-lines a{word-break:break-all}
+.core-side{display:grid;gap:6px;justify-items:end;align-content:start}
+.core-review{grid-column:1/-1;font-size:13px;padding:8px 12px;border-radius:10px;background:var(--warn-tint);color:var(--ink-2)}
+.core-review b{color:var(--warn)}
+@media (max-width:640px){.core-card{grid-template-columns:1fr}.core-side{justify-items:start;grid-auto-flow:column;justify-content:start}}
+.two-col{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+@media (min-width:980px){.two-col{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);display:grid;gap:12px;min-width:0}
+.panel h3{font-size:16px;font-weight:800}
+.sugg{border-top:1px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:13.5px}
+.sugg:first-of-type{border-top:0;padding-top:0}
+.logo-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line)}
+.logo-row:last-child{border-bottom:0}
+.logo-sw{height:64px;border-radius:10px;display:grid;place-items:center;padding:10px}
+.logo-sw img{max-height:40px;max-width:100%}
+@media (max-width:560px){.logo-row{grid-template-columns:1fr}}
+.access dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;font-size:14px}
+.access dt{font-weight:800}
+.access dd{margin:0;color:var(--ink-2)}
+
+/* Drawer */
+.drawer-wrap{position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end}
+.scrim{position:absolute;inset:0;background:rgba(15,10,12,.45);animation:fade .2s ease both}
+@keyframes fade{from{opacity:0}}
+.drawer{position:relative;width:min(560px,100%);height:100%;background:var(--surface);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:slide .32s cubic-bezier(.2,.8,.2,1) both;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@keyframes slide{from{transform:translateX(40px);opacity:.4}}
+.drawer-head{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.drawer-head h3{font-size:18px;font-weight:800;flex:1}
+.drawer-body{overflow:auto;padding:18px 20px;display:grid;gap:14px;align-content:start;flex:1}
+.drawer-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;background:var(--surface-2)}
+.drop{border:2px dashed var(--line-2);border-radius:14px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;display:grid;gap:8px;justify-items:center;transition:border-color .2s,background .2s}
+.drop.is-over{border-color:var(--red);background:var(--red-tint)}
+.drop img{max-height:220px;max-width:100%;border-radius:10px}
+.rep{display:grid;gap:8px}
+.rep-item{display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);position:relative}
+.rep-item .x{position:absolute;right:6px;top:6px}
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;padding-right:34px}
+.section-label{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:6px}
+
+/* Toasts */
+.toasts{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;display:grid;gap:8px;justify-items:center;pointer-events:none;width:min(92vw,520px)}
+.toast{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:var(--shadow-lg);animation:toast .35s cubic-bezier(.2,.8,.2,1) both;pointer-events:auto}
+.toast.err{background:#C4202E;color:#fff}
+@keyframes toast{from{transform:translateY(12px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.step-head .hint{display:none}@media (min-width:520px){.step-head .hint{display:block}}
+@media (max-width:720px){.brand-sep,.brand-name{display:none}.tabs{margin-left:0;order:3;width:100%}.who{margin-left:auto}}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo logo-light" src="brand/logo-primary.png" alt="Redfin Powered by Rocket">
+      <img class="logo logo-dark" src="brand/logo-reverse.png" alt="Redfin Powered by Rocket">
+      <span class="brand-sep"></span>
+      <span class="brand-name"><small>Weekend</small>MOD Studio</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Studio sections">
+      <button class="tab is-active" data-tab="build" role="tab">Build email</button>
+      <button class="tab" data-tab="library" role="tab">Library</button>
+      <button class="tab" data-tab="core" role="tab">Standard info <span class="tab-badge" id="coreBadge" hidden></span></button>
+      <button class="tab" data-tab="brand" role="tab">Brand &amp; access</button>
+    </nav>
+    <div class="who" id="who"><span class="chip">Connecting…</span></div>
+  </header>
+  <div id="banner"></div>
+
+  <main>
+    <section id="view-build" class="view">
+      <div class="build-hero">
+        <div>
+          <div class="eyebrow"><span class="live"></span><span id="bhEyebrow">Manager on Duty</span></div>
+          <h1 id="bhTitle">This weekend’s MOD email</h1>
+          <p id="bhSub">Fill in the steps on the left. The preview updates as you type, and everything you copy is ready to paste into Gmail.</p>
+        </div>
+        <div class="progress" id="bhProgress"></div>
+      </div>
+      <div class="build-grid">
+        <div class="steps" id="steps"></div>
+        <div class="preview-col">
+          <div class="preview-card">
+            <div class="pv-bar">
+              <div class="pv-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="pv-meta"><b id="pvSubject">Subject</b><span id="pvFrom">Preview</span></div>
+              <div class="seg" id="pvDevice">
+                <button data-device="desktop" class="is-active">Desktop</button>
+                <button data-device="phone">Phone</button>
+              </div>
+            </div>
+            <div class="pv-stage" id="pvStage"><iframe id="pvFrame" title="Email preview"></iframe></div>
+            <div class="pv-note"><span id="pvNote">Live preview</span><span id="pvSize" class="mono"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-library" class="view" hidden></section>
+    <section id="view-core" class="view" hidden></section>
+    <section id="view-brand" class="view" hidden></section>
+  </main>
+</div>
+
+<div class="drawer-wrap" id="drawerWrap" hidden>
+  <div class="scrim" data-action="close-drawer"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"></aside>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<input type="file" id="filePick" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- utilities ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nl2br = (s) => esc(s).replace(/\n/g, '<br>');
+const digits = (s) => String(s || '').replace(/\D/g, '');
+const e164 = (p) => { let d = digits(p); if (d.length === 10) d = '1' + d; return d.length >= 11 ? '+' + d : ''; };
+const firstName = (n) => String(n || '').trim().split(/\s+/)[0] || '';
+const initials = (n) => String(n || '').trim().split(/\s+/).map((p) => p[0] || '').slice(0, 2).join('').toUpperCase() || '?';
+const slug = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-').slice(0, 48) || 'item';
+const rid = () => Math.random().toString(36).slice(2, 7);
+const nowISO = () => new Date().toISOString();
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const abs = (p) => new URL(p, document.baseURI).href;
+const assetURL = (id) => '/_blob/' + id;
+const byOrder = (a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.title || '').localeCompare(String(b.title || ''));
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+function safeHref(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  if (/^(https?:|mailto:|tel:|sms:)/i.test(u)) return u;
+  if (/^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(u)) return 'mailto:' + u;
+  if (/^\+?[\d\s().-]{10,}$/.test(u) && e164(u)) return 'tel:' + e164(u);
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(u)) return 'https://' + u;
+  return '';
+}
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MON = MONTHS.map((m) => m.slice(0, 3));
+function nextSaturday(from = new Date()) { const d = new Date(from.getFullYear(), from.getMonth(), from.getDate()); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7)); return d; }
+function isoDay(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function parseDay(iso) { const [y, m, d] = String(iso || '').split('-').map(Number); return y ? new Date(y, m - 1, d) : nextSaturday(); }
+function weekend(iso) {
+  const sat = parseDay(iso); const sun = new Date(sat); sun.setDate(sat.getDate() + 1);
+  const same = sat.getMonth() === sun.getMonth();
+  return {
+    sat, sun,
+    long: same ? `${MONTHS[sat.getMonth()]} ${sat.getDate()}–${sun.getDate()}, ${sun.getFullYear()}` : `${MONTHS[sat.getMonth()]} ${sat.getDate()} – ${MONTHS[sun.getMonth()]} ${sun.getDate()}, ${sun.getFullYear()}`,
+    short: same ? `${MON[sat.getMonth()]} ${sat.getDate()}–${sun.getDate()}` : `${MON[sat.getMonth()]} ${sat.getDate()}–${MON[sun.getMonth()]} ${sun.getDate()}`,
+    pill: `Sat ${MON[sat.getMonth()]} ${sat.getDate()} · Sun ${MON[sun.getMonth()]} ${sun.getDate()}`,
+  };
+}
+function fmtHour(h) {
+  h = Number(h); const hh = Math.floor(h); const mm = Math.round((h - hh) * 60);
+  const ap = hh >= 12 && hh < 24 ? 'PM' : 'AM'; let h12 = hh % 12; if (h12 === 0) h12 = 12;
+  return mm ? `${h12}:${String(mm).padStart(2, '0')} ${ap}` : `${h12} ${ap}`;
+}
+function fmtWhen(iso) { if (!iso) return ''; const d = new Date(iso); if (isNaN(d)) return ''; return `${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; }
+function toast(msg, kind) {
+  const el = document.createElement('div'); el.className = 'toast' + (kind === 'err' ? ' err' : ''); el.textContent = msg;
+  $('#toasts').appendChild(el); setTimeout(() => el.remove(), kind === 'err' ? 6000 : 3200);
+}
+function errMsg(e) {
+  switch (e && e.code) {
+    case 'invalid_argument': return 'That change was refused. You may need Editor access to this Studio.';
+    case 'quota_exceeded': case 'quota_or_state': return 'Storage is full. Remove items you no longer use, then try again.';
+    case 'too_large': return 'That file is too large. Use an image under 20 MB.';
+    case 'unsupported_type': return 'Use a PNG, JPEG, WebP or GIF image.';
+    case 'rate_limited': case 'resource_exhausted': return 'Too many changes at once. Wait a moment and try again.';
+    case 'not_granted': return 'Uploading needs Editor access to this Studio.';
+    default: return 'Something went wrong. Try again in a moment.';
+  }
+}
+
+/* ---------------- state ---------------- */
+const DRAFT_KEY = 'modstudio.draft.v1';
+const DEFAULT_TOGGLES = { live: true, quick: true, spotlight: true, coverage: true, routing: true, playbooks: true, tech: true, resources: true, wins: false };
+const DEFAULT_WELCOME = 'Hi team! I’m your Manager on Duty this weekend. Keep leaning on each other for support, and reach out anytime you need me.';
+const DEFAULT_REACH = 'Text me first for anything urgent. For deal or customer questions, email me the Customer or Deal link with a quick note on how I can help.';
+function blankManager() { return { name: '', title: 'Sales Manager', market: '', phone: '', email: '', reach: DEFAULT_REACH, availStart: '', availEnd: '', signoff: 'Have a great weekend!' }; }
+function blankDraft() {
+  return { managerId: '', manager: blankManager(), saturday: isoDay(nextSaturday()), subject: '', subjectAuto: true, welcome: DEFAULT_WELCOME, wins: '', headshotId: '', crop: null, spotlightIds: [], spInit: false, toggles: { ...DEFAULT_TOGGLES }, style: 'signature', styleInit: false };
+}
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      const d = JSON.parse(raw); const b = blankDraft();
+      const out = { ...b, ...d, manager: { ...b.manager, ...(d.manager || {}) }, toggles: { ...b.toggles, ...(d.toggles || {}) } };
+      if (parseDay(out.saturday) < nextSaturday()) out.saturday = isoDay(nextSaturday());
+      return out;
+    }
+  } catch (e) { /* storage unavailable */ }
+  return blankDraft();
+}
+const saveDraft = debounce(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S.draft)); } catch (e) { /* ignore */ } }, 350);
+
+const S = {
+  mode: 'connecting', db: null, user: null, assets: null, downloads: null,
+  me: { id: null, name: '', avatarUrl: '', isOwner: false, canEdit: false }, canWrite: null,
+  core: [], managers: [], headshots: [], spotlights: [], emails: [], suggestions: [], brandDocs: [], brand: {},
+  loaded: new Set(), people: {},
+  tab: 'build', libTab: 'spotlights', device: 'desktop', replay: false, pendingFile: null,
+  draft: loadDraft(),
+};
+const canAdd = () => S.mode === 'live' && S.canWrite !== false;
+const canUpload = () => canAdd() && !!S.assets;
+const canEditCore = () => S.mode === 'live' && S.me.isOwner;
+const canDelete = (item) => S.me.isOwner || (!!item && !!S.me.id && item.createdBy === S.me.id);
+const adminName = () => brandSettings().adminName || 'the Studio owner';
+const personName = (id) => (id && S.people[id] && S.people[id].name) || '';
+
+function brandSettings() {
+  const b = S.brand || {};
+  return {
+    region: b.region || 'Southern California',
+    program: b.program || 'Weekend Manager on Duty',
+    footer: b.footer || '',
+    adminName: b.adminName || '',
+    defaultStyle: b.defaultStyle || 'signature',
+    tz: b.tz || 'All times Pacific.',
+    logos: b.logos || {},
+    dots: b.dots || {},
+  };
+}
+
+/* ---------------- email styles ---------------- */
+const SANS = "'Helvetica Neue',Helvetica,Arial,sans-serif";
+const SERIF = "Georgia,'Times New Roman',Times,serif";
+const HEAVY = "'Arial Black','Helvetica Neue',Helvetica,Arial,sans-serif";
+const STYLES = {
+  signature: { name: 'Signature Red', blurb: 'White canvas, bold red hero. The classic.', page: '#F2F1F3', card: '#FFFFFF', ink: '#161618', muted: '#5F5E66', line: '#E7E5EA', track: '#ECEAEE', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDEDEF', tile: '#F7F5F7', tileBorder: '', heroBg: '#DE3341', heroGrad: '', heroInk: '#FFFFFF', heroMuted: '#FFE0E4', heroBtnBg: '#FFFFFF', heroBtnInk: '#B9232F', heroBtn2Border: '#FFFFFF', heroBtn2Ink: '#FFFFFF', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'light', pillBg: '#FFFFFF', pillInk: '#B9232F', head: SANS, headWeight: 800, radius: 18, avatar: 'circle', ring: '4px solid #FFFFFF', hero: 'band', warnInk: '#8F5200', warnBg: '#FFF4DE' },
+  afterhours: { name: 'After Hours', blurb: 'Dark and premium. Red glows on charcoal.', page: '#0B0B0D', card: '#161619', ink: '#F3F3F5', muted: '#A3A3AD', line: '#2A2A30', track: '#26262B', accent: '#FF4B5A', accentDeep: '#DE3341', onAccent: '#FFFFFF', tint: '#2A1619', tile: '#1E1E22', tileBorder: '', heroBg: '#161619', heroGrad: '', heroInk: '#FFFFFF', heroMuted: '#B4B4BE', heroBtnBg: '#FF4B5A', heroBtnInk: '#FFFFFF', heroBtn2Border: '#44444C', heroBtn2Ink: '#FFFFFF', logo: 'reverse', logoInHero: true, footLogo: 'reverse', dot: 'dark', pillBg: '#26262A', pillInk: '#FF8A94', head: SANS, headWeight: 800, radius: 18, avatar: 'circle', ring: '3px solid #FF4B5A', hero: 'band', warnInk: '#F0B451', warnBg: '#2D2312' },
+  golden: { name: 'Golden Hour', blurb: 'Warm SoCal sunset gradient. Upbeat.', page: '#FFF4EC', card: '#FFFFFF', ink: '#2B1A15', muted: '#7C625A', line: '#F1DACB', track: '#F6E6DB', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FFEBDF', tile: '#FFF7F1', tileBorder: '', heroBg: '#E4503F', heroGrad: 'linear-gradient(135deg,#DE3341 0%,#EF8648 100%)', heroInk: '#FFFFFF', heroMuted: '#FFE6D8', heroBtnBg: '#FFFFFF', heroBtnInk: '#C2362F', heroBtn2Border: '#FFFFFF', heroBtn2Ink: '#FFFFFF', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'light', pillBg: '#FFFFFF', pillInk: '#C2362F', head: SANS, headWeight: 800, radius: 24, avatar: 'circle', ring: '4px solid #FFFFFF', hero: 'band', warnInk: '#8F5200', warnBg: '#FFF1DC' },
+  executive: { name: 'Executive Brief', blurb: 'Quiet, text-first, serif headlines.', page: '#FFFFFF', card: '#FFFFFF', ink: '#111111', muted: '#66616A', line: '#E3E1E4', track: '#EEECEF', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FBEFF0', tile: '#FFFFFF', tileBorder: '1px solid #E3E1E4', heroBg: '#FFFFFF', heroGrad: '', heroInk: '#111111', heroMuted: '#66616A', heroBtnBg: '#111111', heroBtnInk: '#FFFFFF', heroBtn2Border: '#CFCBD0', heroBtn2Ink: '#111111', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'tint', pillBg: '#FDECEE', pillInk: '#B9232F', head: SERIF, headWeight: 700, radius: 6, avatar: 'circle-small', ring: '0', hero: 'exec', cardBorder: true, warnInk: '#8A5300', warnBg: '#FFF5E3' },
+  billboard: { name: 'Billboard', blurb: 'Huge type in black and red. Hard to miss.', page: '#ECEBEC', card: '#FFFFFF', ink: '#111111', muted: '#5C5B5E', line: '#DCDADC', track: '#E8E6E8', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDECEE', tile: '#F3F2F3', tileBorder: '', heroBg: '#111111', heroGrad: '', heroInk: '#FFFFFF', heroMuted: '#BDBCBF', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#FFFFFF', heroBtn2Ink: '#FFFFFF', logo: 'reverse', logoInHero: true, footLogo: 'primary', dot: 'red', pillBg: '#DE3341', pillInk: '#FFFFFF', head: HEAVY, headWeight: 900, radius: 0, avatar: 'portrait', ring: '0', hero: 'billboard', upper: true, warnInk: '#8A5300', warnBg: '#FFF2DC' },
+};
+const BUILTIN = {
+  primary: 'brand/logo-primary.png', reverse: 'brand/logo-reverse.png', white: 'brand/logo-white.png',
+  light: 'brand/live-dot-light.gif', dark: 'brand/live-dot-dark.gif', tint: 'brand/live-dot-tint.gif', red: 'brand/live-dot-red.gif',
+};
+
+/* ---------------- email renderer (inline styles only, table layout) ---------------- */
+const ff = (family, size, weight = 400, lh = 1.5, extra = '') => `font-family:${family};font-size:${size}px;font-weight:${weight};line-height:${lh};${extra}`;
+const TBL = 'role="presentation" cellpadding="0" cellspacing="0" border="0"';
+const spacer = (h) => `<div style="height:${h}px;line-height:${h}px;font-size:0">&nbsp;</div>`;
+
+function ebtn(href, label, bg, fg, o = {}) {
+  if (!href) return '';
+  const pad = o.small ? '9px 16px' : '13px 22px';
+  const border = `border:2px solid ${o.border || bg};`;
+  return `<a href="${esc(href)}" target="_blank" class="${o.cls || ''}" style="display:inline-block;margin:0 8px 8px 0;background:${bg};${border}color:${fg};border-radius:${o.radius ?? 999}px;padding:${pad};${ff(SANS, o.small ? 13 : 15, 700, 1.1)}text-decoration:none;white-space:nowrap">${esc(label)}</a>`;
+}
+function ehead(s, eyebrow, title, o = {}) {
+  const t = s.upper ? String(title || '').toUpperCase() : title;
+  return (eyebrow ? `<div style="${ff(SANS, 11, 800, 1.4, `letter-spacing:1.6px;text-transform:uppercase;color:${s.accent};margin:0 0 6px;`)}">${esc(eyebrow)}</div>` : '') +
+    (title ? `<div style="${ff(s.head, o.size || 22, s.headWeight, 1.2, `color:${s.ink};margin:0 0 ${o.mb ?? 16}px;${s.upper ? 'letter-spacing:-.3px;' : ''}`)}">${esc(t)}</div>` : '');
+}
+function ecard(s, inner, o = {}) {
+  const bg = o.bg || s.card;
+  const border = s.cardBorder ? `border:1px solid ${s.line};` : '';
+  const top = o.topRule ? `border-top:4px solid ${s.accent};` : '';
+  return `<table ${TBL} width="100%" bgcolor="${bg}" style="background:${bg};border-radius:${s.radius}px;${border}${top}border-collapse:separate"><tr><td style="padding:${o.pad || '26px 24px'}">${inner}</td></tr></table>`;
+}
+function ecols(items, widths, o = {}) {
+  const list = items.filter((x) => x !== null && x !== undefined && x !== '');
+  if (!list.length) return '';
+  const pad = o.gap ?? 4;
+  return `<div style="font-size:0;line-height:0">${list.map((h, i) => `<div style="display:inline-block;vertical-align:${o.valign || 'top'};width:100%;max-width:${Array.isArray(widths) ? widths[i] : widths}px;font-size:15px;line-height:1.5"><div style="padding:${pad}px">${h}</div></div>`).join('')}</div>`;
+}
+function epill(s, img, text) {
+  return `<table ${TBL} style="border-collapse:separate"><tr><td bgcolor="${s.pillBg}" style="background:${s.pillBg};border-radius:999px;padding:5px 14px 5px ${img.dot ? 7 : 14}px;white-space:nowrap">${img.dot ? `<img src="${esc(img.dot)}" width="20" height="20" alt="" style="display:inline-block;vertical-align:middle;border:0;width:20px;height:20px">` : ''}<span style="${ff(SANS, 11, 800, 1, `letter-spacing:1.3px;text-transform:uppercase;color:${s.pillInk};vertical-align:middle;padding-left:${img.dot ? 5 : 0}px`)}">${esc(text)}</span></td></tr></table>`;
+}
+function elink(href, text, color, weight = 700) {
+  const h = safeHref(href);
+  return h ? `<a href="${esc(h)}" target="_blank" style="color:${color};text-decoration:none;font-weight:${weight}">${esc(text)}</a>` : esc(text);
+}
+
+function eLogoBar(m, s, img) {
+  return `<table ${TBL} width="100%"><tr><td align="left" valign="middle" style="padding:2px 4px 14px">${img.logo ? `<img src="${esc(img.logo)}" width="150" alt="Redfin Powered by Rocket" style="display:block;width:150px;height:auto;border:0">` : `<span style="${ff(SANS, 18, 800, 1.2, `color:${s.accent}`)}">Redfin</span>`}</td><td align="right" valign="middle" style="padding:2px 4px 14px;${ff(SANS, 11, 800, 1.35, `letter-spacing:1.3px;text-transform:uppercase;color:${s.muted}`)}">Weekend MOD<br><span style="color:${s.accent}">${esc(m.weekend.short)}</span></td></tr></table>`;
+}
+
+function eHero(m, s, img) {
+  const mg = m.manager; const first = firstName(mg.name); const tel = e164(mg.phone);
+  const name = mg.name || 'Your Manager on Duty';
+  const sub = [mg.title, mg.market].filter(Boolean).join(' · ');
+  const pillTxt = `On duty · ${m.weekend.pill}`;
+  const btns = [
+    tel ? ebtn('sms:' + tel, `Text ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : (mg.email ? ebtn('mailto:' + mg.email, `Email ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : ''),
+    tel ? ebtn('tel:' + tel, 'Call', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
+    tel && mg.email ? ebtn('mailto:' + mg.email, 'Email', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
+  ].join('');
+  const welcome = m.welcome ? `<div style="${ff(SANS, 15.5, 400, 1.55, `color:${s.heroInk};margin:0 0 18px`)}">${nl2br(m.welcome)}</div>` : '';
+  const reach = mg.reach ? `<div style="${ff(SANS, 13, 400, 1.5, `color:${s.heroMuted};margin:4px 0 0`)}">${nl2br(mg.reach)}</div>` : '';
+  const contactLine = [mg.phone ? elink('tel:' + tel, mg.phone, s.heroInk, 700) : '', mg.email ? elink('mailto:' + mg.email, mg.email, s.heroInk, 600) : ''].filter(Boolean).join(` <span style="color:${s.heroMuted}">·</span> `);
+
+  if (s.hero === 'exec') {
+    const av = img.headshot ? `<img src="${esc(img.headshot)}" width="68" height="68" alt="${esc(name)}" style="display:block;width:68px;height:68px;border-radius:50%;border:0">` : '';
+    const inner = `${epill(s, img, pillTxt)}${spacer(18)}
+      <div style="${ff(s.head, 31, 700, 1.15, `color:${s.ink};margin:0 0 18px`)}">${mg.name ? `${esc(mg.name)} is your Manager on Duty this weekend.` : 'Your Manager on Duty this weekend.'}</div>
+      <table ${TBL}><tr>${av ? `<td width="82" valign="middle">${av}</td>` : ''}<td valign="middle"><div style="${ff(SANS, 15, 700, 1.4, `color:${s.ink}`)}">${esc(sub)}</div><div style="${ff(SANS, 14, 400, 1.5, `color:${s.muted}`)}">${contactLine.replaceAll(s.heroInk, s.ink)}</div></td></tr></table>
+      ${spacer(16)}${welcome}<div>${btns}</div>${reach}`;
+    return ecard(s, inner, { pad: '30px 26px 24px', topRule: true });
+  }
+
+  if (s.hero === 'billboard') {
+    const pic = img.portrait ? `<img src="${esc(img.portrait)}" width="200" height="250" alt="${esc(name)}" style="display:block;width:200px;height:250px;border:0;margin:0 0 16px">` : '';
+    const text = `<div style="${ff(SANS, 12, 800, 1.4, `letter-spacing:1.4px;text-transform:uppercase;color:${s.heroMuted};margin:0 0 6px`)}">Your Manager on Duty</div>
+      <div style="${ff(HEAVY, 26, 900, 1.05, `color:${s.heroInk};text-transform:uppercase;margin:0 0 8px;letter-spacing:-.3px`)}">${esc(name)}</div>
+      ${sub ? `<div style="${ff(SANS, 14, 600, 1.4, `color:${s.heroMuted};margin:0 0 14px`)}">${esc(sub)}</div>` : ''}${welcome}<div>${btns}</div>${reach}`;
+    const inner = `${img.logo ? `<img src="${esc(img.logo)}" width="140" alt="Redfin Powered by Rocket" style="display:block;width:140px;height:auto;border:0">` : ''}
+      <div class="mod-shine" style="${ff(HEAVY, 58, 900, 0.95, `color:${s.accent};letter-spacing:-2px;margin:20px 0 14px;text-transform:uppercase`)}">On duty.</div>
+      ${epill(s, img, pillTxt)}${spacer(22)}${ecols([pic, text], [216, 368])}`;
+    return `<table ${TBL} width="100%" bgcolor="${s.heroBg}" style="background:${s.heroBg};border-collapse:separate"><tr><td style="padding:28px 26px 20px">${inner}</td></tr></table>`;
+  }
+
+  const av = img.headshot ? `<img src="${esc(img.headshot)}" width="136" height="136" alt="${esc(name)}" style="display:block;width:136px;height:136px;border-radius:50%;border:${s.ring};margin:0 0 18px">` : '';
+  const text = `<div style="${ff(SANS, 12, 800, 1.4, `letter-spacing:1.4px;text-transform:uppercase;color:${s.heroMuted};margin:0 0 6px`)}">Your Manager on Duty</div>
+    <div style="${ff(s.head, 32, s.headWeight, 1.1, `color:${s.heroInk};margin:0 0 6px;letter-spacing:-.5px`)}">${esc(name)}</div>
+    ${sub ? `<div style="${ff(SANS, 15, 600, 1.4, `color:${s.heroMuted};margin:0 0 16px`)}">${esc(sub)}</div>` : ''}${welcome}<div>${btns}</div>${reach}`;
+  const logo = s.logoInHero && img.logo ? `<img src="${esc(img.logo)}" width="140" alt="Redfin Powered by Rocket" style="display:block;width:140px;height:auto;border:0;margin:0 0 22px">` : '';
+  const inner = `${logo}${epill(s, img, pillTxt)}${spacer(20)}${ecols([av, text], [164, 420])}`;
+  return `<table ${TBL} width="100%" bgcolor="${s.heroBg}" style="background:${s.heroBg};${s.heroGrad ? `background-image:${s.heroGrad};` : ''}border-radius:${s.radius}px;border-collapse:separate"><tr><td style="padding:28px 26px 22px">${inner}</td></tr></table>`;
+}
+
+function eQuick(m, s) {
+  const secs = m.core.filter((c) => c.visible !== false && c.quick && (c.lines || []).length && c.kind !== 'links');
+  if (!secs.length) return '';
+  const tiles = secs.map((c) => {
+    const lines = (c.lines || []).slice(0, 2).map((l, i) => `<div style="margin-top:${i ? 6 : 8}px">${l.label ? `<div style="${ff(SANS, 11.5, 600, 1.3, `color:${s.muted}`)}">${esc(l.label)}</div>` : ''}<div style="${ff(SANS, i ? 13.5 : 14.5, 400, 1.35, `color:${s.ink};word-break:break-word`)}">${elink(l.href || l.value, l.value, s.ink, i ? 600 : 700)}</div></div>`).join('');
+    return `<table ${TBL} width="100%" bgcolor="${s.tile}" style="background:${s.tile};border-radius:${Math.max(0, s.radius - 6)}px;${s.tileBorder ? `border:${s.tileBorder};` : ''}border-collapse:separate"><tr><td style="padding:16px 16px 15px">
+      <div style="${ff(SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
+      <div style="${ff(SANS, 16, 800, 1.3, `color:${s.ink};margin-top:3px`)}">${esc(c.title)}</div>${lines}
+      ${c.hoursText ? `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:8px`)}">${esc(c.hoursText)}</div>` : ''}
+    </td></tr></table>`;
+  });
+  return ecard(s, ehead(s, 'Need help now?', 'Tap to reach the right team') + ecols(tiles, 295));
+}
+
+function eSpotlight(m, s, img) {
+  const [f, ...rest] = m.spotlights;
+  if (!f) return '';
+  let h = ehead(s, `This weekend’s focus${f.category ? ' · ' + f.category : ''}`, f.title, { size: 26 });
+  const src = img.spot[f.id];
+  if (src) {
+    const pic = `<img src="${esc(src)}" width="592" alt="${esc(f.title)}" style="display:block;width:100%;max-width:592px;height:auto;border:0;border-radius:${Math.max(0, s.radius - 8)}px">`;
+    const link = safeHref(f.ctaUrl);
+    h += (link ? `<a href="${esc(link)}" target="_blank" style="text-decoration:none">${pic}</a>` : pic) + spacer(18);
+  }
+  if (f.summary) h += `<div style="${ff(SANS, 15.5, 400, 1.6, `color:${s.ink};margin:0 0 18px`)}">${nl2br(f.summary)}</div>`;
+  const tk = (f.takeaways || []).filter(Boolean);
+  if (tk.length) {
+    h += `<div style="${ff(SANS, 12, 800, 1.4, `letter-spacing:1.3px;text-transform:uppercase;color:${s.muted};margin:0 0 10px`)}">What to know</div>`;
+    h += `<table ${TBL} width="100%">${tk.map((t, i) => `<tr><td width="40" valign="top" style="padding:0 0 12px"><table ${TBL}><tr><td width="28" height="28" align="center" valign="middle" bgcolor="${s.accent}" style="background:${s.accent};border-radius:50%;${ff(SANS, 13, 800, 1, `color:${s.onAccent}`)}">${i + 1}</td></tr></table></td><td valign="top" style="padding:3px 0 12px;${ff(SANS, 15, 400, 1.5, `color:${s.ink}`)}">${esc(t)}</td></tr>`).join('')}</table>`;
+  }
+  const pr = (f.prompts || []).filter(Boolean);
+  if (pr.length) {
+    h += `${spacer(6)}<div style="${ff(SANS, 12, 800, 1.4, `letter-spacing:1.3px;text-transform:uppercase;color:${s.muted};margin:0 0 10px`)}">${esc(f.promptsLabel || 'Try these')}</div>`;
+    h += pr.map((p) => `<div style="background:${s.tint};border-left:3px solid ${s.accent};border-radius:${Math.min(8, s.radius)}px;padding:11px 14px;margin:0 0 8px;${ff(SANS, 15, 500, 1.45, `color:${s.ink}`)}">“${esc(p.replace(/^["“”]+|["“”]+$/g, ''))}”</div>`).join('');
+  }
+  if (f.ctaLabel) {
+    const link = safeHref(f.ctaUrl);
+    h += spacer(10) + (link ? ebtn(link, f.ctaLabel, s.accent, s.onAccent) : `<div style="${ff(SANS, 15, 700, 1.5, `color:${s.accent}`)}">${esc(f.ctaLabel)}</div>`);
+  }
+  const more = rest.filter(Boolean);
+  if (more.length) {
+    h += `${spacer(14)}<div style="border-top:1px solid ${s.line};padding-top:16px;${ff(SANS, 12, 800, 1.4, `letter-spacing:1.3px;text-transform:uppercase;color:${s.muted}`)}">Also on our radar</div>`;
+    h += more.map((x) => {
+      const th = img.thumb[x.id]; const link = safeHref(x.ctaUrl);
+      return `<table ${TBL} width="100%" style="margin-top:12px"><tr>${th ? `<td width="92" valign="top"><img src="${esc(th)}" width="80" height="80" alt="" style="display:block;width:80px;height:80px;border-radius:${Math.min(10, s.radius)}px;border:0"></td>` : ''}<td valign="top">
+        <div style="${ff(SANS, 15.5, 800, 1.3, `color:${s.ink}`)}">${esc(x.title)}</div>
+        ${x.summary ? `<div style="${ff(SANS, 13.5, 400, 1.45, `color:${s.muted};margin-top:3px`)}">${esc(String(x.summary).slice(0, 180))}${String(x.summary).length > 180 ? '…' : ''}</div>` : ''}
+        ${link ? `<div style="margin-top:6px">${elink(link, (x.ctaLabel || 'Learn more') + ' →', s.accent)}</div>` : ''}
+      </td></tr></table>`;
+    }).join('');
+  }
+  return ecard(s, h);
+}
+
+function eCoverage(m, s) {
+  const AX0 = 6, AX1 = 21;
+  const entries = [];
+  const mg = m.manager;
+  if (mg.availStart !== '' && mg.availEnd !== '' && Number(mg.availEnd) > Number(mg.availStart)) entries.push({ days: ['sat', 'sun'], start: Number(mg.availStart), end: Number(mg.availEnd), label: `${firstName(mg.name) || 'Your MOD'} (MOD)`, mod: true });
+  m.core.filter((c) => c.visible !== false).forEach((c) => (c.coverage || []).forEach((cv) => { if (Number(cv.end) > Number(cv.start)) entries.push({ ...cv, start: Number(cv.start), end: Number(cv.end), label: cv.label || c.kicker || c.title }); }));
+  if (!entries.length) return '';
+  const total = AX1 - AX0;
+  const bar = (r) => {
+    const a = clamp(r.start, AX0, AX1), b = clamp(r.end, AX0, AX1);
+    const left = ((a - AX0) / total) * 100, w = Math.max(3, ((b - a) / total) * 100), right = Math.max(0, 100 - left - w);
+    const color = r.mod ? s.ink : s.accent;
+    return `<table ${TBL} width="100%"><tr><td style="${ff(SANS, 13, 700, 1.3, `color:${s.ink}`)}">${esc(r.label)}</td><td align="right" style="${ff(SANS, 12, 400, 1.3, `color:${s.muted};white-space:nowrap`)}">${fmtHour(r.start)}–${fmtHour(r.end)}</td></tr></table>
+      <table ${TBL} width="100%" bgcolor="${s.track}" style="background:${s.track};border-radius:6px;margin:5px 0 13px;border-collapse:separate"><tr>${left > 0.5 ? `<td width="${left.toFixed(1)}%" style="height:10px;font-size:0;line-height:0">&nbsp;</td>` : ''}<td width="${w.toFixed(1)}%" bgcolor="${color}" style="background:${color};border-radius:6px;height:10px;font-size:0;line-height:0">&nbsp;</td>${right > 0.5 ? `<td width="${right.toFixed(1)}%" style="font-size:0;line-height:0">&nbsp;</td>` : ''}</tr></table>`;
+  };
+  const axis = `<table ${TBL} width="100%"><tr>${['6a', '9a', '12p', '3p', '6p'].map((t) => `<td width="20%" style="border-left:1px solid ${s.line};padding-left:4px;${ff(SANS, 10.5, 600, 1.2, `color:${s.muted}`)}">${t}</td>`).join('')}</tr></table>`;
+  const day = (key, label) => {
+    const rows = entries.filter((e) => (e.days || []).includes(key));
+    if (!rows.length) return '';
+    return `<div style="${ff(SANS, 15, 800, 1.3, `color:${s.ink};margin:0 0 10px`)}">${label}</div>${rows.map(bar).join('')}${axis}`;
+  };
+  return ecard(s, ehead(s, 'Weekend coverage', 'Who’s on, and when') + ecols([day('sat', `Saturday · ${MON[m.weekend.sat.getMonth()]} ${m.weekend.sat.getDate()}`), day('sun', `Sunday · ${MON[m.weekend.sun.getMonth()]} ${m.weekend.sun.getDate()}`)], 295, { gap: 6 }) +
+    `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:10px`)}">${esc(m.brand.tz)}</div>`);
+}
+
+function eRouting(m, s) {
+  const rows = [];
+  const mg = m.manager; const first = firstName(mg.name); const tel = e164(mg.phone);
+  if (mg.name) rows.push({ need: 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? 'sms:' + tel : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
+  m.core.filter((c) => c.visible !== false && c.need && c.kind !== 'links' && !(c.group === 'tech' && m.toggles.tech)).forEach((c) => {
+    const l = (c.lines || [])[0] || {}; const detailed = (c.steps || []).length || c.group === 'tech';
+    rows.push({ need: c.need, title: c.title, href: l.href || l.value, value: l.value, hours: c.hoursText, summary: detailed ? '' : c.summary, note: detailed ? '' : c.note });
+  });
+  if (!rows.length) return '';
+  const body = rows.map((r, i) => `<tr><td style="padding:${i ? 14 : 2}px 0 14px;${i ? `border-top:1px solid ${s.line};` : ''}">
+      <div style="${ff(SANS, 15.5, 800, 1.35, `color:${s.ink}`)}">${esc(r.need)}</div>
+      <div style="${ff(SANS, 14, 400, 1.5, `color:${s.ink};margin-top:4px`)}"><span style="color:${s.accent};font-weight:800">→</span> <b>${esc(r.title)}</b>${r.value ? ` <span style="color:${s.muted}">·</span> ${elink(r.href, r.value, s.accent)}` : ''}</div>
+      ${r.hours ? `<div style="${ff(SANS, 12.5, 400, 1.45, `color:${s.muted};margin-top:2px`)}">${esc(r.hours)}</div>` : ''}
+      ${r.summary ? `<div style="${ff(SANS, 13.5, 400, 1.5, `color:${s.muted};margin-top:4px`)}">${esc(r.summary)}</div>` : ''}
+      ${r.note ? `<div style="${ff(SANS, 13, 600, 1.45, `color:${s.warnInk};background:${s.warnBg};border-radius:8px;padding:7px 10px;margin-top:8px`)}">Heads up: ${esc(r.note)}</div>` : ''}
+    </td></tr>`).join('');
+  return ecard(s, ehead(s, 'Quick guide', 'Who to contact for what') + `<table ${TBL} width="100%">${body}</table>`);
+}
+
+function ePlaybooks(m, s) {
+  return m.core.filter((c) => c.visible !== false && (c.steps || []).length && c.group !== 'tech' && c.kind !== 'links').map((c) => {
+    const st = c.steps;
+    let h = ehead(s, c.kicker ? `${c.kicker} playbook` : 'Playbook', c.title);
+    if (c.summary) h += `<div style="${ff(SANS, 15, 400, 1.55, `color:${s.muted};margin:-6px 0 18px`)}">${esc(c.summary)}</div>`;
+    h += `<table ${TBL} width="100%">${st.map((x, i) => {
+      const last = i === st.length - 1; const href = safeHref(x.href);
+      return `<tr><td width="46" valign="top" style="padding:0 0 ${last ? 0 : 18}px"><table ${TBL}><tr><td width="32" height="32" align="center" valign="middle" bgcolor="${s.accent}" style="background:${s.accent};border-radius:50%;${ff(SANS, 14, 800, 1, `color:${s.onAccent}`)}">${i + 1}</td></tr></table></td>
+        <td valign="top" style="padding:4px 0 ${last ? 0 : 18}px">
+          <div style="${ff(SANS, 15.5, 800, 1.35, `color:${s.ink}`)}">${esc(x.title)}</div>
+          ${x.body ? `<div style="${ff(SANS, 14, 400, 1.5, `color:${s.muted};margin-top:3px`)}">${esc(x.body)}</div>` : ''}
+          ${href && x.cta ? `<div style="margin-top:10px">${ebtn(href, x.cta, s.card, s.accent, { small: true, border: s.accent })}</div>` : ''}
+        </td></tr>`;
+    }).join('')}</table>`;
+    const extra = (c.lines || []).filter((l) => /^https?:/i.test(safeHref(l.href || l.value)));
+    if (extra.length) h += `<div style="${ff(SANS, 13.5, 400, 1.5, `color:${s.muted};margin-top:14px;border-top:1px solid ${s.line};padding-top:12px`)}">${extra.map((l) => elink(l.href || l.value, `${l.label || l.value} →`, s.accent)).join(' &nbsp; ')}</div>`;
+    if (c.note) h += `<div style="${ff(SANS, 13, 600, 1.45, `color:${s.warnInk};background:${s.warnBg};border-radius:8px;padding:8px 11px;margin-top:12px`)}">Heads up: ${esc(c.note)}</div>`;
+    return ecard(s, h);
+  });
+}
+
+function eTech(m, s) {
+  const secs = m.core.filter((c) => c.visible !== false && c.group === 'tech');
+  if (!secs.length) return '';
+  const lanes = secs.map((c) => {
+    const btns = (c.lines || []).map((l, i) => ebtn(safeHref(l.href || l.value), l.label || l.value, i ? s.card : s.accent, i ? s.accent : s.onAccent, { small: true, border: s.accent })).join('');
+    return `<table ${TBL} width="100%" bgcolor="${s.tile}" style="background:${s.tile};border-radius:${Math.max(0, s.radius - 6)}px;${s.tileBorder ? `border:${s.tileBorder};` : ''}border-collapse:separate"><tr><td style="padding:18px 16px 12px">
+      <div style="${ff(SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
+      <div style="${ff(SANS, 17, 800, 1.3, `color:${s.ink};margin:3px 0 6px`)}">${esc(c.title)}</div>
+      ${c.need ? `<div style="${ff(SANS, 13.5, 700, 1.45, `color:${s.ink};margin:0 0 4px`)}">${esc(c.need)}</div>` : ''}
+      ${c.summary ? `<div style="${ff(SANS, 13.5, 400, 1.5, `color:${s.muted};margin:0 0 12px`)}">${esc(c.summary)}</div>` : ''}
+      <div>${btns}</div>
+      ${c.hoursText ? `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin:2px 0 6px`)}">${esc(c.hoursText)}</div>` : ''}
+      ${c.note ? `<div style="${ff(SANS, 12.5, 600, 1.45, `color:${s.warnInk};background:${s.warnBg};border-radius:8px;padding:7px 10px;margin:6px 0 4px`)}">${esc(c.note)}</div>` : ''}
+    </td></tr></table>`;
+  });
+  return ecard(s, ehead(s, 'Tech help', 'Pick the right lane') + ecols(lanes, 295));
+}
+
+function eResources(m, s) {
+  return m.core.filter((c) => c.visible !== false && c.kind === 'links' && (c.lines || []).length).map((c) => ecard(s,
+    ehead(s, c.kicker || 'Self-serve', c.title) + (c.summary ? `<div style="${ff(SANS, 14.5, 400, 1.55, `color:${s.muted};margin:-6px 0 14px`)}">${esc(c.summary)}</div>` : '') +
+    ecols(c.lines.map((l) => `<div style="border-top:2px solid ${s.accent};padding:10px 2px 6px;${ff(SANS, 15, 800, 1.35, `color:${s.ink}`)}">${elink(l.href || l.value, l.label || l.value, s.ink, 800)} <span style="color:${s.accent};font-weight:800">→</span>${l.label && l.value ? `<div style="${ff(SANS, 13, 400, 1.45, `color:${s.muted};margin-top:3px`)}">${esc(l.value)}</div>` : ''}</div>`), 295, { gap: 6 })));
+}
+
+function eWins(m, s) {
+  const lines = String(m.wins || '').split('\n').map((x) => x.trim()).filter(Boolean);
+  if (!lines.length) return '';
+  return ecard(s, ehead(s, 'Wins & shout-outs', 'Celebrating the team') + lines.map((l, i) => `<div style="padding:9px 0;${i ? `border-top:1px solid ${s.line};` : ''}${ff(SANS, 15, 400, 1.5, `color:${s.ink}`)}"><span style="color:${s.accent};font-weight:900">★</span>&nbsp; ${esc(l)}</div>`).join(''));
+}
+
+function eSignoff(m, s, img) {
+  const mg = m.manager; const tel = e164(mg.phone);
+  const contact = [mg.phone ? elink('tel:' + tel, mg.phone, s.accent) : '', mg.email ? elink('mailto:' + mg.email, mg.email, s.accent, 600) : ''].filter(Boolean).join(` <span style="color:${s.muted}">·</span> `);
+  return ecard(s, `<div style="${ff(s.head, 21, s.headWeight, 1.3, `color:${s.ink};margin:0 0 16px`)}">${esc(s.upper ? String(mg.signoff || '').toUpperCase() : mg.signoff || '')}</div>
+    <table ${TBL}><tr>${img.headshotSm ? `<td width="66" valign="middle"><img src="${esc(img.headshotSm)}" width="54" height="54" alt="" style="display:block;width:54px;height:54px;border-radius:50%;border:0"></td>` : ''}<td valign="middle">
+      <div style="${ff(SANS, 15.5, 800, 1.35, `color:${s.ink}`)}">${esc(mg.name)}</div>
+      <div style="${ff(SANS, 13, 400, 1.45, `color:${s.muted}`)}">${esc([mg.title, 'Manager on Duty'].filter(Boolean).join(' · '))}</div>
+      ${contact ? `<div style="${ff(SANS, 13, 400, 1.5, `color:${s.muted};margin-top:2px`)}">${contact}</div>` : ''}
+    </td></tr></table>`);
+}
+
+function eFooter(m, s, img) {
+  const b = m.brand;
+  return `<table ${TBL} width="100%"><tr><td align="center" style="padding:14px 12px 4px">
+    ${img.footLogo ? `<img src="${esc(img.footLogo)}" width="118" alt="Redfin Powered by Rocket" style="display:block;width:118px;height:auto;border:0;margin:0 auto 10px">` : ''}
+    <div style="${ff(SANS, 12, 600, 1.5, `color:${s.muted}`)}">${esc(b.region)} · ${esc(b.program)}</div>
+    ${b.footer ? `<div style="${ff(SANS, 12, 400, 1.5, `color:${s.muted};margin-top:2px`)}">${esc(b.footer)}</div>` : ''}
+  </td></tr></table>`;
+}
+
+function renderEmail(m, key, img, o = {}) {
+  const s = STYLES[key] || STYLES.signature;
+  const t = m.toggles || DEFAULT_TOGGLES;
+  const blocks = [];
+  if (!s.logoInHero) blocks.push(eLogoBar(m, s, img));
+  blocks.push(eHero(m, s, img));
+  if (t.quick) blocks.push(eQuick(m, s));
+  if (t.spotlight) blocks.push(eSpotlight(m, s, img));
+  if (t.coverage) blocks.push(eCoverage(m, s));
+  if (t.routing) blocks.push(eRouting(m, s));
+  if (t.playbooks) blocks.push(...ePlaybooks(m, s));
+  if (t.tech) blocks.push(eTech(m, s));
+  if (t.resources) blocks.push(...eResources(m, s));
+  if (t.wins) blocks.push(eWins(m, s));
+  if (m.manager.name || m.manager.signoff) blocks.push(eSignoff(m, s, img));
+  blocks.push(eFooter(m, s, img));
+  const rows = blocks.filter(Boolean).map((b) => `<tr><td class="mod-rise" style="padding:0 0 14px">${b}</td></tr>`).join('');
+  const pre = o.preheader && m.preheader ? `<div style="display:none;font-size:1px;color:${s.page};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">${esc(m.preheader)}${'&#847;&zwnj;&nbsp;'.repeat(30)}</div>` : '';
+  return `<div style="margin:0;padding:0;background:${s.page}">${pre}<table ${TBL} width="100%" bgcolor="${s.page}" style="background:${s.page}"><tr><td align="center" style="padding:22px 10px 26px"><table ${TBL} width="100%" style="max-width:640px;width:100%;margin:0 auto">${rows}</table></td></tr></table></div>`;
+}
+
+function emailCSS(animate) {
+  return `body{margin:0;padding:0;-webkit-text-size-adjust:100%}img{-ms-interpolation-mode:bicubic}a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important}
+@media (prefers-reduced-motion:no-preference){
+${animate ? `.mod-rise{animation:modRise .9s cubic-bezier(.2,.8,.2,1) both}
+tr:nth-child(2)>.mod-rise{animation-delay:.08s}tr:nth-child(3)>.mod-rise{animation-delay:.16s}tr:nth-child(4)>.mod-rise{animation-delay:.24s}tr:nth-child(5)>.mod-rise{animation-delay:.32s}tr:nth-child(6)>.mod-rise{animation-delay:.4s}tr:nth-child(7)>.mod-rise{animation-delay:.48s}tr:nth-child(n+8)>.mod-rise{animation-delay:.56s}` : ''}
+.mod-pulse{animation:modPulse 2.6s ease-in-out infinite}
+.mod-shine{background:linear-gradient(100deg,currentColor 40%,#FF9AA3 50%,currentColor 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:modShine 4s ease-in-out infinite}}
+@keyframes modRise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes modPulse{0%,100%{box-shadow:0 0 0 0 rgba(222,51,65,0)}50%{box-shadow:0 0 0 7px rgba(255,255,255,.28)}}
+@keyframes modShine{0%{background-position:100% 0}60%,100%{background-position:0 0}}`;
+}
+function fullDocument(body, m, s, o = {}) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${o.base ? '<base target="_blank">' : ''}<title>${esc(m.subject)}</title><style>${emailCSS(o.animate)}</style></head><body style="margin:0;padding:0;background:${s.page}">${body}</body></html>`;
+}
+
+function plainText(m) {
+  const L = []; const mg = m.manager;
+  L.push(`MANAGER ON DUTY · ${m.weekend.long}`);
+  if (mg.name) L.push(mg.name + (mg.title ? `, ${mg.title}` : ''));
+  if (mg.phone) L.push(`Text or call: ${mg.phone}`);
+  if (mg.email) L.push(`Email: ${mg.email}`);
+  L.push('');
+  if (m.welcome) L.push(m.welcome, '');
+  if (mg.reach) L.push(mg.reach, '');
+  const f = m.spotlights[0];
+  if (f && m.toggles.spotlight) {
+    L.push(`THIS WEEKEND’S FOCUS: ${f.title}`); if (f.summary) L.push(f.summary);
+    (f.takeaways || []).forEach((t, i) => L.push(`${i + 1}. ${t}`));
+    (f.prompts || []).forEach((p) => L.push(`“${p}”`));
+    if (f.ctaLabel) L.push(`${f.ctaLabel}${f.ctaUrl ? ': ' + f.ctaUrl : ''}`);
+    L.push('');
+  }
+  m.core.filter((c) => c.visible !== false).forEach((c) => {
+    L.push(String(c.title || '').toUpperCase()); if (c.need) L.push(c.need);
+    (c.lines || []).forEach((l) => { const h = safeHref(l.href || l.value); L.push(`- ${l.label ? l.label + ': ' : ''}${l.value || ''}${/^https?:/.test(h) && h !== l.value ? ` (${h})` : ''}`); });
+    (c.steps || []).forEach((x, i) => L.push(`${i + 1}. ${x.title}${x.body ? ' — ' + x.body : ''}`));
+    if (c.hoursText) L.push(c.hoursText); if (c.note) L.push('Note: ' + c.note); L.push('');
+  });
+  if (m.toggles.wins && m.wins) L.push('WINS & SHOUT-OUTS', m.wins, '');
+  L.push(mg.signoff || ''); if (mg.name) L.push(mg.name);
+  return L.join('\n');
+}
+
+/* ---------------- images ---------------- */
+const IMG = new Map();
+function memo(key, fn) { if (!IMG.has(key)) { const p = fn(); IMG.set(key, p); p.catch(() => IMG.delete(key)); } return IMG.get(key); }
+function loadImage(src) { return new Promise((res, rej) => { const im = new Image(); im.decoding = 'async'; im.onload = () => res(im); im.onerror = () => rej(new Error('Image failed to load')); im.src = src; }); }
+function canvasFor(w, h) { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
+function defaultCrop(w, h) { return w >= h ? { zoom: 0.56, fy: 0.3 } : { zoom: 0.62, fy: 0.25 }; }
+function cropRect(im, crop, shape) {
+  const w = im.naturalWidth, h = im.naturalHeight; const d = defaultCrop(w, h);
+  const z = clamp(Number(crop && crop.zoom) || d.zoom, 0.2, 1);
+  const fy = clamp(crop && crop.fy !== undefined ? Number(crop.fy) : d.fy, 0, 1);
+  const fx = clamp(crop && crop.fx !== undefined ? Number(crop.fx) : 0.5, 0, 1);
+  let sw, sh;
+  if (shape === 'portrait') { sh = Math.min(h, Math.min(w, h) * z * 1.9); sw = Math.min(w, sh / 1.25); sh = sw * 1.25; }
+  else { sw = sh = Math.min(w, h) * z; }
+  const sx = clamp(w * fx - sw / 2, 0, w - sw);
+  const sy = shape === 'portrait' ? clamp(h * fy - sh * 0.3, 0, h - sh) : clamp(h * fy - sh / 2, 0, h - sh);
+  return [sx, sy, sw, sh];
+}
+async function cropDataURL(src, crop, shape, outW) {
+  const im = await loadImage(src);
+  const [sx, sy, sw, sh] = cropRect(im, crop, shape);
+  const outH = shape === 'portrait' ? Math.round(outW * 1.25) : outW;
+  const c = canvasFor(outW, outH); const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
+  g.drawImage(im, sx, sy, sw, sh, 0, 0, outW, outH);
+  return c.toDataURL('image/jpeg', 0.86);
+}
+async function scaledDataURL(src, maxW, square) {
+  const im = await loadImage(src);
+  let sx = 0, sy = 0, sw = im.naturalWidth, sh = im.naturalHeight;
+  if (square) { const side = Math.min(sw, sh); sx = (sw - side) / 2; sy = (sh - side) / 2; sw = sh = side; }
+  const k = Math.min(1, maxW / sw);
+  const c = canvasFor(sw * k, sh * k); const g = c.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); g.imageSmoothingQuality = 'high';
+  g.drawImage(im, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.86);
+}
+async function fileDataURL(src) {
+  const r = await fetch(src); if (!r.ok) throw new Error('fetch ' + r.status);
+  const b = await r.blob();
+  return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(b); });
+}
+function initialsDataURL(name, size) {
+  const c = canvasFor(size, size); const g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, size, size); grd.addColorStop(0, '#DE3341'); grd.addColorStop(1, '#B9232F');
+  g.fillStyle = grd; g.fillRect(0, 0, size, size); g.fillStyle = '#fff';
+  g.font = `800 ${Math.round(size * 0.38)}px Figtree, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(initials(name), size / 2, size / 2 + size * 0.03);
+  return c.toDataURL('image/png');
+}
+const isHttps = (u) => /^https:\/\//i.test(String(u || '').trim());
+async function brandImg(kind, variant, exp) {
+  const b = brandSettings(); const slot = (kind === 'logo' ? b.logos : b.dots)[variant] || {};
+  if (exp && isHttps(slot.publicUrl)) return slot.publicUrl.trim();
+  const src = slot.assetId ? assetURL(slot.assetId) : abs(BUILTIN[variant]);
+  return exp ? memo('data:' + src, () => fileDataURL(src)) : src;
+}
+const safe = (p) => Promise.resolve(p).catch(() => null);
+async function resolveImages(m, key, exp) {
+  const s = STYLES[key] || STYLES.signature; const d = S.draft;
+  const hs = S.headshots.find((h) => h.id === d.headshotId);
+  const crop = d.crop || (hs && hs.crop) || null;
+  const src = hs && hs.assetId ? assetURL(hs.assetId) : null;
+  const ck = JSON.stringify(crop || {});
+  const sq = (w) => src ? memo(`hs:${src}:${ck}:sq:${w}`, () => cropDataURL(src, crop, 'square', w)) : (m.manager.name ? memo(`ini:${m.manager.name}:${w}`, async () => initialsDataURL(m.manager.name, w)) : Promise.resolve(null));
+  const out = { spot: {}, thumb: {} };
+  const jobs = [
+    safe(sq(s.avatar === 'circle-small' ? 160 : 280)).then((v) => { out.headshot = v; }),
+    safe(sq(120)).then((v) => { out.headshotSm = v; }),
+    safe(brandImg('logo', s.logo, exp)).then((v) => { out.logo = v; }),
+    safe(brandImg('logo', s.footLogo, exp)).then((v) => { out.footLogo = v; }),
+    m.toggles.live ? safe(brandImg('dot', s.dot, exp)).then((v) => { out.dot = v; }) : null,
+  ];
+  if (s.avatar === 'portrait') jobs.push(safe(src ? memo(`hs:${src}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
+  m.spotlights.forEach((sp, i) => {
+    if (!sp.assetId && !(exp && isHttps(sp.publicUrl))) return;
+    if (i === 0) {
+      if (exp && isHttps(sp.publicUrl)) out.spot[sp.id] = sp.publicUrl.trim();
+      else jobs.push(safe(exp ? memo(`sp:${sp.assetId}:1100`, () => scaledDataURL(assetURL(sp.assetId), 1100)) : assetURL(sp.assetId)).then((v) => { if (v) out.spot[sp.id] = v; }));
+    } else if (sp.assetId) {
+      jobs.push(safe(memo(`th:${sp.assetId}`, () => scaledDataURL(assetURL(sp.assetId), 160, true))).then((v) => { if (v) out.thumb[sp.id] = v; }));
+    }
+  });
+  await Promise.all(jobs.filter(Boolean));
+  return out;
+}
+
+/* ---------------- model ---------------- */
+function subjectOptions(d) {
+  const wk = weekend(d.saturday); const n = d.manager.name; const f = firstName(n);
+  return [
+    `Your weekend MOD: ${n || 'Manager on Duty'} · ${wk.short}`,
+    `On duty this weekend (${wk.short}): ${f || 'your MOD'} + your weekend help guide`,
+    `Weekend support guide, ${wk.short}: MOD, tours, TC/LC & IT`,
+    `🔴 Live this weekend: ${f || 'Your MOD'} is on duty (${wk.short})`,
+  ];
+}
+const subjectFor = (d) => (d.subjectAuto || !d.subject ? subjectOptions(d)[0] : d.subject);
+function buildModel() {
+  const d = S.draft; const mg = d.manager;
+  const first = firstName(mg.name);
+  return {
+    manager: mg, weekend: weekend(d.saturday), subject: subjectFor(d),
+    preheader: mg.phone ? `Text ${first || 'your MOD'} at ${mg.phone} for anything urgent. Tour hotline, TC/LC hours, Rocket and IT help inside.` : 'Tour hotline, TC/LC hours, Rocket and IT help for the weekend, all in one place.',
+    welcome: d.welcome, wins: d.wins,
+    core: S.core.slice().sort(byOrder),
+    spotlights: (d.spotlightIds || []).map((id) => S.spotlights.find((x) => x.id === id)).filter(Boolean),
+    toggles: d.toggles, brand: brandSettings(),
+  };
+}
+
+/* ---------------- preview + export ---------------- */
+let pvSeq = 0;
+const schedulePreview = debounce(() => { updatePreview(); }, 180);
+async function updatePreview() {
+  const seq = ++pvSeq;
+  const m = buildModel(); const key = S.draft.style in STYLES ? S.draft.style : 'signature';
+  $('#pvSubject').textContent = m.subject;
+  $('#pvFrom').textContent = `${m.manager.name || 'Manager on Duty'} → ${m.brand.region} sales team`;
+  const stage = $('#pvStage'); stage.classList.add('is-updating');
+  let img; try { img = await resolveImages(m, key, false); } catch (e) { img = { spot: {}, thumb: {} }; }
+  if (seq !== pvSeq) return;
+  const body = renderEmail(m, key, img, {});
+  const replay = S.replay; S.replay = false;
+  const doc = fullDocument(body, m, STYLES[key], { animate: replay, base: true });
+  const fr = $('#pvFrame');
+  let y = 0; try { y = fr.contentWindow ? fr.contentWindow.scrollY : 0; } catch (e) { /* ignore */ }
+  fr.onload = () => { try { if (!replay && y) fr.contentWindow.scrollTo(0, y); } catch (e) { /* ignore */ } stage.classList.remove('is-updating'); };
+  fr.srcdoc = doc;
+  $('#pvNote').textContent = replay ? 'Playing the web-version intro' : 'Live preview · links open in a new tab';
+  $('#pvSize').textContent = `${STYLES[key].name} · ${Math.max(1, Math.round(body.length / 1024))} KB of HTML`;
+}
+async function makeExport() {
+  const m = buildModel(); const key = S.draft.style in STYLES ? S.draft.style : 'signature';
+  const img = await resolveImages(m, key, true);
+  const body = renderEmail(m, key, img, {});
+  const full = fullDocument(renderEmail(m, key, img, { preheader: true }), m, STYLES[key], { animate: true });
+  return { body, full, text: plainText(m), subject: m.subject };
+}
+function execCopyHtml(html) {
+  const holder = document.createElement('div');
+  holder.contentEditable = 'true'; holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:680px;opacity:0;pointer-events:none';
+  holder.innerHTML = html; document.body.appendChild(holder);
+  const sel = window.getSelection(); const r = document.createRange(); r.selectNodeContents(holder); sel.removeAllRanges(); sel.addRange(r);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  sel.removeAllRanges(); holder.remove(); return ok;
+}
+function execCopyText(text) {
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-10000px;top:0'; document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  ta.remove(); return ok;
+}
+async function copyEmail() {
+  const p = makeExport(); let ok = false;
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': p.then((x) => new Blob([x.body], { type: 'text/html' })), 'text/plain': p.then((x) => new Blob([x.text], { type: 'text/plain' })) })]);
+      ok = true;
+    }
+  } catch (e) { ok = false; }
+  if (!ok) {
+    try { const x = await p; await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([x.body], { type: 'text/html' }), 'text/plain': new Blob([x.text], { type: 'text/plain' }) })]); ok = true; } catch (e) { ok = false; }
+  }
+  if (!ok) { try { ok = execCopyHtml((await p).body); } catch (e) { ok = false; } }
+  if (ok) { S.sentOnce = true; updateProgress(); toast('Email copied. Paste it into a new Gmail message.'); }
+  else toast('Copy was blocked in this view. Use Download .html, or Copy HTML code.', 'err');
+}
+async function copyCode() {
+  const p = makeExport(); let ok = false;
+  try { await navigator.clipboard.write([new ClipboardItem({ 'text/plain': p.then((x) => new Blob([x.full], { type: 'text/plain' })) })]); ok = true; } catch (e) { ok = false; }
+  if (!ok) { const x = await p; try { await navigator.clipboard.writeText(x.full); ok = true; } catch (e) { ok = execCopyText(x.full); } }
+  toast(ok ? 'HTML code copied.' : 'Copy was blocked in this view. Use Download .html instead.', ok ? '' : 'err');
+}
+async function copySubject() {
+  const t = subjectFor(S.draft); let ok = false;
+  try { await navigator.clipboard.writeText(t); ok = true; } catch (e) { ok = execCopyText(t); }
+  toast(ok ? 'Subject copied.' : 'Copy was blocked. Select the subject in step 2 and copy it.', ok ? '' : 'err');
+}
+async function downloadHtml(btn) {
+  if (!S.downloads) { toast('Downloads aren’t available in this view. Use Copy HTML code instead.', 'err'); return; }
+  await busy(btn, 'Preparing…', async () => {
+    const x = await makeExport();
+    try {
+      await S.downloads.save({ filename: `MOD-${S.draft.saturday}-${slug(S.draft.manager.name || 'email')}.html`, data: x.full });
+      toast('Saved. Open the file in a browser to see the animated version.');
+    } catch (e) {
+      if (e && e.code === 'declined') return;
+      toast(e && (e.code === 'unavailable' || e.code === 'not_granted') ? 'Downloads aren’t available in this view.' : 'The download didn’t go through. Try again.', 'err');
+    }
+  });
+}
+async function saveHistory(btn) {
+  if (!canAdd()) { toast('Saving history needs Contributor access or higher.', 'err'); return; }
+  const d = S.draft; const m = buildModel();
+  await busy(btn, 'Saving…', () => write(() => S.db.collection('emails').doc(`${d.saturday}-${slug(d.manager.name)}-${rid()}`).set({
+    createdAt: nowISO(), createdBy: S.me.id || '', managerId: d.managerId, managerName: d.manager.name, saturday: d.saturday, style: d.style,
+    subject: m.subject, spotlightTitles: m.spotlights.map((x) => x.title), draft: JSON.parse(JSON.stringify(d)),
+  }), 'Saved to send history.'));
+}
+
+/* ---------------- data helpers ---------------- */
+async function write(fn, okMsg) {
+  try { await fn(); if (okMsg) toast(okMsg); return true; }
+  catch (e) {
+    console.error(e); toast(errMsg(e), 'err');
+    if (e && e.code === 'invalid_argument' && S.canWrite === null) { S.canWrite = false; renderBanner(); }
+    return false;
+  }
+}
+async function busy(btn, label, fn) {
+  if (!btn) return fn();
+  const old = btn.textContent; btn.disabled = true; btn.textContent = label;
+  try { return await fn(); } finally { if (btn.isConnected) { btn.disabled = false; btn.textContent = old; } }
+}
+function armed(btn) {
+  if (btn.classList.contains('is-armed')) return true;
+  btn.classList.add('is-armed'); btn.dataset.label = btn.textContent; btn.textContent = 'Click again to delete';
+  setTimeout(() => { if (btn.isConnected && btn.classList.contains('is-armed')) { btn.classList.remove('is-armed'); btn.textContent = btn.dataset.label; } }, 4000);
+  return false;
+}
+const uniqueId = (list, base) => { let id = base, n = 2; while (list.some((x) => x.id === id)) id = `${base}-${n++}`; return id; };
+const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o[k] !== undefined && o[k] !== null).map((k) => [k, o[k]]));
+async function resizeBlob(file, maxDim, q) {
+  const url = URL.createObjectURL(file);
+  try {
+    const im = await loadImage(url);
+    const k = Math.min(1, maxDim / Math.max(im.naturalWidth, im.naturalHeight));
+    if (k === 1 && file.size < 3e6 && file.type === 'image/jpeg') return file;
+    const c = canvasFor(im.naturalWidth * k, im.naturalHeight * k); const g = c.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height); g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, c.width, c.height);
+    return await new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', q));
+  } finally { URL.revokeObjectURL(url); }
+}
+async function uploadImage(file, maxDim, keepFormat) {
+  if (!S.assets) throw { code: 'not_granted' };
+  const blob = keepFormat || file.type === 'image/gif' ? file : await resizeBlob(file, maxDim, 0.9);
+  return S.assets.upload(blob, { type: blob.type || file.type });
+}
+
+/* ---------------- shell ---------------- */
+function renderWho() {
+  const el = $('#who'); const me = S.me;
+  if (S.mode === 'connecting') { el.innerHTML = '<span class="chip">Connecting…</span>'; return; }
+  if (S.mode === 'offline') { el.innerHTML = '<span class="chip warn">Offline preview</span>'; return; }
+  const role = me.isOwner ? 'Owner' : me.canEdit ? 'Editor' : S.canWrite === false ? 'Viewer' : S.canWrite ? 'Contributor' : '';
+  el.innerHTML = `${me.avatarUrl ? `<img src="${esc(me.avatarUrl)}" alt="">` : ''}<span>${esc(me.name || 'You')}</span>${role ? `<span class="role">${role}</span>` : ''}`;
+}
+function renderBanner() {
+  const el = $('#banner');
+  if (S.mode === 'offline') el.innerHTML = '<div class="banner"><b>Shared libraries aren’t connected.</b><span>Open the Studio from its claude.ai link to load your region’s standard info, headshots and spotlights. You can still draft and preview here.</span></div>';
+  else if (S.mode === 'live' && S.canWrite === false) el.innerHTML = `<div class="banner"><b>View only.</b><span>You can build, preview and copy emails. To add headshots or spotlights, ask ${esc(adminName())} for Editor access.</span></div>`;
+  else el.innerHTML = '';
+}
+function updateCoreBadge() {
+  const n = S.core.filter((c) => c.needsReview && c.visible !== false).length + (S.me.isOwner ? S.suggestions.filter((x) => x.status !== 'done').length : 0);
+  const b = $('#coreBadge'); b.hidden = !n; b.textContent = n;
+}
+function showTab(tab) {
+  S.tab = tab;
+  $$('.tab').forEach((b) => b.classList.toggle('is-active', b.dataset.tab === tab));
+  $$('.view').forEach((v) => { v.hidden = v.id !== 'view-' + tab; });
+  if (tab !== 'build') renderView(tab);
+  window.scrollTo({ top: 0 });
+}
+function renderView(tab) { if (tab === 'library') renderLibrary(); else if (tab === 'core') renderCore(); else if (tab === 'brand') renderBrand(); }
+
+/* ---------------- build steps ---------------- */
+const HOURS = []; for (let h = 5; h <= 23; h += 0.5) HOURS.push(h);
+const hourOptions = (sel, emptyLabel) => `<option value="">${esc(emptyLabel)}</option>` + HOURS.map((h) => `<option value="${h}" ${sel !== '' && sel !== undefined && sel !== null && Number(sel) === h ? 'selected' : ''}>${fmtHour(h)}</option>`).join('');
+const stepHead = (n, title, hint) => `<div class="step-head"><span class="step-num">${String(n).padStart(2, '0')}</span><h3>${esc(title)}</h3>${hint ? `<span class="hint">${esc(hint)}</span>` : ''}</div>`;
+function mgrHeadshot(mg) { return S.headshots.find((h) => h.id === mg.defaultHeadshotId) || S.headshots.find((h) => h.managerId === mg.id); }
+function mgrAvatarHTML(mg) { const hs = mgrHeadshot(mg); return hs && hs.assetId ? `<img src="${esc(assetURL(hs.assetId))}" alt="" style="object-position:50% 20%">` : `<span class="ini">${esc(initials(mg.name))}</span>`; }
+
+function renderSteps() {
+  $('#steps').innerHTML = `
+    <article class="step">${stepHead(1, 'Who’s on duty', 'Pick yourself or add a manager')}<div class="step-body"><div id="mgrPicker"></div><div id="mgrFields" style="display:grid;gap:12px"></div></div></article>
+    <article class="step">${stepHead(2, 'Weekend & message', '')}<div class="step-body" id="wkFields"></div></article>
+    <article class="step">${stepHead(3, 'Headshot', 'From the shared library')}<div class="step-body"><div id="hsPicker"></div><div id="cropBox"></div></div></article>
+    <article class="step">${stepHead(4, 'This weekend’s focus', 'Infographic or spotlight')}<div class="step-body" id="spPicker"></div></article>
+    <article class="step">${stepHead(5, 'Sections', 'Turn blocks on or off')}<div class="step-body" id="toggles"></div></article>
+    <article class="step">${stepHead(6, 'Style', 'Five looks, same content')}<div class="step-body" id="stylePick"></div></article>
+    <article class="step">${stepHead(7, 'Send', 'Copy into Gmail')}<div class="step-body" id="sendPanel"></div></article>`;
+  renderMgrPicker(); renderMgrFields(); renderWeekendFields(); renderHsPicker(); renderCropBox(); renderSpPicker(); renderToggles(); renderStylePick(); renderSendPanel(); updateProgress();
+}
+function renderMgrPicker() {
+  const el = $('#mgrPicker'); if (!el) return;
+  if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">The manager directory loads from the shared Studio. You can still type your details below.</p>'; return; }
+  if (!S.loaded.has('managers')) { el.innerHTML = '<span class="chip">Loading managers…</span>'; return; }
+  const list = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  el.innerHTML = `<div class="mgr-list">${list.map((mg) => `<button class="mgr ${S.draft.managerId === mg.id ? 'is-active' : ''}" data-action="pick-manager" data-id="${esc(mg.id)}">${mgrAvatarHTML(mg)}${esc(mg.name)}</button>`).join('')}${canAdd() ? '<button class="mgr" data-action="new-manager-inline"><span class="ini">+</span>New manager</button>' : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No managers yet. Fill in your details below and save them to the directory.</p>'}`;
+}
+function renderMgrFields() {
+  const el = $('#mgrFields'); if (!el) return; const mg = S.draft.manager;
+  const existing = S.managers.find((x) => x.id === S.draft.managerId);
+  el.innerHTML = `
+    <div class="row2"><label class="field"><span>Full name</span><input class="input" id="b_name" data-bind="manager.name" value="${esc(mg.name)}" placeholder="First Last" autocomplete="name"></label>
+    <label class="field"><span>Title</span><input class="input" id="b_title" data-bind="manager.title" value="${esc(mg.title)}" placeholder="Sales Manager"></label></div>
+    <div class="row2"><label class="field"><span>Market or office</span><input class="input" id="b_market" data-bind="manager.market" value="${esc(mg.market)}" placeholder="Los Angeles"></label>
+    <label class="field"><span>Cell for texts and calls</span><input class="input" id="b_phone" data-bind="manager.phone" value="${esc(mg.phone)}" placeholder="(310) 555-0123" inputmode="tel"></label></div>
+    <label class="field"><span>Email</span><input class="input" id="b_email" data-bind="manager.email" value="${esc(mg.email)}" placeholder="first.last@redfin.com" inputmode="email"></label>
+    <label class="field"><span>How to reach me</span><textarea class="textarea" id="b_reach" data-bind="manager.reach" rows="3">${esc(mg.reach)}</textarea></label>
+    <div class="row2"><label class="field"><span>Reachable from</span><select class="select" id="b_from" data-bind="manager.availStart">${hourOptions(mg.availStart, 'Not shown')}</select></label>
+    <label class="field"><span>Until</span><select class="select" id="b_until" data-bind="manager.availEnd">${hourOptions(mg.availEnd, 'Not shown')}</select></label></div>
+    <label class="field"><span>Sign-off line</span><input class="input" id="b_signoff" data-bind="manager.signoff" value="${esc(mg.signoff)}"></label>
+    ${S.mode === 'live' && canAdd() ? `<div class="btn-row"><button class="btn btn-sm" data-action="save-manager-profile">${existing ? 'Update directory profile' : 'Save to manager directory'}</button><span class="muted" style="font-size:12px">${existing ? 'Edits here change this email only until you update the profile.' : 'Save once and reuse it every weekend.'}</span></div>` : ''}`;
+}
+function renderWeekendFields() {
+  const el = $('#wkFields'); if (!el) return; const d = S.draft;
+  el.innerHTML = `
+    <div class="row2"><label class="field"><span>Saturday of your weekend</span><input class="input" id="b_sat" type="date" data-bind="saturday" value="${esc(d.saturday)}"></label>
+    <div class="field"><span>Weekend</span><div class="input" id="wkLabel" style="background:var(--surface-3)">${esc(weekend(d.saturday).long)}</div></div></div>
+    <label class="field"><span>Subject line</span><input class="input" id="b_subject" data-bind="subject" value="${esc(subjectFor(d))}"></label>
+    <div class="btn-row" id="subjOpts"></div>
+    <label class="field"><span>Welcome message</span><textarea class="textarea" id="b_welcome" data-bind="welcome" rows="3">${esc(d.welcome)}</textarea></label>
+    <label class="field"><span>Wins and shout-outs (optional, one per line)</span><textarea class="textarea" id="b_wins" data-bind="wins" rows="2" placeholder="Maria closed her first listing in Pasadena!">${esc(d.wins)}</textarea></label>`;
+  renderSubjectChips();
+}
+function renderSubjectChips() {
+  const el = $('#subjOpts'); if (!el) return;
+  el.innerHTML = subjectOptions(S.draft).map((o, i) => `<button class="chip chip-btn" style="white-space:normal;text-align:left" data-action="pick-subject" data-i="${i}">${esc(o)}</button>`).join('');
+}
+function refreshSubjectUI() { const i = $('#b_subject'); if (i && document.activeElement !== i) i.value = subjectFor(S.draft); renderSubjectChips(); }
+function renderHsPicker() {
+  const el = $('#hsPicker'); if (!el) return; const d = S.draft;
+  if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Headshots load from the shared library. Until then the email shows your initials.</p>'; return; }
+  if (!d.managerId) { el.innerHTML = '<p class="muted" style="font-size:13px">Pick or save a manager first to see their headshots. Until then the email shows initials.</p>'; return; }
+  const list = S.headshots.filter((h) => h.managerId === d.managerId).sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+  el.innerHTML = `<div class="hs-grid">${list.map((h) => `<button class="hs ${d.headshotId === h.id ? 'is-active' : ''}" data-action="pick-headshot" data-id="${esc(h.id)}" title="${esc(h.label || 'Headshot')}" aria-label="${esc(h.label || 'Headshot')}"><img src="${esc(assetURL(h.assetId))}" alt="" loading="lazy"><span class="tick">✓</span></button>`).join('')}${canUpload() ? `<button class="add-tile" data-action="upload-headshot" data-manager="${esc(d.managerId)}">+ Add photo</button>` : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No headshots for this manager yet.</p>'}`;
+}
+function renderCropBox() {
+  const el = $('#cropBox'); if (!el) return; const d = S.draft;
+  const hs = S.headshots.find((h) => h.id === d.headshotId);
+  if (!hs) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="crop-box"><canvas id="cropCanvas" width="192" height="192" aria-label="Circle crop preview"></canvas><div style="display:grid;gap:8px;min-width:0">
+    <label class="field"><span>Zoom</span><input class="range" id="b_zoom" type="range" min="0.3" max="1" step="0.01" data-crop="zoom"></label>
+    <label class="field"><span>Face height</span><input class="range" id="b_fy" type="range" min="0.1" max="0.6" step="0.01" data-crop="fy"></label>
+    <div class="btn-row">${canAdd() ? '<button class="btn btn-xs" data-action="save-crop">Save as this photo’s default</button>' : ''}<button class="btn btn-xs btn-ghost" data-action="reset-crop">Reset</button></div></div></div>`;
+  drawCrop(true);
+}
+async function drawCrop(setSliders) {
+  const cv = $('#cropCanvas'); if (!cv) return; const d = S.draft;
+  const hs = S.headshots.find((h) => h.id === d.headshotId); if (!hs) return;
+  try {
+    const im = await loadImage(assetURL(hs.assetId));
+    const crop = d.crop || hs.crop || defaultCrop(im.naturalWidth, im.naturalHeight);
+    if (setSliders) { const z = $('#b_zoom'), f = $('#b_fy'); if (z) z.value = crop.zoom; if (f) f.value = crop.fy; }
+    const [sx, sy, sw, sh] = cropRect(im, crop, 'square'); const g = cv.getContext('2d');
+    g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingQuality = 'high'; g.drawImage(im, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  } catch (e) { /* image missing */ }
+}
+function renderSpPicker() {
+  const el = $('#spPicker'); if (!el) return; const d = S.draft;
+  if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Spotlights load from the shared library.</p>'; return; }
+  const list = S.spotlights.filter((x) => !x.archived).sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  el.innerHTML = `<p class="muted" style="font-size:13px">Tap to add. Your first pick is featured. Add up to two more as smaller “also on our radar” items.</p>
+    <div class="sp-pick">${list.map((x) => { const i = d.spotlightIds.indexOf(x.id); return `<button class="sp-opt ${i === 0 ? 'is-featured' : i > 0 ? 'is-extra' : ''}" data-action="toggle-spotlight" data-id="${esc(x.id)}"><span class="badge">${i === 0 ? 'Featured' : 'Also'}</span><span class="thumb" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}"></span><span class="t"><small>${esc(x.category || 'Spotlight')}</small>${esc(x.title)}</span></button>`; }).join('')}
+    ${canAdd() ? '<button class="sp-opt" data-action="new-spotlight" style="justify-content:center;align-items:center;min-height:140px;border-style:dashed;color:var(--muted);font-weight:800">+ New spotlight</button>' : ''}</div>
+    ${list.length ? '' : '<p class="muted" style="font-size:13px">The library is empty. Add the first infographic.</p>'}`;
+}
+const TOGGLE_INFO = [
+  ['live', 'Animated “On duty” badge', 'A pulsing dot that animates in Gmail'],
+  ['quick', '“Need help now?” tiles', 'Tap-to-contact tiles for the main teams'],
+  ['spotlight', 'This weekend’s focus', 'Your featured infographic or spotlight'],
+  ['coverage', 'Weekend coverage map', 'Saturday and Sunday hours at a glance'],
+  ['routing', 'Who to contact for what', 'A quick guide from need to team'],
+  ['playbooks', 'Step-by-step playbooks', 'For example, how to use the tour hotline'],
+  ['tech', 'Tech help lanes', 'Agent Tools versus laptop and IT'],
+  ['resources', 'Self-serve resources', 'FIN, Doctionary, help videos'],
+  ['wins', 'Wins and shout-outs', 'Turns on when you add wins in step 2'],
+];
+function renderToggles() { $('#toggles').innerHTML = TOGGLE_INFO.map(([k, t, sub]) => `<label class="switch-row"><span><b>${esc(t)}</b><small>${esc(sub)}</small></span><input type="checkbox" class="switch" id="t_${k}" data-toggle="${k}" ${S.draft.toggles[k] ? 'checked' : ''}></label>`).join(''); }
+function miniHTML(s) {
+  const dot = s.hero === 'billboard' ? s.accent : s.hero === 'exec' ? s.tint : s.heroBg === s.card ? s.accent : '#FFFFFF';
+  const border = s.cardBorder ? `border:1px solid ${s.line};` : '';
+  return `<div class="mini" style="background:${s.page}"><div class="h" style="background:${s.heroBg};${s.heroGrad ? `background-image:${s.heroGrad};` : ''}${s.hero === 'exec' ? `${border}border-top:3px solid ${s.accent};` : ''}"><i style="background:${dot}"></i><b style="background:${s.hero === 'billboard' ? s.accent : s.heroInk}"></b></div><div class="c"><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.accent};height:7px;align-self:end"></span></div></div>`;
+}
+function renderStylePick() { $('#stylePick').innerHTML = `<div class="style-grid">${Object.entries(STYLES).map(([k, s]) => `<button class="style-opt ${S.draft.style === k ? 'is-active' : ''}" data-action="pick-style" data-style="${k}">${miniHTML(s)}<span><strong>${esc(s.name)}</strong><small>${esc(s.blurb)}</small></span></button>`).join('')}</div>`; }
+function renderSendPanel() {
+  const el = $('#sendPanel'); if (!el) return; const d = S.draft;
+  const items = [
+    [!!d.manager.name, 'Manager name'],
+    [!!e164(d.manager.phone), 'Cell number so agents can text you'],
+    [!!d.headshotId, 'Headshot selected'],
+    [d.spotlightIds.length > 0 || !d.toggles.spotlight, 'Focus spotlight picked'],
+    [S.core.length > 0, 'Standard info loaded'],
+  ];
+  const review = S.core.filter((c) => c.needsReview && c.visible !== false).length;
+  el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}</div>
+    <div class="btn-row"><button class="btn btn-primary btn-lg" data-action="copy-email">Copy email for Gmail</button><button class="btn" data-action="copy-subject">Copy subject</button></div>
+    <div class="btn-row"><button class="btn btn-sm" data-action="download-html">Download .html (animated)</button><button class="btn btn-sm" data-action="copy-code">Copy HTML code</button>${S.mode === 'live' && canAdd() ? '<button class="btn btn-sm btn-ghost" data-action="save-history">Save to send history</button>' : ''}</div>
+    <div class="howto"><b>How to send</b><ol><li>Click <b>Copy email for Gmail</b>.</li><li>In Gmail, start a new message and paste into the body.</li><li>Click <b>Copy subject</b> and paste it into the subject line.</li><li>Send a test to yourself and open it on your phone.</li><li>Send to the region list. Use BCC for big lists.</li></ol></div>
+    <p class="muted" style="font-size:12px">Photos and graphics are embedded in the copy. If one is missing in your test, give that image a public link in the Library or in Brand &amp; access, then copy again.</p>`;
+}
+function updateProgress() {
+  const d = S.draft; const wk = weekend(d.saturday);
+  $('#bhTitle').innerHTML = `Weekend of <em>${esc(wk.long)}</em>`;
+  $('#bhEyebrow').textContent = d.manager.name ? `Manager on Duty · ${d.manager.name}` : 'Manager on Duty';
+  const done = [!!d.manager.name && !!e164(d.manager.phone), !!d.saturday, !!d.headshotId, d.spotlightIds.length > 0 || !d.toggles.spotlight, true, !!STYLES[d.style], !!S.sentOnce];
+  $$('#steps .step').forEach((el, i) => el.classList.toggle('is-done', !!done[i]));
+  const n = done.filter(Boolean).length;
+  const f = S.spotlights.find((x) => x.id === d.spotlightIds[0]);
+  $('#bhProgress').innerHTML = `<div class="progress-top"><span>${n} of 7 steps ready</span><span class="muted">${esc((STYLES[d.style] || {}).name || '')}</span></div><div class="bar"><i style="width:${Math.round((n / 7) * 100)}%"></i></div><div class="progress-chips">${f ? `<span class="chip red" style="max-width:100%;overflow:hidden;text-overflow:ellipsis">Focus: ${esc(f.title)}</span>` : ''}</div>`;
+}
+
+/* ---------------- build actions ---------------- */
+function setBind(path, val) {
+  const d = S.draft;
+  if (path.startsWith('manager.')) d.manager[path.slice(8)] = val;
+  else if (path === 'subject') { d.subject = val; d.subjectAuto = !val; }
+  else d[path] = val;
+  if (path === 'saturday') { const l = $('#wkLabel'); if (l) l.textContent = weekend(val).long; }
+  if (path === 'wins' && val.trim() && !d.toggles.wins) { d.toggles.wins = true; const sw = $('#t_wins'); if (sw) sw.checked = true; }
+  if (path === 'saturday' || path === 'manager.name') refreshSubjectUI();
+  saveDraft(); schedulePreview(); updateProgress();
+  if (path.startsWith('manager.') || path === 'saturday') renderSendPanel();
+}
+function selectManager(id) {
+  const mg = S.managers.find((x) => x.id === id); if (!mg) return; const d = S.draft;
+  d.managerId = id; d.manager = { ...blankManager(), ...pick(mg, Object.keys(blankManager())) };
+  const hs = mgrHeadshot(mg); d.headshotId = hs ? hs.id : ''; d.crop = null;
+  saveDraft(); renderMgrPicker(); renderMgrFields(); renderHsPicker(); renderCropBox(); refreshSubjectUI(); renderSendPanel(); updateProgress(); schedulePreview();
+}
+function newManagerInline() {
+  const d = S.draft; d.managerId = ''; d.manager = blankManager(); d.headshotId = ''; d.crop = null;
+  saveDraft(); renderMgrPicker(); renderMgrFields(); renderHsPicker(); renderCropBox(); refreshSubjectUI(); renderSendPanel(); updateProgress(); schedulePreview();
+  const n = $('#b_name'); if (n) n.focus();
+}
+async function saveManagerProfile(btn) {
+  const d = S.draft; const mg = d.manager;
+  if (!mg.name.trim()) { toast('Add your name first.', 'err'); return; }
+  const data = { ...pick(mg, Object.keys(blankManager())), updatedAt: nowISO() };
+  const existing = S.managers.find((x) => x.id === d.managerId);
+  await busy(btn, 'Saving…', async () => {
+    if (existing) { await write(() => S.db.collection('managers').doc(existing.id).update(data), 'Directory profile updated.'); return; }
+    const id = uniqueId(S.managers, slug(mg.name));
+    const ok = await write(() => S.db.collection('managers').doc(id).set({ ...data, userId: S.me.id || '', createdBy: S.me.id || '', createdAt: nowISO() }), 'Saved to the manager directory.');
+    if (ok) { d.managerId = id; saveDraft(); renderMgrFields(); renderHsPicker(); }
+  });
+}
+function toggleSpotlight(id) {
+  const d = S.draft; const i = d.spotlightIds.indexOf(id);
+  if (i >= 0) d.spotlightIds.splice(i, 1);
+  else { if (d.spotlightIds.length >= 3) { toast('Pick up to three. Remove one first.', 'err'); return; } d.spotlightIds.push(id); }
+  d.spInit = true; saveDraft(); renderSpPicker(); updateProgress(); renderSendPanel(); schedulePreview();
+}
+function useSpotlight(id) {
+  const d = S.draft; d.spotlightIds = [id, ...d.spotlightIds.filter((x) => x !== id)].slice(0, 3); d.spInit = true; d.toggles.spotlight = true;
+  saveDraft(); renderSpPicker(); renderToggles(); updateProgress(); renderSendPanel(); schedulePreview(); showTab('build'); toast('Set as this weekend’s featured focus.');
+}
+function reuseEmail(id) {
+  const e = S.emails.find((x) => x.id === id); if (!e || !e.draft) return; const b = blankDraft();
+  S.draft = { ...b, ...e.draft, manager: { ...b.manager, ...(e.draft.manager || {}) }, toggles: { ...b.toggles, ...(e.draft.toggles || {}) }, saturday: isoDay(nextSaturday()), subject: '', subjectAuto: true, spInit: true, styleInit: true };
+  saveDraft(); renderSteps(); showTab('build'); schedulePreview(); toast('Loaded into the builder for this weekend.');
+}
+
+/* ---------------- library ---------------- */
+const emptyHTML = (title, body, btn = '') => `<div class="empty"><b>${esc(title)}</b><span>${esc(body)}</span>${btn}</div>`;
+function byLine(id, when, verb = 'Added') { const n = personName(id); return [n ? `${verb} by ${n}` : '', fmtWhen(when)].filter(Boolean).join(' · '); }
+function renderLibrary() {
+  const v = $('#view-library'); const t = S.libTab;
+  const counts = { spotlights: S.spotlights.length, headshots: S.headshots.length, managers: S.managers.length, history: S.emails.length };
+  const actions = {
+    spotlights: canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : '',
+    headshots: canUpload() ? '<button class="btn btn-primary" data-action="upload-headshot">+ Add headshot</button>' : '',
+    managers: canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '',
+    history: '',
+  };
+  const body = S.mode !== 'live' ? emptyHTML('The shared library isn’t connected', 'Open the Studio from its claude.ai link to see everyone’s infographics and headshots.')
+    : t === 'spotlights' ? libSpotlights() : t === 'headshots' ? libHeadshots() : t === 'managers' ? libManagers() : libHistory();
+  v.innerHTML = `<div class="page-head"><div><div class="eyebrow">Shared by every sales manager</div><h2>Library</h2><p>Infographics, headshots and the manager directory. Anything added here is ready for every manager’s next MOD email.</p></div><div class="btn-row">${actions[t]}</div></div>
+    <div class="subtabs">${[['spotlights', 'Infographics & spotlights'], ['headshots', 'Headshots'], ['managers', 'Managers'], ['history', 'Send history']].map(([k, l]) => `<button class="subtab ${t === k ? 'is-active' : ''}" data-action="lib-tab" data-tab="${k}">${l} <span class="mono" style="opacity:.6">${counts[k]}</span></button>`).join('')}</div>
+    <div>${body}</div>`;
+}
+function libSpotlights() {
+  const list = S.spotlights.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  if (!list.length) return emptyHTML('No spotlights yet', 'Upload an infographic and add three takeaways. It becomes a ready-made focus section for any manager’s email.', canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : '');
+  return `<div class="card-grid">${list.map((x) => `<article class="lib-card"><div class="img" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}">${x.category ? `<span class="chip">${esc(x.category)}</span>` : ''}</div>
+    <div class="body"><h4>${esc(x.title)}</h4>${x.summary ? `<p>${esc(x.summary)}</p>` : ''}<div class="btn-row" style="margin-top:4px">${(x.takeaways || []).length ? `<span class="chip">${x.takeaways.length} takeaways</span>` : ''}${(x.prompts || []).length ? `<span class="chip">${x.prompts.length} prompts</span>` : ''}${isHttps(x.publicUrl) ? '<span class="chip ok">Public image link</span>' : ''}${S.draft.spotlightIds[0] === x.id ? '<span class="chip red">Featured in your draft</span>' : ''}</div></div>
+    <div class="foot"><span class="by">${esc(byLine(x.createdBy, x.createdAt))}</span><button class="btn btn-xs btn-primary" data-action="use-spotlight" data-id="${esc(x.id)}">Use this weekend</button>${canAdd() ? `<button class="btn btn-xs" data-action="edit-spotlight" data-id="${esc(x.id)}">Edit</button>` : ''}</div></article>`).join('')}</div>`;
+}
+function hsCard(h, mg) {
+  const isDef = mg && mg.defaultHeadshotId === h.id;
+  return `<div class="hs-card ${isDef ? 'is-default' : ''}"><div class="ph" style="background-image:url('${esc(assetURL(h.assetId))}')">${isDef ? '<span class="chip red">Default</span>' : ''}</div><div class="lab" title="${esc(h.label || '')}">${esc(h.label || 'Headshot')}</div><div class="acts">${canAdd() && mg && !isDef ? `<button class="btn btn-xs" data-action="default-headshot" data-id="${esc(h.id)}">Make default</button>` : ''}${canAdd() ? `<button class="btn btn-xs btn-ghost" data-action="edit-headshot" data-id="${esc(h.id)}">Edit</button>` : ''}</div></div>`;
+}
+function libHeadshots() {
+  const mgrs = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const orphan = S.headshots.filter((h) => !S.managers.some((m) => m.id === h.managerId));
+  if (!mgrs.length && !orphan.length) return emptyHTML('No managers yet', 'Add a manager first, then upload their headshots.', canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '');
+  const blocks = mgrs.map((mg) => {
+    const list = S.headshots.filter((h) => h.managerId === mg.id);
+    return `<section class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}${mg.title || mg.market ? ' · ' : ''}${list.length} photo${list.length === 1 ? '' : 's'}</div></div><div class="btn-row" style="margin-left:auto">${canUpload() ? `<button class="btn btn-sm" data-action="upload-headshot" data-manager="${esc(mg.id)}">+ Add photo</button>` : ''}</div></div>${list.length ? `<div class="hs-row">${list.map((h) => hsCard(h, mg)).join('')}</div>` : '<p class="muted" style="font-size:13px">No photos yet.</p>'}</section>`;
+  });
+  if (orphan.length) blocks.push(`<section class="mgr-block"><div class="mgr-block-head"><div><h4>Unassigned</h4><div class="meta">Photos whose manager was removed</div></div></div><div class="hs-row">${orphan.map((h) => hsCard(h, null)).join('')}</div></section>`);
+  return `<div style="display:grid;gap:14px">${blocks.join('')}</div>`;
+}
+function libManagers() {
+  const list = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  if (!list.length) return emptyHTML('No managers yet', 'Add each sales manager once. Their profile, phone and headshots are then one click away on their weekend.', canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '');
+  return `<div class="card-grid">${list.map((mg) => {
+    const n = S.headshots.filter((h) => h.managerId === mg.id).length; const sent = S.emails.filter((e) => e.managerId === mg.id).length;
+    return `<article class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div style="min-width:0"><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}</div></div></div>
+      <div class="core-lines" style="margin-top:0"><div><span>Cell</span>${esc(mg.phone || '—')}</div><div><span>Email</span>${esc(mg.email || '—')}</div><div><span>Library</span>${n} photo${n === 1 ? '' : 's'} · ${sent} saved email${sent === 1 ? '' : 's'}</div></div>
+      <div class="btn-row"><button class="btn btn-xs btn-primary" data-action="pick-manager" data-id="${esc(mg.id)}" data-go="build">Build their email</button>${canAdd() ? `<button class="btn btn-xs" data-action="edit-manager" data-id="${esc(mg.id)}">Edit</button>` : ''}</div></article>`;
+  }).join('')}</div>`;
+}
+function libHistory() {
+  if (!S.emails.length) return emptyHTML('No saved emails yet', 'Use “Save to send history” in the Send step to keep a copy of each weekend’s email.');
+  return `<div class="core-list">${S.emails.map((e) => `<article class="core-card"><div style="min-width:0"><h4>${esc(e.subject || 'MOD email')}</h4><div class="need">${esc(e.managerName || '')} · Weekend of ${esc(weekend(e.saturday).long)} · ${esc((STYLES[e.style] || {}).name || '')}</div>${(e.spotlightTitles || []).length ? `<div class="core-lines"><div><span>Focus</span>${esc(e.spotlightTitles.join(', '))}</div></div>` : ''}</div>
+    <div class="core-side"><button class="btn btn-xs btn-primary" data-action="reuse-email" data-id="${esc(e.id)}">Reuse for this weekend</button><span class="muted" style="font-size:12px">${esc(byLine(e.createdBy, e.createdAt, 'Saved'))}</span></div></article>`).join('')}</div>`;
+}
+
+/* ---------------- standard info ---------------- */
+function renderCore() {
+  const v = $('#view-core'); const list = S.core.slice().sort(byOrder);
+  const review = list.filter((c) => c.needsReview);
+  const openSugg = S.suggestions.filter((x) => x.status !== 'done').sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  let body;
+  if (S.mode !== 'live') body = emptyHTML('Standard info isn’t connected', 'Open the Studio from its claude.ai link to load the shared hotlines, hours and links.');
+  else if (!list.length) body = emptyHTML('No standard info yet', canEditCore() ? 'Add your first section, such as the tour hotline.' : `${adminName()} hasn’t added the standard info yet.`, canEditCore() ? '<button class="btn btn-primary" data-action="new-core">+ Add section</button>' : '');
+  else body = `<div class="two-col"><div class="core-list">${list.map((c, i) => coreCard(c, i, list.length)).join('')}</div><aside style="display:grid;gap:14px;align-content:start">${reviewPanel(review)}${S.me.isOwner ? suggPanel(openSugg) : ''}${flowPanel()}</aside></div>`;
+  v.innerHTML = `<div class="page-head"><div><div class="eyebrow">One source of truth</div><h2>Standard info</h2><p>Hotlines, hours, links and how-tos that appear in every MOD email. Update them once here and every manager’s next email uses the change.${S.mode === 'live' && !canEditCore() ? ` Only ${esc(adminName())} can edit these. If something is out of date, suggest an update.` : ''}</p></div>
+    <div class="btn-row">${canEditCore() ? '<button class="btn btn-primary" data-action="new-core">+ Add section</button>' : ''}${S.mode === 'live' && canAdd() && !canEditCore() ? '<button class="btn" data-action="suggest">Suggest an update</button>' : ''}</div></div>${body}`;
+}
+function coreCard(c, i, n) {
+  const where = [c.quick && 'Help tiles', (c.coverage || []).length && 'Coverage map', c.need && c.kind !== 'links' && 'Quick guide', (c.steps || []).length && c.group !== 'tech' && 'Playbook', c.group === 'tech' && 'Tech lane', c.kind === 'links' && 'Resources'].filter(Boolean);
+  const lines = (c.lines || []).map((l) => { const h = safeHref(l.href || l.value); return `<div><span>${esc(l.label || '')}</span>${h ? `<a href="${esc(h)}" target="_blank" rel="noopener">${esc(l.value || l.href)}</a>` : esc(l.value)}</div>`; }).join('');
+  const status = c.needsReview ? '<span class="chip warn">Needs review</span>' : c.lastVerified ? `<span class="chip ok">Verified ${esc(fmtWhen(c.lastVerified))}</span>` : '';
+  const side = canEditCore()
+    ? `<button class="btn btn-sm" data-action="edit-core" data-id="${esc(c.id)}">Edit</button><div class="btn-row"><button class="btn btn-xs btn-ghost" data-action="move-core" data-id="${esc(c.id)}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button><button class="btn btn-xs btn-ghost" data-action="move-core" data-id="${esc(c.id)}" data-dir="1" ${i === n - 1 ? 'disabled' : ''} aria-label="Move down">↓</button></div>`
+    : canAdd() ? `<button class="btn btn-xs" data-action="suggest" data-id="${esc(c.id)}">Suggest update</button>` : '';
+  return `<article class="core-card ${c.visible === false ? 'is-hidden' : ''}"><div style="min-width:0"><h4>${esc(c.title)} ${c.visible === false ? '<span class="chip">Hidden</span>' : ''}${status}</h4>${c.need ? `<div class="need">${esc(c.need)}</div>` : ''}
+    <div class="core-lines">${lines}${c.hoursText ? `<div><span>Hours</span>${esc(c.hoursText)}</div>` : ''}${(c.steps || []).length ? `<div><span>Steps</span>${c.steps.map((x) => esc(x.title)).join(' → ')}</div>` : ''}${c.note ? `<div><span>Heads up</span>${esc(c.note)}</div>` : ''}</div>
+    <div class="btn-row" style="margin-top:10px">${where.map((w) => `<span class="chip">${w}</span>`).join('')}</div></div>
+    <div class="core-side">${side}</div>${c.needsReview && c.reviewNote ? `<div class="core-review"><b>Verify:</b> ${esc(c.reviewNote)}</div>` : ''}</article>`;
+}
+function reviewPanel(list) {
+  return `<section class="panel"><h3>Review queue</h3>${list.length ? `<p class="muted" style="font-size:13.5px">These came from past MOD emails that didn’t agree with each other. Confirm the current answer, then mark each one verified.</p>${list.map((c) => `<div class="sugg"><b>${esc(c.title)}</b><span class="muted">${esc(c.reviewNote || 'Needs a quick check.')}</span>${canEditCore() ? `<div class="btn-row"><button class="btn btn-xs" data-action="edit-core" data-id="${esc(c.id)}">Review</button><button class="btn btn-xs btn-ghost" data-action="verify-core" data-id="${esc(c.id)}">Mark verified</button></div>` : ''}</div>`).join('')}` : '<p class="muted" style="font-size:13.5px">Everything is verified.</p>'}</section>`;
+}
+function suggPanel(list) {
+  return `<section class="panel"><h3>Suggested updates</h3>${list.length ? list.map((x) => { const c = S.core.find((y) => y.id === x.sectionId); return `<div class="sugg"><b>${esc(c ? c.title : 'General')}</b><span>${esc(x.text)}</span><span class="muted" style="font-size:12px">${esc(byLine(x.createdBy, x.createdAt, 'Suggested'))}</span><div class="btn-row">${c ? `<button class="btn btn-xs" data-action="edit-core" data-id="${esc(c.id)}">Edit section</button>` : ''}<button class="btn btn-xs btn-ghost" data-action="resolve-sugg" data-id="${esc(x.id)}">Mark done</button></div></div>`; }).join('') : '<p class="muted" style="font-size:13.5px">No open suggestions.</p>'}</section>`;
+}
+function flowPanel() {
+  return `<section class="panel access"><h3>Where each part shows up</h3><dl>
+    <dt>Help tiles</dt><dd>The first two lines of sections marked for “Need help now?”</dd>
+    <dt>Quick guide</dt><dd>The “When agents need this” line, linked to the first contact line</dd>
+    <dt>Coverage</dt><dd>Hours you add become bars on the Saturday and Sunday map</dd>
+    <dt>Steps</dt><dd>A numbered playbook card, like the tour hotline order</dd>
+    <dt>Tech lane</dt><dd>Side-by-side cards so agents pick the right support team</dd>
+    <dt>Links list</dt><dd>The self-serve resources grid</dd></dl></section>`;
+}
+
+/* ---------------- brand & access ---------------- */
+function renderBrand() {
+  const v = $('#view-brand'); const b = brandSettings(); const own = canEditCore(); const dis = own ? '' : 'disabled';
+  const logoRow = (key, label, bg) => {
+    const slot = b.logos[key] || {}; const src = slot.assetId ? assetURL(slot.assetId) : BUILTIN[key];
+    return `<div class="logo-row"><div class="logo-sw" style="background:${bg}"><img src="${esc(src)}" alt="${esc(label)}"></div><div style="display:grid;gap:8px;min-width:0"><b>${esc(label)}</b>
+      <label class="field"><span>Public image link (optional)</span><input class="input" id="br_logo_${key}" data-brand="logos.${key}.publicUrl" value="${esc(slot.publicUrl || '')}" placeholder="https://…/logo-${key}.png" ${dis}></label>
+      ${own ? `<div class="btn-row">${canUpload() ? `<button class="btn btn-xs" data-action="upload-logo" data-key="${key}">Replace image</button>` : ''}${slot.assetId ? `<button class="btn btn-xs btn-ghost" data-action="reset-logo" data-key="${key}">Use built-in</button>` : ''}</div>` : ''}</div></div>`;
+  };
+  v.innerHTML = `<div class="page-head"><div><div class="eyebrow">Redfin Powered by Rocket</div><h2>Brand &amp; access</h2><p>Logos, the animated badge, program details, and who can do what.${own ? '' : ` Only ${esc(adminName())} can change these settings.`}</p></div>${own ? '<div class="btn-row"><button class="btn btn-primary" data-action="save-brand">Save brand settings</button></div>' : ''}</div>
+    <div class="two-col"><div style="display:grid;gap:14px">
+      <section class="panel"><h3>Logos</h3><p class="muted" style="font-size:13.5px">Built from the official brand sheet. Light styles use the primary lockup and dark styles use the reverse.</p>${logoRow('primary', 'Primary · on light', '#FFFFFF')}${logoRow('reverse', 'Reverse · on dark', '#111111')}${logoRow('white', 'White · on red', '#DE3341')}</section>
+      <section class="panel"><h3>Program details</h3>
+        <div class="row2"><label class="field"><span>Region</span><input class="input" id="br_region" data-brand="region" value="${esc(b.region)}" ${dis}></label><label class="field"><span>Program name</span><input class="input" id="br_program" data-brand="program" value="${esc(b.program)}" ${dis}></label></div>
+        <label class="field"><span>Footer line</span><input class="input" id="br_footer" data-brand="footer" value="${esc(b.footer)}" placeholder="Questions about this email? Reply to your MOD." ${dis}></label>
+        <div class="row2"><label class="field"><span>Admin name in help text</span><input class="input" id="br_admin" data-brand="adminName" value="${esc(b.adminName)}" ${dis}></label><label class="field"><span>Time zone note</span><input class="input" id="br_tz" data-brand="tz" value="${esc(b.tz)}" ${dis}></label></div>
+        <label class="field"><span>Default style for new drafts</span><select class="select" id="br_style" data-brand="defaultStyle" ${dis}>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}" ${b.defaultStyle === k ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></section>
+      <section class="panel"><h3>Animated “On duty” badge</h3><p class="muted" style="font-size:13.5px">A pulsing dot GIF that animates in Gmail and Apple Mail. Each style uses the version that matches its background.</p>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">${['light', 'dark', 'tint', 'red'].map((k) => `<div style="display:grid;gap:6px;justify-items:center;font-size:12px;font-weight:700"><img src="${BUILTIN[k]}" width="40" height="40" alt="" style="border-radius:8px;border:1px solid var(--line)">${k}</div>`).join('')}</div>
+        ${['light', 'dark', 'tint', 'red'].map((k) => `<label class="field"><span>Public link · ${k} (optional)</span><input class="input" id="br_dot_${k}" data-brand="dots.${k}.publicUrl" value="${esc((b.dots[k] || {}).publicUrl || '')}" placeholder="https://…/live-dot-${k}.gif" ${dis}></label>`).join('')}</section>
+    </div>
+    <aside style="display:grid;gap:14px;align-content:start">
+      <section class="panel access"><h3>Share with your sales managers</h3>
+        <ol style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px"><li>Open <b>Share</b> on this Studio.</li><li>Invite each sales manager by email as an <b>Editor</b>, so they can add headshots and infographics.</li><li>Keep link sharing off. A public link turns outside editors into viewers.</li></ol>
+        <dl><dt>Owner</dt><dd>Everything, including standard info and brand settings.</dd><dt>Editor</dt><dd>Build emails, add managers, headshots and spotlights, and suggest standard info updates.</dd><dt>Viewer</dt><dd>Build, preview and copy emails.</dd></dl></section>
+      <section class="panel"><h3>How images reach inboxes</h3><p style="font-size:14px;color:var(--ink-2)">Copy email for Gmail embeds photos, logos and the animated badge right in the message. Gmail normally keeps pasted images. If one goes missing in your test send, paste a public https link for that image here or on the spotlight, and the email points to it instead.</p></section>
+    </aside></div>`;
+}
+function setPath(o, path, val) { const ks = path.split('.'); let t = o; ks.slice(0, -1).forEach((k) => { if (!t[k] || typeof t[k] !== 'object') t[k] = {}; t = t[k]; }); t[ks[ks.length - 1]] = val; }
+async function saveBrand(btn) {
+  const cur = JSON.parse(JSON.stringify(S.brand || {}));
+  $$('[data-brand]').forEach((i) => setPath(cur, i.dataset.brand, i.value.trim()));
+  cur.updatedAt = nowISO();
+  await busy(btn, 'Saving…', () => write(() => S.db.collection('brand').doc('settings').set(cur), 'Brand settings saved.'));
+}
+async function uploadLogo(key, f) {
+  try {
+    const r = await uploadImage(f, 1200, true);
+    const cur = JSON.parse(JSON.stringify(S.brand || {})); cur.logos = cur.logos || {}; cur.logos[key] = { ...(cur.logos[key] || {}), assetId: r.id };
+    await S.db.collection('brand').doc('settings').set(cur); toast('Logo replaced.');
+  } catch (e) { toast(errMsg(e), 'err'); }
+}
+async function resetLogo(key) {
+  const cur = JSON.parse(JSON.stringify(S.brand || {})); if (cur.logos && cur.logos[key]) delete cur.logos[key].assetId;
+  await write(() => S.db.collection('brand').doc('settings').set(cur), 'Using the built-in logo.');
+}
+
+/* ---------------- drawers ---------------- */
+function openDrawer(html) {
+  S.pendingFile = null; S.fileTarget = null;
+  $('#drawer').innerHTML = html; $('#drawerWrap').hidden = false;
+  setTimeout(() => { const f = $('#drawer .drawer-body input:not([type=checkbox]):not([disabled]), #drawer .drawer-body textarea'); if (f) f.focus({ preventScroll: true }); }, 80);
+}
+function closeDrawer() { $('#drawerWrap').hidden = true; $('#drawer').innerHTML = ''; S.pendingFile = null; S.fileTarget = null; }
+const dHead = (t) => `<div class="drawer-head"><h3 id="drawerTitle">${esc(t)}</h3><button class="btn btn-ghost btn-sm" data-action="close-drawer">Close</button></div>`;
+const dropHTML = (src, label) => `<div class="drop" id="dz" data-action="pick-file" tabindex="0" role="button"><img id="dzImg" alt="" ${src ? `src="${esc(src)}"` : 'hidden'}><b>${esc(label)}</b><span>Drop an image, paste a screenshot, or click to choose. PNG, JPEG, WebP or GIF.</span></div>`;
+const CATEGORIES = ['AI & Tools', 'Rocket Mortgage', 'Tours & Conversion', 'Listings', 'Buyer Consults', 'Market Update', 'Training', 'Recognition', 'Operations'];
+
+function spotlightDrawer(id) {
+  const x = S.spotlights.find((y) => y.id === id) || null; const v = x || {};
+  const cats = [...new Set([...CATEGORIES, ...S.spotlights.map((y) => y.category).filter(Boolean)])];
+  const tk = v.takeaways || [];
+  openDrawer(`${dHead(x ? 'Edit spotlight' : 'New spotlight')}<div class="drawer-body">
+    ${dropHTML(v.assetId ? assetURL(v.assetId) : '', x ? 'Replace the infographic (optional)' : 'Add the infographic')}
+    <label class="field"><span>Title</span><input class="input" id="f_title" value="${esc(v.title || '')}" placeholder="Meet Ava, your AI assistant"></label>
+    <div class="row2"><label class="field"><span>Category</span><input class="input" id="f_cat" list="catList" value="${esc(v.category || '')}"><datalist id="catList">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+    <label class="field"><span>Button label</span><input class="input" id="f_ctaLabel" value="${esc(v.ctaLabel || '')}" placeholder="Join #ava-wins"></label></div>
+    <label class="field"><span>Button link</span><input class="input" id="f_ctaUrl" value="${esc(v.ctaUrl || '')}" placeholder="https://"><small>Leave blank to show the label as text without a button.</small></label>
+    <label class="field"><span>Summary</span><textarea class="textarea" id="f_summary" rows="3">${esc(v.summary || '')}</textarea></label>
+    <div class="section-label">Three things to know</div>
+    ${[0, 1, 2].map((i) => `<input class="input" id="f_t${i}" value="${esc(tk[i] || '')}" placeholder="Takeaway ${i + 1}">`).join('')}
+    <div class="row2"><label class="field"><span>Prompts or scripts heading</span><input class="input" id="f_pLabel" value="${esc(v.promptsLabel || '')}" placeholder="Try these"></label></div>
+    <label class="field"><span>Prompts or scripts</span><textarea class="textarea" id="f_prompts" rows="5" placeholder="One per line">${esc((v.prompts || []).join('\n'))}</textarea><small>One per line. Each shows as a quote block agents can copy.</small></label>
+    <label class="field"><span>Public image link (optional)</span><input class="input" id="f_public" value="${esc(v.publicUrl || '')}" placeholder="https://…/infographic.jpg"><small>A public https link makes the image load in every inbox. Leave blank to embed it.</small></label>
+  </div><div class="drawer-foot">${x && canDelete(x) ? `<button class="btn btn-danger" data-action="delete-spotlight" data-id="${esc(x.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-spotlight" data-id="${esc(x ? x.id : '')}">Save spotlight</button></div>`);
+}
+async function saveSpotlight(id, btn) {
+  const x = S.spotlights.find((y) => y.id === id);
+  const g = (k) => ($('#' + k) ? $('#' + k).value.trim() : '');
+  const title = g('f_title'); if (!title) { toast('Add a title first.', 'err'); return; }
+  await busy(btn, 'Saving…', async () => {
+    try {
+      let assetId = x ? x.assetId || '' : '';
+      if (S.pendingFile) { const r = await uploadImage(S.pendingFile, 1800); assetId = r.id; }
+      const data = { title, category: g('f_cat'), summary: g('f_summary'), takeaways: [g('f_t0'), g('f_t1'), g('f_t2')].filter(Boolean), promptsLabel: g('f_pLabel'), prompts: g('f_prompts').split('\n').map((s) => s.trim()).filter(Boolean), ctaLabel: g('f_ctaLabel'), ctaUrl: g('f_ctaUrl'), publicUrl: g('f_public'), assetId, updatedAt: nowISO() };
+      if (x) await S.db.collection('spotlights').doc(x.id).update(data);
+      else {
+        const nid = uniqueId(S.spotlights, slug(title));
+        await S.db.collection('spotlights').doc(nid).set({ ...data, createdBy: S.me.id || '', createdAt: nowISO() });
+        if (!S.draft.spotlightIds.length) { S.draft.spotlightIds = [nid]; S.draft.spInit = true; saveDraft(); }
+      }
+      if (x && x.assetId && x.assetId !== assetId && S.assets) S.assets.delete(x.assetId).catch(() => {});
+      toast(x ? 'Spotlight updated.' : 'Spotlight added to the library.'); closeDrawer();
+    } catch (e) { console.error(e); toast(errMsg(e), 'err'); }
+  });
+}
+async function deleteSpotlight(id, btn) {
+  if (!armed(btn)) return; const x = S.spotlights.find((y) => y.id === id); if (!x) return;
+  const ok = await write(() => S.db.collection('spotlights').doc(id).delete(), 'Spotlight deleted.');
+  if (ok) { if (x.assetId && S.assets) S.assets.delete(x.assetId).catch(() => {}); S.draft.spotlightIds = S.draft.spotlightIds.filter((y) => y !== id); saveDraft(); closeDrawer(); }
+}
+
+function headshotDrawer(hsId, managerId) {
+  const h = S.headshots.find((x) => x.id === hsId) || null;
+  const mgrs = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  if (!mgrs.length) { openDrawer(`${dHead('Add a headshot')}<div class="drawer-body">${emptyHTML('Add a manager first', 'Headshots belong to a manager in the directory.', '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>')}</div>`); return; }
+  const mid = h ? h.managerId : managerId || S.draft.managerId || mgrs[0].id;
+  const owner = S.managers.find((m) => m.id === mid);
+  openDrawer(`${dHead(h ? 'Edit headshot' : 'Add a headshot')}<div class="drawer-body">
+    ${dropHTML(h ? assetURL(h.assetId) : '', h ? 'Replace the photo (optional)' : 'Choose a photo')}
+    <label class="field"><span>Manager</span><select class="select" id="h_mgr">${mgrs.map((m) => `<option value="${esc(m.id)}" ${m.id === mid ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
+    <label class="field"><span>Label</span><input class="input" id="h_label" value="${esc(h ? h.label || '' : '')}" placeholder="Navy suit · terrace"></label>
+    <label class="switch-row"><span><b>Make this the default photo</b><small>Picked automatically when this manager builds an email</small></span><input type="checkbox" class="switch" id="h_def" ${h && owner && owner.defaultHeadshotId === h.id ? 'checked' : !h && owner && !owner.defaultHeadshotId ? 'checked' : ''}></label>
+  </div><div class="drawer-foot">${h && canDelete(h) ? `<button class="btn btn-danger" data-action="delete-headshot" data-id="${esc(h.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-headshot" data-id="${esc(h ? h.id : '')}">${h ? 'Save' : 'Upload headshot'}</button></div>`);
+}
+async function saveHeadshot(id, btn) {
+  const h = S.headshots.find((x) => x.id === id);
+  const managerId = $('#h_mgr') ? $('#h_mgr').value : ''; if (!managerId) { toast('Pick a manager first.', 'err'); return; }
+  if (!h && !S.pendingFile) { toast('Choose a photo first.', 'err'); return; }
+  const label = $('#h_label').value.trim(); const makeDef = $('#h_def').checked;
+  await busy(btn, 'Saving…', async () => {
+    try {
+      let assetId = h ? h.assetId : '';
+      if (S.pendingFile) { const r = await uploadImage(S.pendingFile, 1200); assetId = r.id; }
+      const docId = h ? h.id : `hs-${slug(managerId)}-${rid()}`;
+      const ref = S.db.collection('headshots').doc(docId);
+      if (h) await ref.update({ managerId, label, assetId, updatedAt: nowISO(), ...(assetId !== h.assetId ? { crop: null } : {}) });
+      else await ref.set({ managerId, label, assetId, createdBy: S.me.id || '', createdAt: nowISO() });
+      if (makeDef) await S.db.collection('managers').doc(managerId).update({ defaultHeadshotId: docId });
+      if (h && h.assetId && assetId !== h.assetId && S.assets) S.assets.delete(h.assetId).catch(() => {});
+      if (!h && S.draft.managerId === managerId && (!S.draft.headshotId || makeDef)) { S.draft.headshotId = docId; S.draft.crop = null; saveDraft(); }
+      toast(h ? 'Headshot updated.' : 'Headshot added to the library.'); closeDrawer();
+    } catch (e) { console.error(e); toast(errMsg(e), 'err'); }
+  });
+}
+async function deleteHeadshot(id, btn) {
+  if (!armed(btn)) return; const h = S.headshots.find((x) => x.id === id); if (!h) return;
+  const ok = await write(async () => {
+    await S.db.collection('headshots').doc(id).delete();
+    const mg = S.managers.find((m) => m.id === h.managerId);
+    if (mg && mg.defaultHeadshotId === id) await S.db.collection('managers').doc(mg.id).update({ defaultHeadshotId: '' });
+  }, 'Headshot deleted.');
+  if (ok) { if (h.assetId && S.assets) S.assets.delete(h.assetId).catch(() => {}); if (S.draft.headshotId === id) { S.draft.headshotId = ''; S.draft.crop = null; saveDraft(); } closeDrawer(); }
+}
+
+function managerDrawer(id) {
+  const mg = S.managers.find((x) => x.id === id) || null; const v = mg ? { ...blankManager(), ...mg } : blankManager();
+  const f = (k, label, ph = '', extra = '') => `<label class="field"><span>${label}</span><input class="input" id="m_${k}" value="${esc(v[k] || '')}" placeholder="${esc(ph)}" ${extra}></label>`;
+  openDrawer(`${dHead(mg ? 'Edit manager' : 'Add a manager')}<div class="drawer-body">
+    <div class="row2">${f('name', 'Full name', 'First Last')}${f('title', 'Title', 'Sales Manager')}</div>
+    <div class="row2">${f('market', 'Market or office', 'Los Angeles')}${f('phone', 'Cell for texts and calls', '(310) 555-0123', 'inputmode="tel"')}</div>
+    ${f('email', 'Email', 'first.last@redfin.com', 'inputmode="email"')}
+    <label class="field"><span>How to reach me</span><textarea class="textarea" id="m_reach" rows="3">${esc(v.reach || '')}</textarea></label>
+    ${f('signoff', 'Sign-off line', 'Have a great weekend!')}
+    <label class="switch-row"><span><b>This is me</b><small>Opens this profile automatically when you visit the Studio</small></span><input type="checkbox" class="switch" id="m_me" ${mg && mg.userId && mg.userId === S.me.id ? 'checked' : ''} ${S.me.id ? '' : 'disabled'}></label>
+  </div><div class="drawer-foot">${mg && S.me.isOwner ? `<button class="btn btn-danger" data-action="delete-manager" data-id="${esc(mg.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-manager" data-id="${esc(mg ? mg.id : '')}">Save manager</button></div>`);
+}
+async function saveManager(id, btn) {
+  const mg = S.managers.find((x) => x.id === id);
+  const g = (k) => $('#m_' + k).value.trim();
+  const data = { name: g('name'), title: g('title'), market: g('market'), phone: g('phone'), email: g('email'), reach: g('reach'), signoff: g('signoff'), updatedAt: nowISO() };
+  if (!data.name) { toast('Add a name first.', 'err'); return; }
+  const me = $('#m_me') && $('#m_me').checked;
+  if (me && S.me.id) data.userId = S.me.id; else if (mg && mg.userId && mg.userId === S.me.id) data.userId = '';
+  await busy(btn, 'Saving…', async () => {
+    const ok = await write(() => (mg ? S.db.collection('managers').doc(mg.id).update(data) : S.db.collection('managers').doc(uniqueId(S.managers, slug(data.name))).set({ ...data, createdBy: S.me.id || '', createdAt: nowISO() })), mg ? 'Manager updated.' : 'Manager added.');
+    if (ok) {
+      if (mg && S.draft.managerId === mg.id) { S.draft.manager = { ...S.draft.manager, ...pick(data, Object.keys(blankManager())) }; saveDraft(); renderMgrFields(); schedulePreview(); }
+      closeDrawer();
+    }
+  });
+}
+async function deleteManager(id, btn) {
+  if (!armed(btn)) return;
+  const ok = await write(() => S.db.collection('managers').doc(id).delete(), 'Manager removed. Their photos stay in the library under Unassigned.');
+  if (ok) { if (S.draft.managerId === id) { S.draft.managerId = ''; saveDraft(); } closeDrawer(); }
+}
+
+function lineRow(l = {}) {
+  return `<div class="rep-item" data-rep="line"><button class="btn btn-ghost btn-xs x" data-action="rep-remove" aria-label="Remove line">✕</button><div class="rep-grid"><label class="field"><span>Label</span><input class="input" data-k="label" value="${esc(l.label || '')}" placeholder="Email (preferred)"></label><label class="field"><span>Shown as</span><input class="input" data-k="value" value="${esc(l.value || '')}" placeholder="tour-hotline@redfin.com"></label></div><label class="field"><span>Link</span><input class="input" data-k="href" value="${esc(l.href || '')}" placeholder="mailto:, tel:, sms: or https://"></label></div>`;
+}
+function stepRow(x = {}) {
+  return `<div class="rep-item" data-rep="step"><button class="btn btn-ghost btn-xs x" data-action="rep-remove" aria-label="Remove step">✕</button><div class="rep-grid"><label class="field"><span>Step</span><input class="input" data-k="title" value="${esc(x.title || '')}"></label><label class="field"><span>Button label</span><input class="input" data-k="cta" value="${esc(x.cta || '')}"></label></div><label class="field"><span>Details</span><textarea class="textarea" rows="2" data-k="body">${esc(x.body || '')}</textarea></label><label class="field"><span>Button link</span><input class="input" data-k="href" value="${esc(x.href || '')}"></label></div>`;
+}
+function covRow(cv = {}) {
+  const days = (cv.days || ['sat', 'sun']).join(',');
+  return `<div class="rep-item" data-rep="cov"><button class="btn btn-ghost btn-xs x" data-action="rep-remove" aria-label="Remove hours">✕</button><div class="rep-grid"><label class="field"><span>Days</span><select class="select" data-k="days"><option value="sat,sun" ${days === 'sat,sun' ? 'selected' : ''}>Sat and Sun</option><option value="sat" ${days === 'sat' ? 'selected' : ''}>Saturday</option><option value="sun" ${days === 'sun' ? 'selected' : ''}>Sunday</option></select></label><label class="field"><span>Bar label</span><input class="input" data-k="label" value="${esc(cv.label || '')}"></label></div><div class="rep-grid"><label class="field"><span>From</span><select class="select" data-k="start">${hourOptions(cv.start ?? 8, '—')}</select></label><label class="field"><span>To</span><select class="select" data-k="end">${hourOptions(cv.end ?? 12, '—')}</select></label></div></div>`;
+}
+function coreDrawer(id) {
+  const c = S.core.find((x) => x.id === id) || null;
+  const v = c || { title: '', kicker: '', need: '', summary: '', hoursText: '', note: '', group: '', kind: 'contact', quick: false, visible: true, lines: [], steps: [], coverage: [], needsReview: false, reviewNote: '' };
+  const type = v.kind === 'links' ? 'links' : v.group === 'tech' ? 'tech' : 'contact';
+  openDrawer(`${dHead(c ? `Edit · ${c.title}` : 'New section')}<div class="drawer-body">
+    <div class="row2"><label class="field"><span>Title</span><input class="input" id="c_title" value="${esc(v.title)}" placeholder="Tour Support Hotline"></label><label class="field"><span>Short label</span><input class="input" id="c_kicker" value="${esc(v.kicker)}" placeholder="Tours"></label></div>
+    <label class="field"><span>Section type</span><select class="select" id="c_type"><option value="contact" ${type === 'contact' ? 'selected' : ''}>Team or hotline</option><option value="tech" ${type === 'tech' ? 'selected' : ''}>Tech help lane</option><option value="links" ${type === 'links' ? 'selected' : ''}>Links list (self-serve resources)</option></select></label>
+    <label class="field"><span>When agents need this</span><input class="input" id="c_need" value="${esc(v.need)}" placeholder="Tour requests, schedule changes and urgent touring issues"><small>Shows in the “Who to contact for what” guide.</small></label>
+    <label class="field"><span>Summary</span><textarea class="textarea" id="c_summary" rows="3">${esc(v.summary)}</textarea></label>
+    <div class="row2"><label class="field"><span>Hours as shown</span><input class="input" id="c_hours" value="${esc(v.hoursText)}" placeholder="Sat 8 AM–12 PM"></label><label class="field"><span>Heads-up note</span><input class="input" id="c_note" value="${esc(v.note)}"></label></div>
+    <div class="section-label">Contact lines and links</div><div class="rep" id="repLines">${(v.lines || []).map(lineRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="line">+ Add line</button></div>
+    <div class="section-label">Steps (optional playbook)</div><div class="rep" id="repSteps">${(v.steps || []).map(stepRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="step">+ Add step</button></div>
+    <div class="section-label">Coverage hours for the weekend map</div><div class="rep" id="repCov">${(v.coverage || []).map(covRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="cov">+ Add hours</button></div>
+    <div class="section-label">Display</div>
+    <label class="switch-row"><span><b>Show in “Need help now?” tiles</b><small>Uses the first two lines</small></span><input type="checkbox" class="switch" id="c_quick" ${v.quick ? 'checked' : ''}></label>
+    <label class="switch-row"><span><b>Show in emails</b><small>Turn off to hide without deleting</small></span><input type="checkbox" class="switch" id="c_visible" ${v.visible !== false ? 'checked' : ''}></label>
+    <div class="section-label">Accuracy</div>
+    <label class="switch-row"><span><b>Needs review</b><small>Flags this section in the review queue</small></span><input type="checkbox" class="switch" id="c_review" ${v.needsReview ? 'checked' : ''}></label>
+    <label class="field"><span>What to verify</span><input class="input" id="c_reviewNote" value="${esc(v.reviewNote || '')}"></label>
+    <label class="switch-row"><span><b>Mark verified today</b><small>${v.lastVerified ? `Last verified ${esc(fmtWhen(v.lastVerified))}` : 'Not verified yet'}</small></span><input type="checkbox" class="switch" id="c_verify"></label>
+  </div><div class="drawer-foot">${c ? `<button class="btn btn-danger" data-action="delete-core" data-id="${esc(c.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-core" data-id="${esc(c ? c.id : '')}">Save section</button></div>`);
+}
+async function saveCore(id, btn) {
+  const c = S.core.find((x) => x.id === id);
+  const g = (k) => $('#c_' + k).value.trim();
+  const title = g('title'); if (!title) { toast('Add a title first.', 'err'); return; }
+  const type = $('#c_type').value;
+  const reps = (sel, map) => $$(`${sel} .rep-item`).map((el) => { const o = {}; $$('[data-k]', el).forEach((i) => { o[i.dataset.k] = i.value.trim(); }); return map(o); }).filter(Boolean);
+  const data = {
+    title, kicker: g('kicker'), need: g('need'), summary: g('summary'), hoursText: g('hours'), note: g('note'),
+    kind: type === 'links' ? 'links' : 'contact', group: type === 'tech' ? 'tech' : '',
+    lines: reps('#repLines', (o) => (o.label || o.value || o.href ? { label: o.label, value: o.value, href: o.href } : null)),
+    steps: reps('#repSteps', (o) => (o.title ? { title: o.title, body: o.body, cta: o.cta, href: o.href } : null)),
+    coverage: reps('#repCov', (o) => (o.start !== '' && o.end !== '' ? { days: o.days.split(','), start: Number(o.start), end: Number(o.end), label: o.label } : null)),
+    quick: $('#c_quick').checked, visible: $('#c_visible').checked, needsReview: $('#c_review').checked, reviewNote: g('reviewNote'),
+    updatedAt: nowISO(), updatedBy: S.me.id || '',
+  };
+  if ($('#c_verify').checked) { data.lastVerified = nowISO(); data.verifiedBy = S.me.id || ''; data.needsReview = false; }
+  await busy(btn, 'Saving…', async () => {
+    const ok = await write(async () => {
+      if (c) await S.db.collection('core').doc(c.id).update(data);
+      else await S.db.collection('core').doc(uniqueId(S.core, slug(title))).set({ ...data, order: Math.max(0, ...S.core.map((x) => x.order || 0)) + 1, createdAt: nowISO(), createdBy: S.me.id || '' });
+    }, 'Saved. Every new email uses this now.');
+    if (ok) closeDrawer();
+  });
+}
+async function moveCore(id, dir) {
+  const list = S.core.slice().sort(byOrder); const i = list.findIndex((x) => x.id === id); const j = i + Number(dir);
+  if (i < 0 || j < 0 || j >= list.length) return;
+  await write(async () => { await S.db.collection('core').doc(list[i].id).update({ order: j + 1 }); await S.db.collection('core').doc(list[j].id).update({ order: i + 1 }); });
+}
+function suggestDrawer(sectionId) {
+  openDrawer(`${dHead('Suggest an update')}<div class="drawer-body"><p class="muted">Tell ${esc(adminName())} what changed. Once it’s updated here, every manager’s next email uses it.</p>
+    <label class="field"><span>Section</span><select class="select" id="s_sec"><option value="">General or a new section</option>${S.core.slice().sort(byOrder).map((c) => `<option value="${esc(c.id)}" ${c.id === sectionId ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select></label>
+    <label class="field"><span>What should change?</span><textarea class="textarea" id="s_text" rows="5" placeholder="Sunday TC hours are now 9 AM–1 PM."></textarea></label></div>
+    <div class="drawer-foot"><button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-suggestion">Send suggestion</button></div>`);
+}
+
+/* ---------------- events ---------------- */
+function onFile(f) {
+  if (!f) return;
+  if (!/^image\/(png|jpeg|webp|gif)$/.test(f.type)) { toast('Use a PNG, JPEG, WebP or GIF image.', 'err'); return; }
+  if (S.fileTarget && S.fileTarget.kind === 'logo') { const k = S.fileTarget.key; S.fileTarget = null; uploadLogo(k, f); return; }
+  if (f.size > 20 * 1024 * 1024) { toast('That file is too large. Use an image under 20 MB.', 'err'); return; }
+  S.pendingFile = f;
+  const img = $('#dzImg'); if (img) { img.src = URL.createObjectURL(f); img.hidden = false; }
+}
+const handlers = {
+  'close-drawer': () => closeDrawer(),
+  'pick-manager': (a) => { selectManager(a.dataset.id); if (a.dataset.go === 'build') showTab('build'); },
+  'new-manager-inline': () => newManagerInline(),
+  'save-manager-profile': (a) => saveManagerProfile(a),
+  'new-manager': () => managerDrawer(null),
+  'edit-manager': (a) => managerDrawer(a.dataset.id),
+  'save-manager': (a) => saveManager(a.dataset.id, a),
+  'delete-manager': (a) => deleteManager(a.dataset.id, a),
+  'pick-subject': (a) => { const i = Number(a.dataset.i); S.draft.subject = subjectOptions(S.draft)[i]; S.draft.subjectAuto = i === 0; const inp = $('#b_subject'); if (inp) inp.value = S.draft.subject; saveDraft(); schedulePreview(); },
+  'pick-headshot': (a) => { S.draft.headshotId = a.dataset.id; S.draft.crop = null; saveDraft(); renderHsPicker(); renderCropBox(); renderSendPanel(); updateProgress(); schedulePreview(); },
+  'upload-headshot': (a) => headshotDrawer(null, a.dataset.manager),
+  'edit-headshot': (a) => headshotDrawer(a.dataset.id),
+  'save-headshot': (a) => saveHeadshot(a.dataset.id, a),
+  'delete-headshot': (a) => deleteHeadshot(a.dataset.id, a),
+  'default-headshot': (a) => { const h = S.headshots.find((x) => x.id === a.dataset.id); if (h) write(() => S.db.collection('managers').doc(h.managerId).update({ defaultHeadshotId: h.id }), 'Default photo updated.'); },
+  'save-crop': (a) => { const d = S.draft; if (!d.crop || !d.headshotId) { toast('Adjust the sliders first.'); return; } const crop = { ...d.crop }; busy(a, 'Saving…', () => write(() => S.db.collection('headshots').doc(d.headshotId).update({ crop }), 'Crop saved for this photo.').then((ok) => { if (ok) { d.crop = null; saveDraft(); } })); },
+  'reset-crop': () => { S.draft.crop = null; saveDraft(); drawCrop(true); schedulePreview(); },
+  'toggle-spotlight': (a) => toggleSpotlight(a.dataset.id),
+  'use-spotlight': (a) => useSpotlight(a.dataset.id),
+  'new-spotlight': () => spotlightDrawer(null),
+  'edit-spotlight': (a) => spotlightDrawer(a.dataset.id),
+  'save-spotlight': (a) => saveSpotlight(a.dataset.id, a),
+  'delete-spotlight': (a) => deleteSpotlight(a.dataset.id, a),
+  'pick-style': (a) => { S.draft.style = a.dataset.style; S.draft.styleInit = true; saveDraft(); renderStylePick(); updateProgress(); schedulePreview(); },
+  'copy-email': () => copyEmail(),
+  'copy-subject': () => copySubject(),
+  'copy-code': () => copyCode(),
+  'download-html': (a) => downloadHtml(a),
+  'save-history': (a) => saveHistory(a),
+  'go-core': (a, e) => { e.preventDefault(); showTab('core'); },
+  'lib-tab': (a) => { S.libTab = a.dataset.tab; renderLibrary(); },
+  'reuse-email': (a) => reuseEmail(a.dataset.id),
+  'new-core': () => coreDrawer(null),
+  'edit-core': (a) => coreDrawer(a.dataset.id),
+  'save-core': (a) => saveCore(a.dataset.id, a),
+  'delete-core': (a) => { if (armed(a)) write(() => S.db.collection('core').doc(a.dataset.id).delete(), 'Section deleted.').then((ok) => ok && closeDrawer()); },
+  'move-core': (a) => moveCore(a.dataset.id, a.dataset.dir),
+  'verify-core': (a) => write(() => S.db.collection('core').doc(a.dataset.id).update({ needsReview: false, lastVerified: nowISO(), verifiedBy: S.me.id || '' }), 'Marked verified.'),
+  'rep-add': (a) => { const k = a.dataset.kind; const box = $(k === 'line' ? '#repLines' : k === 'step' ? '#repSteps' : '#repCov'); box.insertAdjacentHTML('beforeend', k === 'line' ? lineRow() : k === 'step' ? stepRow() : covRow()); const f = box.lastElementChild.querySelector('input,textarea'); if (f) f.focus(); },
+  'rep-remove': (a) => { const it = a.closest('.rep-item'); if (it) it.remove(); },
+  'suggest': (a) => suggestDrawer(a.dataset.id || ''),
+  'save-suggestion': (a) => { const text = $('#s_text').value.trim(); if (!text) { toast('Describe the change first.', 'err'); return; } busy(a, 'Sending…', () => write(() => S.db.collection('suggestions').doc(`sg-${Date.now()}-${rid()}`).set({ sectionId: $('#s_sec').value, text, status: 'open', createdBy: S.me.id || '', createdAt: nowISO() }), `Sent to ${adminName()}.`).then((ok) => ok && closeDrawer())); },
+  'resolve-sugg': (a) => write(() => S.db.collection('suggestions').doc(a.dataset.id).update({ status: 'done', resolvedAt: nowISO() }), 'Marked done.'),
+  'upload-logo': (a) => { S.fileTarget = { kind: 'logo', key: a.dataset.key }; $('#filePick').click(); },
+  'reset-logo': (a) => resetLogo(a.dataset.key),
+  'save-brand': (a) => saveBrand(a),
+  'pick-file': () => $('#filePick').click(),
+  'replay': () => { S.replay = true; updatePreview(); },
+};
+function bindGlobal() {
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.tab[data-tab]'); if (tab) { showTab(tab.dataset.tab); return; }
+    const dev = e.target.closest('[data-device]');
+    if (dev) { S.device = dev.dataset.device; $$('#pvDevice button').forEach((b) => b.classList.toggle('is-active', b === dev)); $('#pvStage').classList.toggle('phone', S.device === 'phone'); return; }
+    const a = e.target.closest('[data-action]'); if (!a) return;
+    const fn = handlers[a.dataset.action]; if (fn) fn(a, e);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#drawerWrap').hidden) closeDrawer();
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'dz') { e.preventDefault(); $('#filePick').click(); }
+  });
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset && t.dataset.bind) { setBind(t.dataset.bind, t.value); return; }
+    if (t.dataset && t.dataset.crop) {
+      S.draft.crop = { zoom: Number($('#b_zoom').value), fy: Number($('#b_fy').value) };
+      saveDraft(); drawCrop(false); schedulePreview();
+    }
+  });
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset && t.dataset.toggle) { S.draft.toggles[t.dataset.toggle] = t.checked; saveDraft(); schedulePreview(); updateProgress(); renderSendPanel(); }
+  });
+  $('#filePick').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; onFile(f); });
+  document.addEventListener('dragover', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) { e.preventDefault(); dz.classList.add('is-over'); } });
+  document.addEventListener('dragleave', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) dz.classList.remove('is-over'); });
+  document.addEventListener('drop', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) { e.preventDefault(); dz.classList.remove('is-over'); onFile(e.dataTransfer.files && e.dataTransfer.files[0]); } });
+  document.addEventListener('paste', (e) => {
+    if ($('#drawerWrap').hidden || !$('#dz')) return;
+    const item = Array.from((e.clipboardData && e.clipboardData.items) || []).find((i) => i.type.startsWith('image/'));
+    if (item) { e.preventDefault(); onFile(item.getAsFile()); }
+  });
+}
+
+/* ---------------- data ---------------- */
+function subscribeAll() {
+  const on = (coll, key, q = (x) => x) => {
+    try {
+      q(S.db.collection(coll)).onSnapshot((snap) => { S[key] = snap.docs.map((d) => ({ id: d.id, ...d.data() })); S.loaded.add(key); dataChanged(key); },
+        (err) => { console.warn(coll, err); S.loaded.add(key); dataChanged(key); });
+    } catch (e) { console.warn(coll, e); S.loaded.add(key); }
+  };
+  on('core', 'core'); on('managers', 'managers'); on('headshots', 'headshots'); on('spotlights', 'spotlights');
+  on('emails', 'emails', (c) => c.orderBy('createdAt', 'desc').limit(60)); on('suggestions', 'suggestions'); on('brand', 'brandDocs');
+}
+function dataChanged(key) {
+  if (key === 'brandDocs') {
+    const d = S.brandDocs.find((x) => x.id === 'settings'); if (d) { const { id, ...rest } = d; S.brand = rest; } else S.brand = {};
+    IMG.clear();
+    if (!S.draft.styleInit) { S.draft.style = brandSettings().defaultStyle in STYLES ? brandSettings().defaultStyle : 'signature'; S.draft.styleInit = true; saveDraft(); renderStylePick(); }
+  }
+  pending.add(key); if (!raf) raf = requestAnimationFrame(flush);
+}
+let pending = new Set(); let raf = 0;
+function flush() {
+  raf = 0; const keys = pending; pending = new Set(); const d = S.draft;
+  if (S.loaded.has('managers')) {
+    if (d.managerId && !S.managers.some((m) => m.id === d.managerId)) { d.managerId = ''; saveDraft(); }
+    if (!d.managerId && !d.manager.name) {
+      const mine = S.managers.find((m) => m.userId && m.userId === S.me.id) || (S.me.isOwner && S.managers.find((m) => m.ownerProfile)) || (S.managers.length === 1 ? S.managers[0] : null);
+      if (mine) selectManager(mine.id);
+    }
+    if (d.managerId && !d.headshotId && S.loaded.has('headshots')) { const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && mgrHeadshot(mg); if (hs) { d.headshotId = hs.id; saveDraft(); } }
+  }
+  if (!d.spInit && S.loaded.has('spotlights') && S.spotlights.length) {
+    const newest = S.spotlights.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0];
+    d.spotlightIds = [newest.id]; d.spInit = true; saveDraft();
+  }
+  d.spotlightIds = d.spotlightIds.filter((id) => !S.loaded.has('spotlights') || S.spotlights.some((x) => x.id === id));
+  if (keys.has('managers') || keys.has('headshots')) { renderMgrPicker(); renderHsPicker(); renderCropBox(); }
+  if (keys.has('managers') && !$('#mgrFields').contains(document.activeElement)) renderMgrFields();
+  if (keys.has('spotlights')) renderSpPicker();
+  renderSendPanel(); updateProgress(); updateCoreBadge(); renderWho();
+  if (S.tab !== 'build') renderView(S.tab);
+  schedulePreview(); refreshPeople();
+}
+let peopleBusy = false;
+async function refreshPeople() {
+  if (!S.user || peopleBusy) return;
+  const ids = new Set(); [S.spotlights, S.headshots, S.emails, S.suggestions].forEach((l) => l.forEach((x) => { if (x.createdBy) ids.add(x.createdBy); }));
+  const missing = [...ids].filter((id) => !(id in S.people)); if (!missing.length) return;
+  peopleBusy = true;
+  try { const ps = await S.user.profiles(missing); missing.forEach((id) => { S.people[id] = ps[id] || { name: '' }; }); if (S.tab !== 'build') renderView(S.tab); }
+  catch (e) { missing.forEach((id) => { S.people[id] = { name: '' }; }); }
+  finally { peopleBusy = false; }
+}
+
+/* ---------------- boot ---------------- */
+function afterMode() { renderWho(); renderBanner(); renderMgrPicker(); renderMgrFields(); renderHsPicker(); renderSpPicker(); renderSendPanel(); updateProgress(); if (S.tab !== 'build') renderView(S.tab); }
+async function init() {
+  const bar = $('.pv-bar'); const play = document.createElement('button'); play.className = 'btn btn-xs'; play.dataset.action = 'replay'; play.textContent = '▶ Play intro'; bar.insertBefore(play, $('#pvDevice'));
+  bindGlobal(); renderSteps(); renderWho(); renderBanner();
+  const h = (location.hash || '').slice(1);
+  showTab(['build', 'library', 'core', 'brand'].includes(h) ? h : 'build');
+  schedulePreview();
+  const c = window.claude;
+  if (!c || typeof c.use !== 'function') { S.mode = 'offline'; afterMode(); return; }
+  const got = await Promise.all(['db', 'user', 'assets', 'downloads'].map((n) => Promise.resolve().then(() => c.use(n)).catch(() => null)));
+  [S.db, S.user, S.assets, S.downloads] = got;
+  if (S.user) {
+    try { const me = await S.user.me(); S.me = { id: me.id, name: me.name, avatarUrl: me.avatarUrl, isOwner: !!me.isOwner, canEdit: !!me.canEdit }; } catch (e) { /* keep defaults */ }
+    try { S.canWrite = await S.user.can('data.write'); } catch (e) { S.canWrite = null; }
+  }
+  if (!S.db) { S.mode = 'offline'; afterMode(); return; }
+  S.mode = 'live'; afterMode(); subscribeAll();
+}
+init();
+})();
+</script>
