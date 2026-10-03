@@ -278,6 +278,42 @@ p{margin:0}
 .rep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;padding-right:34px}
 .section-label{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:6px}
 
+/* Sortable sections */
+.fixed-row{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px;padding:2px 2px}
+.fixed-row::before{content:"";width:18px;height:2px;border-radius:2px;background:var(--line-2)}
+.sort{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.sort-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:9px 10px 9px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);transition:box-shadow .2s,border-color .2s,opacity .2s}
+.sort-item.is-off{opacity:.55}
+.sort-item.is-dragging{border-color:var(--red);box-shadow:var(--shadow-lg);background:var(--surface);position:relative;z-index:2}
+.sort-item b{display:block;font-size:14px;font-weight:700}
+.sort-item small{display:block;font-size:12px;color:var(--muted)}
+.handle{touch-action:none;cursor:grab;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:8px 6px;border-radius:8px}
+.handle:hover{background:var(--surface-3);color:var(--ink)}
+.is-dragging .handle{cursor:grabbing}
+.sort-moves{display:flex;gap:2px}
+.sort-moves .btn{padding:4px 8px}
+@media (max-width:420px){.sort-moves{display:none}}
+.style-group{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:4px 0 -2px}
+.tab-count{font-size:11px;font-weight:600;opacity:.7}
+/* Recipients */
+.recip-list{display:grid;gap:8px}
+.recip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+.recip.is-off{opacity:.55}
+.recip .av{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--surface-3);color:var(--ink-2)}
+.recip.group .av{background:var(--red-tint);color:var(--red-ink)}
+.recip b{display:block;font-size:14.5px}
+.recip .em{font-family:var(--mono);font-size:12.5px;color:var(--muted);word-break:break-all}
+.recip .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.send-to{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.send-to .rowline{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;font-size:13px}
+.send-to .rowline>span{font-weight:800;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.bcc-box{max-height:240px;overflow:auto;display:grid;gap:4px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.bcc-box label{display:flex;gap:8px;align-items:center;font-size:13px}
+.bcc-box label span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
+.lib-card.is-trash{opacity:.75}
+.lib-card .img .chip.warn{left:auto;right:10px}
+
 /* Toasts */
 .toasts{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;display:grid;gap:8px;justify-items:center;pointer-events:none;width:min(92vw,520px)}
 .toast{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:var(--shadow-lg);animation:toast .35s cubic-bezier(.2,.8,.2,1) both;pointer-events:auto}
@@ -300,6 +336,7 @@ p{margin:0}
       <button class="tab is-active" data-tab="build" role="tab">Build email</button>
       <button class="tab" data-tab="library" role="tab">Library</button>
       <button class="tab" data-tab="core" role="tab">Standard info <span class="tab-badge" id="coreBadge" hidden></span></button>
+      <button class="tab" data-tab="recipients" role="tab">Recipients <span class="tab-count mono" id="recipCount"></span></button>
       <button class="tab" data-tab="brand" role="tab">Brand &amp; access</button>
     </nav>
     <div class="who" id="who"><span class="chip">Connecting…</span></div>
@@ -337,6 +374,7 @@ p{margin:0}
 
     <section id="view-library" class="view" hidden></section>
     <section id="view-core" class="view" hidden></section>
+    <section id="view-recipients" class="view" hidden></section>
     <section id="view-brand" class="view" hidden></section>
   </main>
 </div>
@@ -346,7 +384,8 @@ p{margin:0}
   <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"></aside>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<input type="file" id="filePick" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+<input type="file" id="filePick" accept="image/*" hidden>
+<input type="file" id="filePickMulti" accept="image/*" multiple hidden>
 
 <script>
 (() => {
@@ -368,6 +407,7 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const abs = (p) => new URL(p, document.baseURI).href;
 const assetURL = (id) => '/_blob/' + id;
 const byOrder = (a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.title || '').localeCompare(String(b.title || ''));
+const byListOrder = (a, b) => (a.order ?? 999) - (b.order ?? 999) || String(a.name || a.email || '').localeCompare(String(b.name || b.email || ''));
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 function safeHref(u) {
   u = String(u || '').trim();
@@ -417,12 +457,26 @@ function errMsg(e) {
 
 /* ---------------- state ---------------- */
 const DRAFT_KEY = 'modstudio.draft.v1';
-const DEFAULT_TOGGLES = { live: true, quick: true, spotlight: true, coverage: true, routing: true, playbooks: true, tech: true, resources: true, wins: false };
+const DEFAULT_TOGGLES = { live: true, announce: false, quick: true, spotlight: true, coverage: true, routing: true, playbooks: true, tech: true, resources: true, wins: false };
+const SECTION_INFO = {
+  announce: ['Weekend announcement', 'Your own headline and note for the region'],
+  quick: ['“Need help now?” tiles', 'Tap-to-contact tiles for the main teams'],
+  spotlight: ['This weekend’s focus', 'Your featured infographic or spotlight'],
+  coverage: ['Weekend coverage map', 'Saturday and Sunday hours at a glance'],
+  routing: ['Who to contact for what', 'A quick guide from need to team'],
+  playbooks: ['Step-by-step playbooks', 'For example, how to use the tour hotline'],
+  tech: ['Tech help lanes', 'Agent Tools versus laptop and IT'],
+  resources: ['Self-serve resources', 'FIN, Doctionary, help videos'],
+  wins: ['Wins and shout-outs', 'Turns on when you add wins in step 2'],
+};
+const DEFAULT_ORDER = ['announce', 'quick', 'spotlight', 'coverage', 'routing', 'playbooks', 'tech', 'resources', 'wins'];
+function normOrder(o) { const seen = new Set(); const out = []; (o || []).forEach((k) => { if (SECTION_INFO[k] && !seen.has(k)) { seen.add(k); out.push(k); } }); DEFAULT_ORDER.forEach((k) => { if (!seen.has(k)) out.push(k); }); return out; }
 const DEFAULT_WELCOME = 'Hi team! I’m your Manager on Duty this weekend. Keep leaning on each other for support, and reach out anytime you need me.';
 const DEFAULT_REACH = 'Text me first for anything urgent. For deal or customer questions, email me the Customer or Deal link with a quick note on how I can help.';
 function blankManager() { return { name: '', title: 'Sales Manager', market: '', phone: '', email: '', reach: DEFAULT_REACH, availStart: '', availEnd: '', signoff: 'Have a great weekend!' }; }
 function blankDraft() {
-  return { managerId: '', manager: blankManager(), saturday: isoDay(nextSaturday()), subject: '', subjectAuto: true, welcome: DEFAULT_WELCOME, wins: '', headshotId: '', crop: null, spotlightIds: [], spInit: false, toggles: { ...DEFAULT_TOGGLES }, style: 'signature', styleInit: false };
+  return { managerId: '', manager: blankManager(), saturday: isoDay(nextSaturday()), subject: '', subjectAuto: true, welcome: DEFAULT_WELCOME, wins: '', headshotId: '', crop: null, spotlightIds: [], spInit: false, toggles: { ...DEFAULT_TOGGLES }, order: DEFAULT_ORDER.slice(), style: 'signature', styleInit: false,
+    announceTitle: '', announceBody: '', announceCta: '', announceUrl: '', to: '', bccOff: [], bccExtra: '' };
 }
 function loadDraft() {
   try {
@@ -430,6 +484,7 @@ function loadDraft() {
     if (raw) {
       const d = JSON.parse(raw); const b = blankDraft();
       const out = { ...b, ...d, manager: { ...b.manager, ...(d.manager || {}) }, toggles: { ...b.toggles, ...(d.toggles || {}) } };
+      out.order = normOrder(out.order); if (!Array.isArray(out.bccOff)) out.bccOff = [];
       if (parseDay(out.saturday) < nextSaturday()) out.saturday = isoDay(nextSaturday());
       return out;
     }
@@ -441,8 +496,8 @@ const saveDraft = debounce(() => { try { localStorage.setItem(DRAFT_KEY, JSON.st
 const S = {
   mode: 'connecting', db: null, user: null, assets: null, downloads: null,
   me: { id: null, name: '', avatarUrl: '', isOwner: false, canEdit: false }, canWrite: null,
-  core: [], managers: [], headshots: [], spotlights: [], emails: [], suggestions: [], brandDocs: [], brand: {},
-  loaded: new Set(), people: {},
+  core: [], managers: [], headshots: [], spotlights: [], emails: [], suggestions: [], brandDocs: [], brand: {}, distribution: [],
+  loaded: new Set(), people: {}, spTrash: false,
   tab: 'build', libTab: 'spotlights', device: 'desktop', replay: false, pendingFile: null,
   draft: loadDraft(),
 };
@@ -451,6 +506,8 @@ const canUpload = () => canAdd() && !!S.assets;
 const canEditCore = () => S.mode === 'live' && S.me.isOwner;
 const canDelete = (item) => S.me.isOwner || (!!item && !!S.me.id && item.createdBy === S.me.id);
 const adminName = () => brandSettings().adminName || 'the Studio owner';
+const canEditList = () => S.mode === 'live' && (S.me.isOwner || (brandSettings().listEditors === 'editors' && S.me.canEdit));
+const liveSpotlights = () => S.spotlights.filter((x) => !x.trashedAt && !x.archived);
 const personName = (id) => (id && S.people[id] && S.people[id].name) || '';
 
 function brandSettings() {
@@ -462,6 +519,7 @@ function brandSettings() {
     adminName: b.adminName || '',
     defaultStyle: b.defaultStyle || 'signature',
     tz: b.tz || 'All times Pacific.',
+    listEditors: b.listEditors === 'editors' ? 'editors' : 'owner',
     logos: b.logos || {},
     dots: b.dots || {},
   };
@@ -478,10 +536,20 @@ const STYLES = {
   executive: { name: 'Executive Brief', blurb: 'Quiet, text-first, serif headlines.', page: '#FFFFFF', card: '#FFFFFF', ink: '#111111', muted: '#66616A', line: '#E3E1E4', track: '#EEECEF', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FBEFF0', tile: '#FFFFFF', tileBorder: '1px solid #E3E1E4', heroBg: '#FFFFFF', heroGrad: '', heroInk: '#111111', heroMuted: '#66616A', heroBtnBg: '#111111', heroBtnInk: '#FFFFFF', heroBtn2Border: '#CFCBD0', heroBtn2Ink: '#111111', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'tint', pillBg: '#FDECEE', pillInk: '#B9232F', head: SERIF, headWeight: 700, radius: 6, avatar: 'circle-small', ring: '0', hero: 'exec', cardBorder: true, warnInk: '#8A5300', warnBg: '#FFF5E3' },
   billboard: { name: 'Billboard', blurb: 'Huge type in black and red. Hard to miss.', page: '#ECEBEC', card: '#FFFFFF', ink: '#111111', muted: '#5C5B5E', line: '#DCDADC', track: '#E8E6E8', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDECEE', tile: '#F3F2F3', tileBorder: '', heroBg: '#111111', heroGrad: '', heroInk: '#FFFFFF', heroMuted: '#BDBCBF', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#FFFFFF', heroBtn2Ink: '#FFFFFF', logo: 'reverse', logoInHero: true, footLogo: 'primary', dot: 'red', pillBg: '#DE3341', pillInk: '#FFFFFF', head: HEAVY, headWeight: 900, radius: 0, avatar: 'portrait', ring: '0', hero: 'billboard', upper: true, warnInk: '#8A5300', warnBg: '#FFF2DC' },
 };
+const MONO = "'Courier New',Courier,monospace";
+Object.values(STYLES).forEach((s) => { s.group = 'classic'; });
+Object.assign(STYLES, {
+  openhouse: { group: 'creative', name: 'Open House', blurb: 'A red listing sign out front. Friendly and local.', page: '#F4F1EE', card: '#FFFFFF', ink: '#1A1A1A', muted: '#66615C', line: '#E7E1DB', track: '#EEE8E2', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDEDEF', tile: '#FAF7F4', tileBorder: '', heroBg: '#FFFFFF', heroGrad: '', heroInk: '#1A1A1A', heroMuted: '#66615C', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#D8D1CA', heroBtn2Ink: '#1A1A1A', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'light', pillBg: '#FFFFFF', pillInk: '#B9232F', head: SANS, headWeight: 800, radius: 16, avatar: 'circle', ring: '4px solid #DE3341', hero: 'openhouse', warnInk: '#8F5200', warnBg: '#FFF4DE' },
+  listing: { group: 'creative', name: 'Featured Listing', blurb: 'A listing flyer, with stats where beds and baths go.', page: '#F2F3F5', card: '#FFFFFF', ink: '#121417', muted: '#5E6670', line: '#E2E5E9', track: '#E8EBEF', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDEDEF', tile: '#F6F7F9', tileBorder: '', heroBg: '#FFFFFF', heroGrad: '', heroInk: '#121417', heroMuted: '#5E6670', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#D3D8DE', heroBtn2Ink: '#121417', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'red', pillBg: '#DE3341', pillInk: '#FFFFFF', head: SANS, headWeight: 800, radius: 14, avatar: 'portrait', ring: '0', hero: 'listing', warnInk: '#8F5200', warnBg: '#FFF4DE' },
+  edition: { group: 'creative', name: 'Weekend Edition', blurb: 'A Saturday-paper front page with serif headlines.', page: '#F4F0E8', card: '#FFFDF8', ink: '#171513', muted: '#5F5951', line: '#D8D0C3', track: '#E7E0D4', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#F8EAE6', tile: '#FFFDF8', tileBorder: '1px solid #D8D0C3', heroBg: '#FFFDF8', heroGrad: '', heroInk: '#171513', heroMuted: '#5F5951', heroBtnBg: '#171513', heroBtnInk: '#FFFFFF', heroBtn2Border: '#BDB4A6', heroBtn2Ink: '#171513', logo: 'primary', logoInHero: true, footLogo: 'primary', dot: 'tint', pillBg: '#FDECEE', pillInk: '#B9232F', head: SERIF, headWeight: 700, radius: 0, avatar: 'circle-small', ring: '0', hero: 'edition', cardBorder: true, headRule: true, warnInk: '#7A4A00', warnBg: '#FBF0DC' },
+  blueprint: { group: 'creative', name: 'Blueprint', blurb: 'A navy drafting sheet with numbered sections.', page: '#E8EDF2', card: '#FFFFFF', ink: '#0F2A44', muted: '#4D6782', line: '#C8D5E2', track: '#DCE4ED', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDEDEF', tile: '#F5F8FB', tileBorder: '1px dashed #9DB3C9', heroBg: '#0F2A44', heroGrad: '', heroInk: '#FFFFFF', heroMuted: '#A8C0D8', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#5C86B0', heroBtn2Ink: '#FFFFFF', logo: 'reverse', logoInHero: true, footLogo: 'primary', dot: 'navy', pillBg: '#163A5C', pillInk: '#FFFFFF', head: SANS, headWeight: 800, radius: 4, avatar: 'square', ring: '0', hero: 'blueprint', eyebrowFont: MONO, numbered: true, warnInk: '#8F5200', warnBg: '#FFF4DE' },
+  postcard: { group: 'creative', name: 'Postcard', blurb: 'Greetings from SoCal, with a stamp-framed photo.', page: '#F6EEE3', card: '#FFFFFF', ink: '#1F2A33', muted: '#5F6B73', line: '#EADFD0', track: '#EFE6D9', accent: '#DE3341', accentDeep: '#B9232F', onAccent: '#FFFFFF', tint: '#FDEDEF', tile: '#FBF7F1', tileBorder: '', heroBg: '#FFFDF9', heroGrad: '', heroInk: '#1F2A33', heroMuted: '#5F6B73', heroBtnBg: '#DE3341', heroBtnInk: '#FFFFFF', heroBtn2Border: '#D9CDBD', heroBtn2Ink: '#1F2A33', logo: 'primary', logoInHero: false, footLogo: 'primary', dot: 'tint', pillBg: '#FDECEE', pillInk: '#B9232F', head: SANS, headWeight: 800, radius: 12, avatar: 'stamp', ring: '0', hero: 'postcard', warnInk: '#8F5200', warnBg: '#FFF4DE' },
+});
 const BUILTIN = {
   primary: 'brand/logo-primary.png', reverse: 'brand/logo-reverse.png', white: 'brand/logo-white.png',
-  light: 'brand/live-dot-light.gif', dark: 'brand/live-dot-dark.gif', tint: 'brand/live-dot-tint.gif', red: 'brand/live-dot-red.gif',
+  light: 'brand/live-dot-light.gif', dark: 'brand/live-dot-dark.gif', tint: 'brand/live-dot-tint.gif', red: 'brand/live-dot-red.gif', navy: 'brand/live-dot-navy.gif',
 };
+function isoWeek(d) { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 86400000 + 1) / 7); }
 
 /* ---------------- email renderer (inline styles only, table layout) ---------------- */
 const ff = (family, size, weight = 400, lh = 1.5, extra = '') => `font-family:${family};font-size:${size}px;font-weight:${weight};line-height:${lh};${extra}`;
@@ -494,10 +562,12 @@ function ebtn(href, label, bg, fg, o = {}) {
   const border = `border:2px solid ${o.border || bg};`;
   return `<a href="${esc(href)}" target="_blank" class="${o.cls || ''}" style="display:inline-block;margin:0 8px 8px 0;background:${bg};${border}color:${fg};border-radius:${o.radius ?? 999}px;padding:${pad};${ff(SANS, o.small ? 13 : 15, 700, 1.1)}text-decoration:none;white-space:nowrap">${esc(label)}</a>`;
 }
+let SEC_N = 0;
 function ehead(s, eyebrow, title, o = {}) {
   const t = s.upper ? String(title || '').toUpperCase() : title;
-  return (eyebrow ? `<div style="${ff(SANS, 11, 800, 1.4, `letter-spacing:1.6px;text-transform:uppercase;color:${s.accent};margin:0 0 6px;`)}">${esc(eyebrow)}</div>` : '') +
-    (title ? `<div style="${ff(s.head, o.size || 22, s.headWeight, 1.2, `color:${s.ink};margin:0 0 ${o.mb ?? 16}px;${s.upper ? 'letter-spacing:-.3px;' : ''}`)}">${esc(t)}</div>` : '');
+  let eb = eyebrow; if (eb && s.numbered) { SEC_N += 1; eb = `${String(SEC_N).padStart(2, '0')} / ${eb}`; }
+  return (eb ? `<div style="${ff(s.eyebrowFont || SANS, 11, 800, 1.4, `letter-spacing:${s.eyebrowFont ? 1 : 1.6}px;text-transform:uppercase;color:${s.accent};margin:0 0 6px;`)}">${esc(eb)}</div>` : '') +
+    (title ? `<div style="${ff(s.head, o.size || 22, s.headWeight, 1.2, `color:${s.ink};margin:0 0 ${o.mb ?? 16}px;${s.upper ? 'letter-spacing:-.3px;' : ''}${s.headRule ? `border-bottom:1px solid ${s.ink};padding-bottom:8px;` : ''}`)}">${esc(t)}</div>` : '');
 }
 function ecard(s, inner, o = {}) {
   const bg = o.bg || s.card;
@@ -537,6 +607,86 @@ function eHero(m, s, img) {
   const reach = mg.reach ? `<div style="${ff(SANS, 13, 400, 1.5, `color:${s.heroMuted};margin:4px 0 0`)}">${nl2br(mg.reach)}</div>` : '';
   const contactLine = [mg.phone ? elink('tel:' + tel, mg.phone, s.heroInk, 700) : '', mg.email ? elink('mailto:' + mg.email, mg.email, s.heroInk, 600) : ''].filter(Boolean).join(` <span style="color:${s.heroMuted}">·</span> `);
 
+  const pic = (w, h, extra = '') => (img.portrait ? `<img src="${esc(img.portrait)}" width="${w}" height="${h}" alt="${esc(name)}" style="display:block;width:${w}px;height:${h}px;border:0;${extra}">`
+    : img.headshot ? `<img src="${esc(img.headshot)}" width="${w}" height="${w}" alt="${esc(name)}" style="display:block;width:${w}px;height:${w}px;border:0;${extra}">` : '');
+  const nil = 'font-size:0;line-height:0';
+
+  if (s.hero === 'openhouse') {
+    const post = '#2B2B2B';
+    const sign = `<table ${TBL} style="border-collapse:separate">
+      <tr><td width="12" rowspan="5" bgcolor="${post}" style="background:${post};width:12px;${nil}">&nbsp;</td><td colspan="5" height="10" bgcolor="${post}" style="background:${post};height:10px;${nil}">&nbsp;</td></tr>
+      <tr><td width="34" height="18" style="height:18px;${nil}">&nbsp;</td><td width="3" bgcolor="${post}" style="background:${post};${nil}">&nbsp;</td><td width="190" style="${nil}">&nbsp;</td><td width="3" bgcolor="${post}" style="background:${post};${nil}">&nbsp;</td><td width="30" style="${nil}">&nbsp;</td></tr>
+      <tr><td style="${nil}">&nbsp;</td><td colspan="3" align="center" bgcolor="${s.accent}" style="background:${s.accent};border-radius:6px 6px 0 0;padding:16px 12px 12px">
+        <div style="${ff(HEAVY, 22, 900, 1.05, 'color:#FFFFFF;letter-spacing:.5px;text-transform:uppercase')}">Manager<br>on duty</div>
+        <div style="${ff(SANS, 11, 800, 1.3, 'color:#FFE0E4;letter-spacing:1.6px;text-transform:uppercase;margin-top:6px')}">This weekend</div></td><td style="${nil}">&nbsp;</td></tr>
+      <tr><td style="${nil}">&nbsp;</td><td colspan="3" align="center" bgcolor="#FFFFFF" style="background:#FFFFFF;border:3px solid ${s.accent};border-top:0;border-radius:0 0 6px 6px;padding:7px 6px;white-space:nowrap">${img.dot ? `<img src="${esc(img.dot)}" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;width:16px;height:16px;border:0">` : ''}<span style="${ff(SANS, 11, 800, 1, `color:${s.accentDeep};letter-spacing:.8px;text-transform:uppercase;vertical-align:middle;padding-left:4px`)}">${esc(m.weekend.pill)}</span></td><td style="${nil}">&nbsp;</td></tr>
+      <tr><td colspan="5" height="40" style="height:40px;${nil}">&nbsp;</td></tr>
+      <tr><td colspan="6" height="4" bgcolor="#D9D2CA" style="background:#D9D2CA;height:4px;border-radius:2px;${nil}">&nbsp;</td></tr></table>`;
+    const av = img.headshot ? `<img src="${esc(img.headshot)}" width="112" height="112" alt="${esc(name)}" style="display:block;width:112px;height:112px;border-radius:50%;border:${s.ring};margin:0 0 14px">` : '';
+    const who = `${av}<div style="${ff(SANS, 12, 800, 1.4, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent};margin:0 0 4px`)}">Come on in</div>
+      <div style="${ff(s.head, 28, 800, 1.1, `color:${s.ink};letter-spacing:-.4px`)}">${esc(name)}</div>${sub ? `<div style="${ff(SANS, 14.5, 600, 1.4, `color:${s.muted};margin-top:4px`)}">${esc(sub)}</div>` : ''}`;
+    return ecard(s, `${ecols([sign, who], [288, 296], { valign: 'bottom' })}${spacer(18)}${welcome}<div>${btns}</div>${reach}`, { pad: '26px 26px 22px' });
+  }
+
+  if (s.hero === 'listing') {
+    const lines = m.core.filter((c) => c.visible !== false && c.kind !== 'links').length;
+    const links = m.core.filter((c) => c.visible !== false && c.kind === 'links').reduce((a, c) => a + (c.lines || []).length, 0);
+    const stat = (n, label, last) => `<td align="center" valign="top" width="33%" style="padding:10px 4px;${last ? '' : `border-right:1px solid ${s.line};`}"><div style="${ff(SANS, 24, 900, 1.1, `color:${s.ink}`)}">${n}</div><div style="${ff(SANS, 10.5, 700, 1.3, `color:${s.muted};letter-spacing:.8px;text-transform:uppercase;margin-top:3px`)}">${label}</div></td>`;
+    const stats = `<table ${TBL} width="100%" style="border-top:1px solid ${s.line};border-bottom:1px solid ${s.line};margin:14px 0 16px"><tr>${stat(2, 'Days on duty')}${stat(lines || '—', 'Support lines')}${stat(links || '—', 'Self-serve links', true)}</tr></table>`;
+    const sat = m.weekend.sat;
+    const mls = `MOD# ${sat.getFullYear()}-${String(sat.getMonth() + 1).padStart(2, '0')}${String(sat.getDate()).padStart(2, '0')}`;
+    const text = `${epill(s, img, 'Featured · On duty')}${spacer(12)}
+      <div style="${ff(SANS, 29, 900, 1.05, `color:${s.ink};letter-spacing:-.5px`)}">Available all weekend</div>
+      <div style="${ff(SANS, 19, 800, 1.3, `color:${s.ink};margin-top:8px`)}">${esc(name)}</div>
+      <div style="${ff(SANS, 13.5, 500, 1.45, `color:${s.muted};margin-top:2px`)}">${esc([sub, m.weekend.pill].filter(Boolean).join(' · '))}</div>
+      ${stats}${welcome}<div>${btns}</div>${reach}
+      <div style="${ff(SANS, 10.5, 700, 1.4, `color:${s.muted};margin-top:12px;letter-spacing:.8px;text-transform:uppercase`)}">Listed by Redfin Powered by Rocket · ${mls}</div>`;
+    return ecard(s, ecols([pic(232, 290, `border-radius:${Math.max(0, s.radius - 4)}px;margin:0 0 14px`), text], [250, 332]), { pad: '22px 22px 18px' });
+  }
+
+  if (s.hero === 'edition') {
+    const wk = m.weekend;
+    const dayLong = `Saturday, ${MONTHS[wk.sat.getMonth()]} ${wk.sat.getDate()}, ${wk.sat.getFullYear()}`;
+    const mast = `<table ${TBL} width="100%"><tr><td align="center" style="padding:0 0 12px">${img.logo ? `<img src="${esc(img.logo)}" width="118" alt="Redfin Powered by Rocket" style="display:block;width:118px;height:auto;border:0;margin:0 auto 12px">` : ''}
+      <div style="${ff(SERIF, 42, 700, 1.05, `color:${s.ink};letter-spacing:-1px`)}">The Weekend Edition</div></td></tr>
+      <tr><td style="border-top:3px double ${s.ink};border-bottom:1px solid ${s.ink};padding:7px 0"><table ${TBL} width="100%"><tr>
+        <td width="25%" style="${ff(SANS, 10.5, 700, 1.3, `color:${s.muted};letter-spacing:1px;text-transform:uppercase`)}">No. ${isoWeek(wk.sat)}</td>
+        <td align="center" style="${ff(SANS, 10.5, 700, 1.3, `color:${s.ink};letter-spacing:1px;text-transform:uppercase`)}">${esc(dayLong)}</td>
+        <td width="25%" align="right" style="${ff(SANS, 10.5, 700, 1.3, `color:${s.accent};letter-spacing:1px;text-transform:uppercase`)}">MOD desk</td></tr></table></td></tr></table>`;
+    const byline = `<table ${TBL}><tr>${img.headshot ? `<td width="54" valign="middle"><img src="${esc(img.headshot)}" width="44" height="44" alt="" style="display:block;width:44px;height:44px;border-radius:50%;border:0"></td>` : ''}<td valign="middle" style="${ff(SANS, 13, 400, 1.45, `color:${s.muted}`)}">By <b style="color:${s.ink}">${esc(name)}</b>${sub ? `, ${esc(sub)}` : ''}${contactLine ? `<br>${contactLine}` : ''}</td></tr></table>`;
+    const deck = tel ? 'Text first for anything urgent. Inside: who to call, when they’re open, and this weekend’s focus.' : 'Inside: who to call, when they’re open, and this weekend’s focus.';
+    const inner = `${mast}${spacer(18)}${epill(s, img, pillTxt)}${spacer(12)}
+      <div style="${ff(SERIF, 32, 700, 1.12, `color:${s.ink};margin:0 0 10px;letter-spacing:-.3px`)}">${mg.name ? `${esc(mg.name)} takes the MOD desk this weekend` : 'Your Manager on Duty this weekend'}</div>
+      <div style="${ff(SERIF, 17, 400, 1.45, `color:${s.muted};font-style:italic;margin:0 0 14px`)}">${deck}</div>
+      ${byline}<div style="border-top:1px solid ${s.line};margin-top:14px;padding-top:16px">${welcome}</div><div>${btns}</div>${reach}`;
+    return ecard(s, inner, { pad: '26px 26px 22px' });
+  }
+
+  if (s.hero === 'blueprint') {
+    const dash = '#3E6487';
+    const row = (k, v) => `<tr><td width="112" valign="top" style="padding:8px 10px 8px 0;border-top:1px dashed ${dash};${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1px;text-transform:uppercase`)}">${k}</td><td valign="top" style="padding:8px 0;border-top:1px dashed ${dash};${ff(SANS, 14, 600, 1.45, `color:${s.heroInk}`)}">${v}</td></tr>`;
+    const spec = `<table ${TBL} width="100%" style="border-bottom:1px dashed ${dash};margin:4px 0 14px">${row('Manager', esc(name))}${sub ? row('Role', esc(sub)) : ''}${row('Weekend', esc(m.weekend.pill))}${tel ? row('First contact', `Text ${elink('sms:' + tel, mg.phone, s.heroInk)}`) : ''}${mg.email ? row('Email', elink('mailto:' + mg.email, mg.email, s.heroInk, 600)) : ''}</table>`;
+    const av = img.headshot ? `<table ${TBL} style="border:1px dashed #5C86B0;border-collapse:separate"><tr><td style="padding:6px"><img src="${esc(img.headshot)}" width="132" height="132" alt="${esc(name)}" style="display:block;width:132px;height:132px;border:0"></td></tr></table><div style="${ff(MONO, 10, 700, 1.4, `color:${s.heroMuted};letter-spacing:1px;margin:6px 0 14px`)}">FIG. 1 · ON DUTY</div>` : '';
+    const inner = `${img.logo ? `<img src="${esc(img.logo)}" width="130" alt="Redfin Powered by Rocket" style="display:block;width:130px;height:auto;border:0;margin:0 0 20px">` : ''}${epill(s, img, pillTxt)}${spacer(16)}
+      <div style="${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1.5px;text-transform:uppercase`)}">Sheet A-1 · Weekend MOD plan · ${esc(m.weekend.short)}</div>
+      <div style="${ff(SANS, 30, 800, 1.1, `color:${s.heroInk};margin:8px 0 12px;letter-spacing:-.4px`)}">Your weekend support plan</div>
+      ${ecols([spec, av], [416, 168])}${welcome}<div>${btns}</div>${reach}`;
+    return `<table ${TBL} width="100%" bgcolor="${s.heroBg}" style="background:${s.heroBg};border-radius:${s.radius}px;border-collapse:separate"><tr><td style="padding:26px 26px 22px">${inner}</td></tr></table>`;
+  }
+
+  if (s.hero === 'postcard') {
+    const wk = m.weekend; const region = m.brand.region === 'Southern California' ? 'SoCal' : m.brand.region;
+    const stamp = img.portrait || img.headshot ? `<table ${TBL} align="center" style="border-collapse:separate"><tr><td bgcolor="${s.accent}" style="background:${s.accent};padding:7px;border:3px dotted #FFFFFF">${pic(136, 170)}</td></tr></table>` : '';
+    const postmark = `<table ${TBL} align="center" style="margin-top:12px;border-collapse:separate"><tr><td width="92" height="92" align="center" valign="middle" style="width:92px;height:92px;border:2px solid ${s.muted};border-radius:50%;${ff(MONO, 10.5, 700, 1.4, `color:${s.muted};letter-spacing:1px;text-transform:uppercase`)}">${esc(region)}<br>${MON[wk.sat.getMonth()]} ${wk.sat.getDate()}<br>${wk.sat.getFullYear()}</td></tr></table>`;
+    const left = `<div style="${ff(SERIF, 22, 400, 1.2, `color:${s.muted};font-style:italic`)}">Greetings from</div>
+      <div style="${ff(HEAVY, 32, 900, 1.02, `color:${s.accent};letter-spacing:-.5px;text-transform:uppercase;margin:4px 0 14px`)}">Your weekend MOD</div>
+      ${epill(s, img, pillTxt)}${spacer(14)}
+      <div style="${ff(SANS, 20, 800, 1.25, `color:${s.ink}`)}">${esc(name)}</div>${sub ? `<div style="${ff(SANS, 14, 500, 1.4, `color:${s.muted};margin:2px 0 14px`)}">${esc(sub)}</div>` : spacer(12)}
+      ${welcome}<div>${btns}</div>${reach}`;
+    const right = `${stamp}${postmark}<div style="${ff(MONO, 10, 700, 1.4, 'color:#2F5D8A;letter-spacing:2px;text-align:center;margin:10px 0 6px')}">AIR MAIL · PAR AVION</div>`;
+    return `<table ${TBL} width="100%" bgcolor="${s.heroBg}" style="background:${s.heroBg};border:6px dashed ${s.accent};border-radius:${s.radius}px;border-collapse:separate"><tr><td style="padding:24px 20px 18px">${ecols([left, right], [376, 196])}</td></tr></table>`;
+  }
+
   if (s.hero === 'exec') {
     const av = img.headshot ? `<img src="${esc(img.headshot)}" width="68" height="68" alt="${esc(name)}" style="display:block;width:68px;height:68px;border-radius:50%;border:0">` : '';
     const inner = `${epill(s, img, pillTxt)}${spacer(18)}
@@ -572,7 +722,7 @@ function eQuick(m, s) {
   const tiles = secs.map((c) => {
     const lines = (c.lines || []).slice(0, 2).map((l, i) => `<div style="margin-top:${i ? 6 : 8}px">${l.label ? `<div style="${ff(SANS, 11.5, 600, 1.3, `color:${s.muted}`)}">${esc(l.label)}</div>` : ''}<div style="${ff(SANS, i ? 13.5 : 14.5, 400, 1.35, `color:${s.ink};word-break:break-word`)}">${elink(l.href || l.value, l.value, s.ink, i ? 600 : 700)}</div></div>`).join('');
     return `<table ${TBL} width="100%" bgcolor="${s.tile}" style="background:${s.tile};border-radius:${Math.max(0, s.radius - 6)}px;${s.tileBorder ? `border:${s.tileBorder};` : ''}border-collapse:separate"><tr><td style="padding:16px 16px 15px">
-      <div style="${ff(SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
+      <div style="${ff(s.eyebrowFont || SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
       <div style="${ff(SANS, 16, 800, 1.3, `color:${s.ink};margin-top:3px`)}">${esc(c.title)}</div>${lines}
       ${c.hoursText ? `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:8px`)}">${esc(c.hoursText)}</div>` : ''}
     </td></tr></table>`;
@@ -691,7 +841,7 @@ function eTech(m, s) {
   const lanes = secs.map((c) => {
     const btns = (c.lines || []).map((l, i) => ebtn(safeHref(l.href || l.value), l.label || l.value, i ? s.card : s.accent, i ? s.accent : s.onAccent, { small: true, border: s.accent })).join('');
     return `<table ${TBL} width="100%" bgcolor="${s.tile}" style="background:${s.tile};border-radius:${Math.max(0, s.radius - 6)}px;${s.tileBorder ? `border:${s.tileBorder};` : ''}border-collapse:separate"><tr><td style="padding:18px 16px 12px">
-      <div style="${ff(SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
+      <div style="${ff(s.eyebrowFont || SANS, 11, 800, 1.3, `letter-spacing:1.4px;text-transform:uppercase;color:${s.accent}`)}">${esc(c.kicker || '')}</div>
       <div style="${ff(SANS, 17, 800, 1.3, `color:${s.ink};margin:3px 0 6px`)}">${esc(c.title)}</div>
       ${c.need ? `<div style="${ff(SANS, 13.5, 700, 1.45, `color:${s.ink};margin:0 0 4px`)}">${esc(c.need)}</div>` : ''}
       ${c.summary ? `<div style="${ff(SANS, 13.5, 400, 1.5, `color:${s.muted};margin:0 0 12px`)}">${esc(c.summary)}</div>` : ''}
@@ -735,20 +885,22 @@ function eFooter(m, s, img) {
   </td></tr></table>`;
 }
 
+function eAnnounce(m, s) {
+  const a = m.announce || {};
+  if (!a.title && !a.body) return '';
+  const link = safeHref(a.url);
+  const cta = a.cta ? (link ? ebtn(link, a.cta, s.accent, s.onAccent) : `<div style="${ff(SANS, 15, 700, 1.5, `color:${s.accent}`)}">${esc(a.cta)}</div>`) : '';
+  return ecard(s, ehead(s, 'Weekend announcement', a.title || '') + (a.body ? `<div style="${ff(SANS, 15.5, 400, 1.6, `color:${s.ink};margin:0 0 ${cta ? 16 : 0}px`)}">${nl2br(a.body)}</div>` : '') + cta, { topRule: true });
+}
+const BLOCKS = { announce: eAnnounce, quick: eQuick, spotlight: eSpotlight, coverage: eCoverage, routing: eRouting, playbooks: ePlaybooks, tech: eTech, resources: eResources, wins: eWins };
 function renderEmail(m, key, img, o = {}) {
   const s = STYLES[key] || STYLES.signature;
   const t = m.toggles || DEFAULT_TOGGLES;
   const blocks = [];
+  SEC_N = 0;
   if (!s.logoInHero) blocks.push(eLogoBar(m, s, img));
   blocks.push(eHero(m, s, img));
-  if (t.quick) blocks.push(eQuick(m, s));
-  if (t.spotlight) blocks.push(eSpotlight(m, s, img));
-  if (t.coverage) blocks.push(eCoverage(m, s));
-  if (t.routing) blocks.push(eRouting(m, s));
-  if (t.playbooks) blocks.push(...ePlaybooks(m, s));
-  if (t.tech) blocks.push(eTech(m, s));
-  if (t.resources) blocks.push(...eResources(m, s));
-  if (t.wins) blocks.push(eWins(m, s));
+  normOrder(m.order).forEach((k) => { if (t[k] && BLOCKS[k]) blocks.push(...[].concat(BLOCKS[k](m, s, img))); });
   if (m.manager.name || m.manager.signoff) blocks.push(eSignoff(m, s, img));
   blocks.push(eFooter(m, s, img));
   const rows = blocks.filter(Boolean).map((b) => `<tr><td class="mod-rise" style="padding:0 0 14px">${b}</td></tr>`).join('');
@@ -780,6 +932,7 @@ function plainText(m) {
   L.push('');
   if (m.welcome) L.push(m.welcome, '');
   if (mg.reach) L.push(mg.reach, '');
+  if (m.toggles.announce && m.announce && (m.announce.title || m.announce.body)) L.push(`WEEKEND ANNOUNCEMENT: ${m.announce.title || ''}`, m.announce.body || '', m.announce.cta ? `${m.announce.cta}${m.announce.url ? ': ' + m.announce.url : ''}` : '', '');
   const f = m.spotlights[0];
   if (f && m.toggles.spotlight) {
     L.push(`THIS WEEKEND’S FOCUS: ${f.title}`); if (f.summary) L.push(f.summary);
@@ -870,7 +1023,7 @@ async function resolveImages(m, key, exp) {
     safe(brandImg('logo', s.footLogo, exp)).then((v) => { out.footLogo = v; }),
     m.toggles.live ? safe(brandImg('dot', s.dot, exp)).then((v) => { out.dot = v; }) : null,
   ];
-  if (s.avatar === 'portrait') jobs.push(safe(src ? memo(`hs:${src}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
+  if (s.avatar === 'portrait' || s.avatar === 'stamp') jobs.push(safe(src ? memo(`hs:${src}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
   m.spotlights.forEach((sp, i) => {
     if (!sp.assetId && !(exp && isHttps(sp.publicUrl))) return;
     if (i === 0) {
@@ -903,8 +1056,9 @@ function buildModel() {
     preheader: mg.phone ? `Text ${first || 'your MOD'} at ${mg.phone} for anything urgent. Tour hotline, TC/LC hours, Rocket and IT help inside.` : 'Tour hotline, TC/LC hours, Rocket and IT help for the weekend, all in one place.',
     welcome: d.welcome, wins: d.wins,
     core: S.core.slice().sort(byOrder),
-    spotlights: (d.spotlightIds || []).map((id) => S.spotlights.find((x) => x.id === id)).filter(Boolean),
-    toggles: d.toggles, brand: brandSettings(),
+    spotlights: (d.spotlightIds || []).map((id) => liveSpotlights().find((x) => x.id === id)).filter(Boolean),
+    toggles: d.toggles, order: normOrder(d.order), brand: brandSettings(),
+    announce: { title: d.announceTitle, body: d.announceBody, cta: d.announceCta, url: d.announceUrl },
   };
 }
 
@@ -928,6 +1082,7 @@ async function updatePreview() {
   fr.srcdoc = doc;
   $('#pvNote').textContent = replay ? 'Playing the web-version intro' : 'Live preview · links open in a new tab';
   $('#pvSize').textContent = `${STYLES[key].name} · ${Math.max(1, Math.round(body.length / 1024))} KB of HTML`;
+  refreshSendBits(); warmExport();
 }
 async function makeExport() {
   const m = buildModel(); const key = S.draft.style in STYLES ? S.draft.style : 'signature';
@@ -949,8 +1104,12 @@ function execCopyText(text) {
   let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
   ta.remove(); return ok;
 }
-async function copyEmail() {
-  const p = makeExport(); let ok = false;
+let exportCache = null;
+const modelKey = () => { try { return JSON.stringify([buildModel(), S.draft.style, S.draft.headshotId, S.draft.crop, S.brand]); } catch (e) { return String(Math.random()); } };
+const warmExport = debounce(() => { const key = modelKey(); if (exportCache && exportCache.key === key) return; const p = makeExport(); p.catch(() => { exportCache = null; }); exportCache = { key, p }; }, 700);
+function freshExport() { const key = modelKey(); if (exportCache && exportCache.key === key) return exportCache.p; const p = makeExport(); p.catch(() => { exportCache = null; }); exportCache = { key, p }; return p; }
+async function copyEmail(o = {}) {
+  const p = freshExport(); let ok = false;
   try {
     if (navigator.clipboard && window.ClipboardItem) {
       await navigator.clipboard.write([new ClipboardItem({ 'text/html': p.then((x) => new Blob([x.body], { type: 'text/html' })), 'text/plain': p.then((x) => new Blob([x.text], { type: 'text/plain' })) })]);
@@ -961,11 +1120,11 @@ async function copyEmail() {
     try { const x = await p; await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([x.body], { type: 'text/html' }), 'text/plain': new Blob([x.text], { type: 'text/plain' }) })]); ok = true; } catch (e) { ok = false; }
   }
   if (!ok) { try { ok = execCopyHtml((await p).body); } catch (e) { ok = false; } }
-  if (ok) { S.sentOnce = true; updateProgress(); toast('Email copied. Paste it into a new Gmail message.'); }
-  else toast('Copy was blocked in this view. Use Download .html, or Copy HTML code.', 'err');
+  if (ok) { S.sentOnce = true; updateProgress(); toast(o.launch ? 'Gmail is opening with To, BCC and the subject filled in. Click into the message and paste (Ctrl+V or ⌘V).' : 'Email copied. Paste it into a Gmail message.'); }
+  else toast(o.launch ? 'Gmail is opening, but copying was blocked here. Come back, click Copy email, then paste it into the message.' : 'Copy was blocked in this view. Use Download .html, or Copy HTML code.', 'err');
 }
 async function copyCode() {
-  const p = makeExport(); let ok = false;
+  const p = freshExport(); let ok = false;
   try { await navigator.clipboard.write([new ClipboardItem({ 'text/plain': p.then((x) => new Blob([x.full], { type: 'text/plain' })) })]); ok = true; } catch (e) { ok = false; }
   if (!ok) { const x = await p; try { await navigator.clipboard.writeText(x.full); ok = true; } catch (e) { ok = execCopyText(x.full); } }
   toast(ok ? 'HTML code copied.' : 'Copy was blocked in this view. Use Download .html instead.', ok ? '' : 'err');
@@ -978,7 +1137,7 @@ async function copySubject() {
 async function downloadHtml(btn) {
   if (!S.downloads) { toast('Downloads aren’t available in this view. Use Copy HTML code instead.', 'err'); return; }
   await busy(btn, 'Preparing…', async () => {
-    const x = await makeExport();
+    const x = await freshExport();
     try {
       await S.downloads.save({ filename: `MOD-${S.draft.saturday}-${slug(S.draft.manager.name || 'email')}.html`, data: x.full });
       toast('Saved. Open the file in a browser to see the animated version.');
@@ -1032,7 +1191,8 @@ async function resizeBlob(file, maxDim, q) {
 }
 async function uploadImage(file, maxDim, keepFormat) {
   if (!S.assets) throw { code: 'not_granted' };
-  const blob = keepFormat || file.type === 'image/gif' ? file : await resizeBlob(file, maxDim, 0.9);
+  const native = /^image\/(png|jpeg|webp|gif)$/.test(file.type);
+  const blob = (keepFormat && native) || file.type === 'image/gif' ? file : await resizeBlob(file, maxDim, 0.9);
   return S.assets.upload(blob, { type: blob.type || file.type });
 }
 
@@ -1061,7 +1221,7 @@ function showTab(tab) {
   if (tab !== 'build') renderView(tab);
   window.scrollTo({ top: 0 });
 }
-function renderView(tab) { if (tab === 'library') renderLibrary(); else if (tab === 'core') renderCore(); else if (tab === 'brand') renderBrand(); }
+function renderView(tab) { if (tab === 'library') renderLibrary(); else if (tab === 'core') renderCore(); else if (tab === 'recipients') renderRecipients(); else if (tab === 'brand') renderBrand(); }
 
 /* ---------------- build steps ---------------- */
 const HOURS = []; for (let h = 5; h <= 23; h += 0.5) HOURS.push(h);
@@ -1111,7 +1271,11 @@ function renderWeekendFields() {
     <label class="field"><span>Subject line</span><input class="input" id="b_subject" data-bind="subject" value="${esc(subjectFor(d))}"></label>
     <div class="btn-row" id="subjOpts"></div>
     <label class="field"><span>Welcome message</span><textarea class="textarea" id="b_welcome" data-bind="welcome" rows="3">${esc(d.welcome)}</textarea></label>
-    <label class="field"><span>Wins and shout-outs (optional, one per line)</span><textarea class="textarea" id="b_wins" data-bind="wins" rows="2" placeholder="Maria closed her first listing in Pasadena!">${esc(d.wins)}</textarea></label>`;
+    <label class="field"><span>Wins and shout-outs (optional, one per line)</span><textarea class="textarea" id="b_wins" data-bind="wins" rows="2" placeholder="Maria closed her first listing in Pasadena!">${esc(d.wins)}</textarea></label>
+    <div class="section-label">Weekend announcement (optional)</div>
+    <label class="field"><span>Headline</span><input class="input" id="b_aTitle" data-bind="announceTitle" value="${esc(d.announceTitle)}" placeholder="Open house blitz this Sunday"></label>
+    <label class="field"><span>Message</span><textarea class="textarea" id="b_aBody" data-bind="announceBody" rows="3" placeholder="What the whole region should know or do this weekend.">${esc(d.announceBody)}</textarea></label>
+    <div class="row2"><label class="field"><span>Button label</span><input class="input" id="b_aCta" data-bind="announceCta" value="${esc(d.announceCta)}" placeholder="Sign up here"></label><label class="field"><span>Button link</span><input class="input" id="b_aUrl" data-bind="announceUrl" value="${esc(d.announceUrl)}" placeholder="https://"></label></div>`;
   renderSubjectChips();
 }
 function renderSubjectChips() {
@@ -1150,44 +1314,139 @@ async function drawCrop(setSliders) {
 function renderSpPicker() {
   const el = $('#spPicker'); if (!el) return; const d = S.draft;
   if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Spotlights load from the shared library.</p>'; return; }
-  const list = S.spotlights.filter((x) => !x.archived).sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-  el.innerHTML = `<p class="muted" style="font-size:13px">Tap to add. Your first pick is featured. Add up to two more as smaller “also on our radar” items.</p>
+  const list = liveSpotlights().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  el.innerHTML = `<div class="btn-row" style="justify-content:space-between"><p class="muted" style="font-size:13px;flex:1;min-width:200px">Tap to add. Your first pick is featured. Add up to two more as smaller “also on our radar” items.</p>${canUpload() ? '<button class="btn btn-sm" data-action="bulk-upload">Upload from phone or computer</button>' : ''}</div>
     <div class="sp-pick">${list.map((x) => { const i = d.spotlightIds.indexOf(x.id); return `<button class="sp-opt ${i === 0 ? 'is-featured' : i > 0 ? 'is-extra' : ''}" data-action="toggle-spotlight" data-id="${esc(x.id)}"><span class="badge">${i === 0 ? 'Featured' : 'Also'}</span><span class="thumb" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}"></span><span class="t"><small>${esc(x.category || 'Spotlight')}</small>${esc(x.title)}</span></button>`; }).join('')}
     ${canAdd() ? '<button class="sp-opt" data-action="new-spotlight" style="justify-content:center;align-items:center;min-height:140px;border-style:dashed;color:var(--muted);font-weight:800">+ New spotlight</button>' : ''}</div>
     ${list.length ? '' : '<p class="muted" style="font-size:13px">The library is empty. Add the first infographic.</p>'}`;
 }
-const TOGGLE_INFO = [
-  ['live', 'Animated “On duty” badge', 'A pulsing dot that animates in Gmail'],
-  ['quick', '“Need help now?” tiles', 'Tap-to-contact tiles for the main teams'],
-  ['spotlight', 'This weekend’s focus', 'Your featured infographic or spotlight'],
-  ['coverage', 'Weekend coverage map', 'Saturday and Sunday hours at a glance'],
-  ['routing', 'Who to contact for what', 'A quick guide from need to team'],
-  ['playbooks', 'Step-by-step playbooks', 'For example, how to use the tour hotline'],
-  ['tech', 'Tech help lanes', 'Agent Tools versus laptop and IT'],
-  ['resources', 'Self-serve resources', 'FIN, Doctionary, help videos'],
-  ['wins', 'Wins and shout-outs', 'Turns on when you add wins in step 2'],
-];
-function renderToggles() { $('#toggles').innerHTML = TOGGLE_INFO.map(([k, t, sub]) => `<label class="switch-row"><span><b>${esc(t)}</b><small>${esc(sub)}</small></span><input type="checkbox" class="switch" id="t_${k}" data-toggle="${k}" ${S.draft.toggles[k] ? 'checked' : ''}></label>`).join(''); }
-function miniHTML(s) {
-  const dot = s.hero === 'billboard' ? s.accent : s.hero === 'exec' ? s.tint : s.heroBg === s.card ? s.accent : '#FFFFFF';
-  const border = s.cardBorder ? `border:1px solid ${s.line};` : '';
-  return `<div class="mini" style="background:${s.page}"><div class="h" style="background:${s.heroBg};${s.heroGrad ? `background-image:${s.heroGrad};` : ''}${s.hero === 'exec' ? `${border}border-top:3px solid ${s.accent};` : ''}"><i style="background:${dot}"></i><b style="background:${s.hero === 'billboard' ? s.accent : s.heroInk}"></b></div><div class="c"><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.accent};height:7px;align-self:end"></span></div></div>`;
+function renderToggles() {
+  const d = S.draft; d.order = normOrder(d.order);
+  $('#toggles').innerHTML = `<label class="switch-row"><span><b>Animated “On duty” badge</b><small>A pulsing dot that animates in Gmail</small></span><input type="checkbox" class="switch" id="t_live" data-toggle="live" ${d.toggles.live ? 'checked' : ''}></label>
+    <p class="muted" style="font-size:13px">Drag the <b>⠿</b> handle (or use the arrows) to put sections in the order you want. The email follows this order exactly.</p>
+    <div class="fixed-row">Always first: logo and your hero card</div>
+    <ol class="sort" id="sortList">${d.order.map((k, i) => `<li class="sort-item ${d.toggles[k] ? '' : 'is-off'}" data-key="${k}"><button class="handle" data-handle aria-label="Drag to reorder ${esc(SECTION_INFO[k][0])}" title="Drag to reorder">⠿</button><span style="min-width:0"><b>${esc(SECTION_INFO[k][0])}</b><small>${esc(SECTION_INFO[k][1])}</small></span><span class="sort-moves"><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} up">↑</button><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="1" ${i === d.order.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} down">↓</button></span><input type="checkbox" class="switch" id="t_${k}" data-toggle="${k}" ${d.toggles[k] ? 'checked' : ''} aria-label="Show ${esc(SECTION_INFO[k][0])}"></li>`).join('')}</ol>
+    <div class="fixed-row">Always last: your sign-off and the footer</div>
+    <div class="btn-row"><button class="btn btn-xs btn-ghost" data-action="reset-order">Reset to the standard order</button></div>`;
 }
-function renderStylePick() { $('#stylePick').innerHTML = `<div class="style-grid">${Object.entries(STYLES).map(([k, s]) => `<button class="style-opt ${S.draft.style === k ? 'is-active' : ''}" data-action="pick-style" data-style="${k}">${miniHTML(s)}<span><strong>${esc(s.name)}</strong><small>${esc(s.blurb)}</small></span></button>`).join('')}</div>`; }
+function moveSection(key, dir) {
+  const o = normOrder(S.draft.order); const i = o.indexOf(key); const j = i + Number(dir);
+  if (i < 0 || j < 0 || j >= o.length) return;
+  [o[i], o[j]] = [o[j], o[i]]; S.draft.order = o; saveDraft(); renderToggles(); schedulePreview();
+  const b = $(`[data-action="move-sec"][data-key="${key}"][data-dir="${dir}"]`); if (b && !b.disabled) b.focus(); else { const h = $(`.sort-item[data-key="${key}"] .handle`); if (h) h.focus(); }
+}
+function flipMove(list, mutate) {
+  const items = Array.from(list.children); const first = new Map(items.map((el) => [el, el.getBoundingClientRect().top]));
+  mutate();
+  items.forEach((el) => {
+    if (el.classList.contains('is-dragging')) return;
+    const dy = first.get(el) - el.getBoundingClientRect().top;
+    if (dy) { el.style.transition = 'none'; el.style.transform = `translateY(${dy}px)`; requestAnimationFrame(() => { el.style.transition = 'transform .2s cubic-bezier(.2,.8,.2,1)'; el.style.transform = ''; }); }
+  });
+}
+let drag = null;
+function bindSortable() {
+  document.addEventListener('pointerdown', (e) => {
+    const h = e.target.closest && e.target.closest('[data-handle]'); if (!h) return;
+    const li = h.closest('.sort-item'); e.preventDefault();
+    drag = { li, list: li.parentElement, start: normOrder(S.draft.order).join(',') };
+    li.classList.add('is-dragging'); try { h.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const y = e.clientY; const others = Array.from(drag.list.children).filter((x) => x !== drag.li);
+    let before = null; for (const it of others) { const r = it.getBoundingClientRect(); if (y < r.top + r.height / 2) { before = it; break; } }
+    const cur = drag.li.nextElementSibling;
+    if (before === cur || (!before && !drag.li.nextElementSibling)) return;
+    flipMove(drag.list, () => { if (before) drag.list.insertBefore(drag.li, before); else drag.list.appendChild(drag.li); });
+  });
+  const end = () => {
+    if (!drag) return; const d = drag; drag = null; d.li.classList.remove('is-dragging');
+    const order = Array.from(d.list.children).map((x) => x.dataset.key);
+    if (order.join(',') !== d.start) { S.draft.order = normOrder(order); saveDraft(); schedulePreview(); }
+    renderToggles();
+  };
+  document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+}
+function miniHTML(s) {
+  const lightHero = /^#FFF/i.test(s.heroBg);
+  const dot = s.hero === 'billboard' ? s.accent : s.hero === 'exec' ? s.tint : lightHero ? s.accent : '#FFFFFF';
+  const border = s.cardBorder ? `border:1px solid ${s.line};` : '';
+  const heroEdge = s.hero === 'postcard' ? `border:2px dashed ${s.accent};` : lightHero && s.hero !== 'exec' ? `border:1px solid ${s.line};` : '';
+  return `<div class="mini" style="background:${s.page}"><div class="h" style="background:${s.heroBg};${s.heroGrad ? `background-image:${s.heroGrad};` : ''}${s.hero === 'exec' ? `${border}border-top:3px solid ${s.accent};` : heroEdge}"><i style="background:${dot}"></i><b style="background:${s.hero === 'billboard' ? s.accent : s.heroInk}"></b></div><div class="c"><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.card};${border}"></span><span style="background:${s.accent};height:7px;align-self:end"></span></div></div>`;
+}
+function renderStylePick() {
+  const grid = (g) => `<div class="style-grid">${Object.entries(STYLES).filter(([, s]) => s.group === g).map(([k, s]) => `<button class="style-opt ${S.draft.style === k ? 'is-active' : ''}" data-action="pick-style" data-style="${k}">${miniHTML(s)}<span><strong>${esc(s.name)}</strong><small>${esc(s.blurb)}</small></span></button>`).join('')}</div>`;
+  $('#stylePick').innerHTML = `<div class="style-group">Classic</div>${grid('classic')}<div class="style-group">Creative</div>${grid('creative')}`;
+}
+function parseEmails(text) {
+  const out = []; const seen = new Set();
+  String(text || '').split(/\n|;/).forEach((line) => {
+    const found = line.match(/[\w.+'-]+@[\w-]+(\.[\w-]+)+/g) || [];
+    found.forEach((email, i) => {
+      const k = email.toLowerCase(); if (seen.has(k)) return; seen.add(k);
+      let name = '';
+      if (found.length === 1) name = line.replace(email, '').replace(/[<>()"“”•·|,:]/g, ' ').replace(/\s[-–—]\s/g, ' ').replace(/\s+/g, ' ').trim();
+      const isGroup = /^\s*#/.test(line) || /\b(team|teams|advisors|agents|relations|support|all)\b/i.test(name) || /^(agents-all|sales-advisors|tour-team|weekendsupport|cra)\b/i.test(email);
+      out.push({ name: name.replace(/^#\s*/, ''), email, kind: isGroup ? 'group' : 'person' });
+    });
+  });
+  return out;
+}
+const toAddress = () => String(S.draft.to || S.draft.manager.email || '').trim();
+function bccList() {
+  const d = S.draft; const to = toAddress().toLowerCase(); const off = new Set(d.bccOff || []);
+  const base = S.distribution.filter((r) => r.active !== false && !off.has(r.id)).sort(byListOrder).map((r) => String(r.email || '').trim()).filter(Boolean);
+  const all = [...base, ...parseEmails(d.bccExtra).map((x) => x.email)]; const seen = new Set();
+  return all.filter((e) => { const k = e.toLowerCase(); if (!k || k === to || seen.has(k)) return false; seen.add(k); return true; });
+}
+function gmailURL() {
+  const to = toAddress(); const from = String(S.draft.manager.email || '').trim(); const bcc = bccList();
+  const q = [];
+  if (/@/.test(from)) q.push('authuser=' + encodeURIComponent(from));
+  q.push('view=cm', 'fs=1', 'tf=1');
+  if (to) q.push('to=' + encodeURIComponent(to));
+  if (bcc.length) q.push('bcc=' + encodeURIComponent(bcc.join(',')));
+  q.push('su=' + encodeURIComponent(subjectFor(S.draft)));
+  return 'https://mail.google.com/mail/?' + q.join('&');
+}
+function bccSummary() {
+  const n = bccList().length; const off = (S.draft.bccOff || []).filter((id) => S.distribution.some((r) => r.id === id && r.active !== false)).length;
+  const extra = parseEmails(S.draft.bccExtra).length;
+  if (S.mode === 'live' && !S.loaded.has('distribution')) return 'Loading the distribution list…';
+  if (!S.distribution.length && !extra) return 'No distribution list yet. Add recipients on the Recipients tab.';
+  return `${n} recipient${n === 1 ? '' : 's'} from the distribution list${off ? ` · ${off} left out this time` : ''}${extra ? ` · ${extra} extra` : ''}`;
+}
+function refreshSendBits() {
+  const a = $('#launchGmail'); if (a) a.href = gmailURL();
+  const c = $('#bccCount'); if (c) c.textContent = bccSummary();
+  const t = $('#b_to'); if (t && document.activeElement !== t) t.placeholder = S.draft.manager.email || 'your.name@redfin.com';
+}
 function renderSendPanel() {
   const el = $('#sendPanel'); if (!el) return; const d = S.draft;
+  const act = document.activeElement;
+  if (el.contains(act) && act && /^(INPUT|TEXTAREA)$/.test(act.tagName)) { refreshSendBits(); return; }
   const items = [
     [!!d.manager.name, 'Manager name'],
     [!!e164(d.manager.phone), 'Cell number so agents can text you'],
     [!!d.headshotId, 'Headshot selected'],
     [d.spotlightIds.length > 0 || !d.toggles.spotlight, 'Focus spotlight picked'],
     [S.core.length > 0, 'Standard info loaded'],
+    [!!toAddress(), 'Your email in the To line'],
   ];
   const review = S.core.filter((c) => c.needsReview && c.visible !== false).length;
+  const actives = S.distribution.filter((r) => r.active !== false).sort(byListOrder);
   el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}</div>
-    <div class="btn-row"><button class="btn btn-primary btn-lg" data-action="copy-email">Copy email for Gmail</button><button class="btn" data-action="copy-subject">Copy subject</button></div>
-    <div class="btn-row"><button class="btn btn-sm" data-action="download-html">Download .html (animated)</button><button class="btn btn-sm" data-action="copy-code">Copy HTML code</button>${S.mode === 'live' && canAdd() ? '<button class="btn btn-sm btn-ghost" data-action="save-history">Save to send history</button>' : ''}</div>
-    <div class="howto"><b>How to send</b><ol><li>Click <b>Copy email for Gmail</b>.</li><li>In Gmail, start a new message and paste into the body.</li><li>Click <b>Copy subject</b> and paste it into the subject line.</li><li>Send a test to yourself and open it on your phone.</li><li>Send to the region list. Use BCC for big lists.</li></ol></div>
+    <div class="send-to">
+      <div class="rowline"><span>To</span><input class="input" id="b_to" data-bind="to" value="${esc(d.to)}" placeholder="${esc(d.manager.email || 'your.name@redfin.com')}" inputmode="email" aria-label="To"></div>
+      <div class="rowline"><span>BCC</span><div style="font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b id="bccCount">${esc(bccSummary())}</b><button class="btn btn-xs btn-ghost" data-action="toggle-bcc">${S.bccOpen ? 'Done' : 'Adjust for this email'}</button></div></div>
+      ${S.bccOpen ? `<div class="bcc-box">${actives.length ? actives.map((r) => `<label><input type="checkbox" data-bccid="${esc(r.id)}" ${(d.bccOff || []).includes(r.id) ? '' : 'checked'}><span>${esc(r.name || r.email)} <span class="muted mono" style="font-size:11.5px">${esc(r.email)}</span></span></label>`).join('') : '<span class="muted" style="font-size:13px">No one on the list yet.</span>'}</div>
+        <label class="field"><span>Extra BCC for this email only</span><input class="input" id="b_bccExtra" data-bind="bccExtra" value="${esc(d.bccExtra)}" placeholder="name@redfin.com, another@redfin.com"></label>` : ''}
+      <small class="muted" style="font-size:12px">Put your own email in To. Everyone else gets a blind copy, so replies come only to you and addresses stay private.</small>
+    </div>
+    <div class="btn-row"><a class="btn btn-primary btn-lg" id="launchGmail" href="${esc(gmailURL())}" target="_blank" rel="noopener" data-action="launch-gmail">Launch in Gmail</a><button class="btn" data-action="copy-email">Copy email</button></div>
+    <div class="btn-row"><button class="btn btn-sm" data-action="copy-subject">Copy subject</button><button class="btn btn-sm" data-action="copy-bcc">Copy BCC list</button><button class="btn btn-sm" data-action="download-html">Download .html</button><button class="btn btn-sm" data-action="copy-code">Copy HTML code</button>${S.mode === 'live' && canAdd() ? '<button class="btn btn-sm btn-ghost" data-action="save-history">Save to send history</button>' : ''}</div>
+    <div class="howto"><b>How to send</b><ol><li><b>Test first.</b> Click <b>Copy email</b>, paste it into a message to yourself, and check it on your phone.</li><li>Click <b>Launch in Gmail</b>. A new message opens with To, BCC and the subject filled in, and the email is copied for you.</li><li>Click into the message body and paste: <b>Ctrl+V</b> on a PC, <b>⌘V</b> on a Mac.</li><li>Give it a last look, then send.</li></ol></div>
     <p class="muted" style="font-size:12px">Photos and graphics are embedded in the copy. If one is missing in your test, give that image a public link in the Library or in Brand &amp; access, then copy again.</p>`;
 }
 function updateProgress() {
@@ -1208,7 +1467,9 @@ function setBind(path, val) {
   else if (path === 'subject') { d.subject = val; d.subjectAuto = !val; }
   else d[path] = val;
   if (path === 'saturday') { const l = $('#wkLabel'); if (l) l.textContent = weekend(val).long; }
-  if (path === 'wins' && val.trim() && !d.toggles.wins) { d.toggles.wins = true; const sw = $('#t_wins'); if (sw) sw.checked = true; }
+  if (path === 'wins' && val.trim() && !d.toggles.wins) { d.toggles.wins = true; const sw = $('#t_wins'); if (sw) { sw.checked = true; sw.closest('.sort-item').classList.remove('is-off'); } }
+  if ((path === 'announceTitle' || path === 'announceBody') && val.trim() && !d.toggles.announce) { d.toggles.announce = true; const sw = $('#t_announce'); if (sw) { sw.checked = true; sw.closest('.sort-item').classList.remove('is-off'); } }
+  if (path === 'to' || path === 'bccExtra' || path === 'subject' || path.startsWith('manager.')) refreshSendBits();
   if (path === 'saturday' || path === 'manager.name') refreshSubjectUI();
   saveDraft(); schedulePreview(); updateProgress();
   if (path.startsWith('manager.') || path === 'saturday') renderSendPanel();
@@ -1259,7 +1520,7 @@ function renderLibrary() {
   const v = $('#view-library'); const t = S.libTab;
   const counts = { spotlights: S.spotlights.length, headshots: S.headshots.length, managers: S.managers.length, history: S.emails.length };
   const actions = {
-    spotlights: canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : '',
+    spotlights: `${canUpload() ? '<button class="btn" data-action="bulk-upload">Upload from phone or computer</button>' : ''}${canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : ''}`,
     headshots: canUpload() ? '<button class="btn btn-primary" data-action="upload-headshot">+ Add headshot</button>' : '',
     managers: canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '',
     history: '',
@@ -1271,11 +1532,51 @@ function renderLibrary() {
     <div>${body}</div>`;
 }
 function libSpotlights() {
-  const list = S.spotlights.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-  if (!list.length) return emptyHTML('No spotlights yet', 'Upload an infographic and add three takeaways. It becomes a ready-made focus section for any manager’s email.', canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : '');
-  return `<div class="card-grid">${list.map((x) => `<article class="lib-card"><div class="img" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}">${x.category ? `<span class="chip">${esc(x.category)}</span>` : ''}</div>
-    <div class="body"><h4>${esc(x.title)}</h4>${x.summary ? `<p>${esc(x.summary)}</p>` : ''}<div class="btn-row" style="margin-top:4px">${(x.takeaways || []).length ? `<span class="chip">${x.takeaways.length} takeaways</span>` : ''}${(x.prompts || []).length ? `<span class="chip">${x.prompts.length} prompts</span>` : ''}${isHttps(x.publicUrl) ? '<span class="chip ok">Public image link</span>' : ''}${S.draft.spotlightIds[0] === x.id ? '<span class="chip red">Featured in your draft</span>' : ''}</div></div>
-    <div class="foot"><span class="by">${esc(byLine(x.createdBy, x.createdAt))}</span><button class="btn btn-xs btn-primary" data-action="use-spotlight" data-id="${esc(x.id)}">Use this weekend</button>${canAdd() ? `<button class="btn btn-xs" data-action="edit-spotlight" data-id="${esc(x.id)}">Edit</button>` : ''}</div></article>`).join('')}</div>`;
+  const all = S.spotlights.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  const live = all.filter((x) => !x.trashedAt); const trash = all.filter((x) => x.trashedAt);
+  const view = S.spTrash ? trash : live;
+  const filters = `<div class="filter-row"><button class="subtab ${S.spTrash ? '' : 'is-active'}" data-action="sp-filter" data-trash="0">In the bank <span class="mono" style="opacity:.6">${live.length}</span></button><button class="subtab ${S.spTrash ? 'is-active' : ''}" data-action="sp-filter" data-trash="1">Trash <span class="mono" style="opacity:.6">${trash.length}</span></button></div>`;
+  if (!view.length) {
+    return filters + (S.spTrash ? emptyHTML('Trash is empty', 'Items you trash land here. Restore them anytime, or delete them for good.')
+      : emptyHTML('No infographics yet', 'Upload graphics from your phone or computer. Each one becomes a ready-made focus section for any manager’s email.', canUpload() ? '<button class="btn btn-primary" data-action="bulk-upload">Upload from phone or computer</button>' : ''));
+  }
+  return `${filters}<div class="card-grid">${view.map((x) => {
+    const bare = !x.summary && !(x.takeaways || []).length;
+    const foot = S.spTrash
+      ? `<span class="by">Trashed ${esc(fmtWhen(x.trashedAt))}</span>${canAdd() ? `<button class="btn btn-xs" data-action="restore-spotlight" data-id="${esc(x.id)}">Restore</button>` : ''}${canDelete(x) ? `<button class="btn btn-xs btn-danger" data-action="purge-spotlight" data-id="${esc(x.id)}">Delete forever</button>` : ''}`
+      : `<span class="by">${esc(byLine(x.createdBy, x.createdAt))}</span><button class="btn btn-xs btn-primary" data-action="use-spotlight" data-id="${esc(x.id)}">Use this weekend</button>${canAdd() ? `<button class="btn btn-xs" data-action="edit-spotlight" data-id="${esc(x.id)}">Edit</button><button class="btn btn-xs btn-ghost" data-action="trash-spotlight" data-id="${esc(x.id)}" aria-label="Move ${esc(x.title)} to trash">Trash</button>` : ''}`;
+    return `<article class="lib-card ${S.spTrash ? 'is-trash' : ''}"><div class="img" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}">${x.category ? `<span class="chip">${esc(x.category)}</span>` : ''}${bare && !S.spTrash ? '<span class="chip warn">Add details</span>' : ''}</div>
+      <div class="body"><h4>${esc(x.title)}</h4>${x.summary ? `<p>${esc(x.summary)}</p>` : ''}<div class="btn-row" style="margin-top:4px">${(x.takeaways || []).length ? `<span class="chip">${x.takeaways.length} takeaways</span>` : ''}${(x.prompts || []).length ? `<span class="chip">${x.prompts.length} prompts</span>` : ''}${isHttps(x.publicUrl) ? '<span class="chip ok">Public image link</span>' : ''}${!S.spTrash && S.draft.spotlightIds[0] === x.id ? '<span class="chip red">Featured in your draft</span>' : ''}</div></div>
+      <div class="foot">${foot}</div></article>`;
+  }).join('')}</div>`;
+}
+const titleFromFile = (n) => { const t = String(n || 'Infographic').replace(/\.[a-z0-9]+$/i, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim(); return t ? t[0].toUpperCase() + t.slice(1) : 'Infographic'; };
+async function bulkUpload(files) {
+  files = Array.from(files || []).filter((f) => /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name));
+  if (!files.length) { toast('Pick image files: PNG, JPEG, WebP or GIF.', 'err'); return; }
+  if (!canUpload()) { toast(errMsg({ code: 'not_granted' }), 'err'); return; }
+  if (files.length === 1) { spotlightDrawer(null); onFile(files[0]); const t = $('#f_title'); if (t && !t.value) t.value = titleFromFile(files[0].name); return; }
+  toast(`Uploading ${files.length} graphics…`);
+  let ok = 0;
+  for (const f of files) {
+    try {
+      const r = await uploadImage(f, 1800); const title = titleFromFile(f.name);
+      await S.db.collection('spotlights').doc(`${slug(title)}-${rid()}`).set({ title, category: '', summary: '', takeaways: [], prompts: [], promptsLabel: '', ctaLabel: '', ctaUrl: '', publicUrl: '', assetId: r.id, createdBy: S.me.id || '', createdAt: nowISO(), updatedAt: nowISO() });
+      ok += 1;
+    } catch (e) { console.error(e); }
+  }
+  if (ok) { S.spTrash = false; if (S.tab === 'library') { S.libTab = 'spotlights'; renderLibrary(); } }
+  toast(ok ? `${ok} graphic${ok > 1 ? 's' : ''} saved to the bank. Add titles and takeaways anytime.` : 'Those files didn’t upload. Try PNG or JPEG.', ok ? '' : 'err');
+}
+async function trashSpotlight(id) {
+  const ok = await write(() => S.db.collection('spotlights').doc(id).update({ trashedAt: nowISO(), trashedBy: S.me.id || '' }), 'Moved to trash. Restore it anytime from Trash.');
+  if (ok) { S.draft.spotlightIds = S.draft.spotlightIds.filter((y) => y !== id); saveDraft(); renderSpPicker(); schedulePreview(); }
+  return ok;
+}
+async function purgeSpotlight(id, btn) {
+  if (!armed(btn)) return; const x = S.spotlights.find((y) => y.id === id); if (!x) return;
+  const ok = await write(() => S.db.collection('spotlights').doc(id).delete(), 'Deleted for good.');
+  if (ok && x.assetId && S.assets) S.assets.delete(x.assetId).catch(() => {});
 }
 function hsCard(h, mg) {
   const isDef = mg && mg.defaultHeadshotId === h.id;
@@ -1348,6 +1649,74 @@ function flowPanel() {
     <dt>Links list</dt><dd>The self-serve resources grid</dd></dl></section>`;
 }
 
+/* ---------------- recipients ---------------- */
+function renderRecipients() {
+  const v = $('#view-recipients'); const list = S.distribution.slice().sort(byListOrder);
+  const groups = list.filter((r) => r.kind === 'group'); const people = list.filter((r) => r.kind !== 'group');
+  const active = list.filter((r) => r.active !== false).length; const edit = canEditList();
+  const row = (r) => `<div class="recip ${r.kind === 'group' ? 'group' : ''} ${r.active === false ? 'is-off' : ''}"><span class="av">${r.kind === 'group' ? '#' : esc(initials(r.name || r.email))}</span><div style="min-width:0"><b>${esc(r.name || r.email)}</b><div class="em">${esc(r.email)}</div></div><div class="acts">${r.active === false ? '<span class="chip">Paused</span>' : ''}${edit ? `<input type="checkbox" class="switch" data-recip-active="${esc(r.id)}" ${r.active !== false ? 'checked' : ''} aria-label="Include ${esc(r.name || r.email)}"><button class="btn btn-xs" data-action="edit-recip" data-id="${esc(r.id)}">Edit</button>` : ''}</div></div>`;
+  let body;
+  if (S.mode !== 'live') body = emptyHTML('The distribution list isn’t connected', 'Open the Studio from its claude.ai link to load the shared BCC list.');
+  else if (!S.loaded.has('distribution')) body = '<span class="chip">Loading the distribution list…</span>';
+  else if (!list.length) body = emptyHTML('No recipients yet', edit ? 'Paste the team lists and people who should get the MOD email every weekend.' : `${adminName()} hasn’t added the distribution list yet.`, edit ? '<button class="btn btn-primary" data-action="paste-recips">Paste a list</button>' : '');
+  else body = `<div class="two-col"><div style="display:grid;gap:20px;min-width:0">
+      ${groups.length ? `<section><div class="section-label" style="margin-bottom:8px">Team lists · ${groups.length}</div><div class="recip-list">${groups.map(row).join('')}</div></section>` : ''}
+      ${people.length ? `<section><div class="section-label" style="margin-bottom:8px">People · ${people.length}</div><div class="recip-list">${people.map(row).join('')}</div></section>` : ''}
+    </div><aside style="display:grid;gap:14px;align-content:start">
+      <section class="panel"><h3>${active} of ${list.length} included</h3><div class="btn-row"><span class="chip red">${groups.length} team list${groups.length === 1 ? '' : 's'}</span><span class="chip">${people.length} ${people.length === 1 ? 'person' : 'people'}</span></div><p style="font-size:14px;color:var(--ink-2)">Paused recipients stay on the list but don’t get the email until you turn them back on.</p></section>
+      <section class="panel"><h3>How sending works</h3><ol style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px"><li>The manager on duty puts their own email in <b>To</b>.</li><li>This list goes in <b>BCC</b>. The sender is left out of BCC automatically.</li><li><b>Launch in Gmail</b> opens a new message with To, BCC and the subject filled in, and copies the email. Paste it in and send.</li></ol></section>
+    </aside></div>`;
+  v.innerHTML = `<div class="page-head"><div><div class="eyebrow">Who gets the MOD email</div><h2>Distribution list</h2><p>Every MOD email goes <b>To</b> the manager on duty and <b>BCC</b> to this list, so replies come back to the MOD and everyone’s address stays private. ${edit ? 'Changes here apply to every manager’s next email.' : `Only ${esc(adminName())} can change this list. You can still leave someone out, or add an extra address, for a single email in the Send step.`}</p></div>
+    <div class="btn-row"><button class="btn" data-action="copy-bcc-all">Copy BCC list</button>${edit ? '<button class="btn" data-action="paste-recips">Paste a list</button><button class="btn btn-primary" data-action="new-recip">+ Add recipient</button>' : ''}</div></div>${body}`;
+}
+function recipDrawer(id) {
+  const r = S.distribution.find((x) => x.id === id) || null; const v = r || { name: '', email: '', kind: 'person', active: true };
+  openDrawer(`${dHead(r ? 'Edit recipient' : 'Add a recipient')}<div class="drawer-body">
+    <label class="field"><span>Name</span><input class="input" id="r_name" value="${esc(v.name || '')}" placeholder="Los Angeles Buy-side and Sell-Side Agents"></label>
+    <label class="field"><span>Email</span><input class="input" id="r_email" value="${esc(v.email || '')}" placeholder="agents-all.losangeles@redfin.com" inputmode="email"></label>
+    <label class="field"><span>Type</span><select class="select" id="r_kind"><option value="group" ${v.kind === 'group' ? 'selected' : ''}>Team list or alias</option><option value="person" ${v.kind !== 'group' ? 'selected' : ''}>Person</option></select></label>
+    <label class="switch-row"><span><b>Included in BCC</b><small>Turn off to pause without removing</small></span><input type="checkbox" class="switch" id="r_active" ${v.active !== false ? 'checked' : ''}></label>
+  </div><div class="drawer-foot">${r ? `<button class="btn btn-danger" data-action="delete-recip" data-id="${esc(r.id)}" style="margin-right:auto">Remove</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-recip" data-id="${esc(r ? r.id : '')}">Save</button></div>`);
+}
+async function saveRecip(id, btn) {
+  const r = S.distribution.find((x) => x.id === id);
+  const email = $('#r_email').value.trim(); const name = $('#r_name').value.trim().replace(/^#\s*/, '');
+  if (!/^[\w.+'-]+@[\w-]+(\.[\w-]+)+$/.test(email)) { toast('Enter a valid email address.', 'err'); return; }
+  const dup = S.distribution.find((x) => x.id !== id && String(x.email).toLowerCase() === email.toLowerCase());
+  if (dup) { toast(`${email} is already on the list.`, 'err'); return; }
+  const data = { name, email, kind: $('#r_kind').value, active: $('#r_active').checked, updatedAt: nowISO(), updatedBy: S.me.id || '' };
+  await busy(btn, 'Saving…', async () => {
+    const ok = await write(() => (r ? S.db.collection('distribution').doc(r.id).update(data)
+      : S.db.collection('distribution').doc(uniqueId(S.distribution, slug(email.replace('@', '-at-'))))
+        .set({ ...data, order: Math.max(0, ...S.distribution.map((x) => x.order || 0)) + 1, createdBy: S.me.id || '', createdAt: nowISO() })), r ? 'Recipient updated.' : 'Added to the distribution list.');
+    if (ok) closeDrawer();
+  });
+}
+function pasteDrawer() {
+  openDrawer(`${dHead('Paste a list')}<div class="drawer-body">
+    <p class="muted">Paste one recipient per line, like <span class="mono">Name • email@redfin.com</span>. Lines that start with # are saved as team lists. Addresses already on the list are skipped.</p>
+    <label class="field"><span>Recipients</span><textarea class="textarea mono" id="p_text" rows="12" placeholder="#Los Angeles Buy-side and Sell-Side Agents • agents-all.losangeles@redfin.com&#10;Julie Kang • julie.kang@redfin.com"></textarea></label>
+    <div id="p_preview" class="muted" style="font-size:13px">Nothing to add yet.</div>
+  </div><div class="drawer-foot"><button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-paste">Add to list</button></div>`);
+}
+function pasteParsed() {
+  const have = new Set(S.distribution.map((x) => String(x.email).toLowerCase()));
+  const all = parseEmails($('#p_text') ? $('#p_text').value : '');
+  return { all, fresh: all.filter((x) => !have.has(x.email.toLowerCase())) };
+}
+async function savePaste(btn) {
+  const { fresh } = pasteParsed(); if (!fresh.length) { toast('No new addresses found.', 'err'); return; }
+  await busy(btn, 'Adding…', async () => {
+    let order = Math.max(0, ...S.distribution.map((x) => x.order || 0)); let n = 0; const ids = S.distribution.slice();
+    for (const x of fresh) {
+      order += 1; const id = uniqueId(ids, slug(x.email.replace('@', '-at-'))); ids.push({ id });
+      const ok = await write(() => S.db.collection('distribution').doc(id).set({ name: x.name, email: x.email, kind: x.kind, active: true, order, createdBy: S.me.id || '', createdAt: nowISO() }));
+      if (!ok) break; n += 1;
+    }
+    if (n) { toast(`Added ${n} recipient${n === 1 ? '' : 's'}.`); closeDrawer(); }
+  });
+}
+
 /* ---------------- brand & access ---------------- */
 function renderBrand() {
   const v = $('#view-brand'); const b = brandSettings(); const own = canEditCore(); const dis = own ? '' : 'disabled';
@@ -1364,6 +1733,7 @@ function renderBrand() {
         <div class="row2"><label class="field"><span>Region</span><input class="input" id="br_region" data-brand="region" value="${esc(b.region)}" ${dis}></label><label class="field"><span>Program name</span><input class="input" id="br_program" data-brand="program" value="${esc(b.program)}" ${dis}></label></div>
         <label class="field"><span>Footer line</span><input class="input" id="br_footer" data-brand="footer" value="${esc(b.footer)}" placeholder="Questions about this email? Reply to your MOD." ${dis}></label>
         <div class="row2"><label class="field"><span>Admin name in help text</span><input class="input" id="br_admin" data-brand="adminName" value="${esc(b.adminName)}" ${dis}></label><label class="field"><span>Time zone note</span><input class="input" id="br_tz" data-brand="tz" value="${esc(b.tz)}" ${dis}></label></div>
+        <label class="field"><span>Who can edit the distribution list</span><select class="select" id="br_list" data-brand="listEditors" ${dis}><option value="owner" ${b.listEditors === 'owner' ? 'selected' : ''}>Only ${esc(b.adminName || 'the owner')}</option><option value="editors" ${b.listEditors === 'editors' ? 'selected' : ''}>${esc(b.adminName || 'The owner')} and every Editor</option></select></label>
         <label class="field"><span>Default style for new drafts</span><select class="select" id="br_style" data-brand="defaultStyle" ${dis}>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}" ${b.defaultStyle === k ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></section>
       <section class="panel"><h3>Animated “On duty” badge</h3><p class="muted" style="font-size:13.5px">A pulsing dot GIF that animates in Gmail and Apple Mail. Each style uses the version that matches its background.</p>
         <div style="display:flex;gap:16px;flex-wrap:wrap">${['light', 'dark', 'tint', 'red'].map((k) => `<div style="display:grid;gap:6px;justify-items:center;font-size:12px;font-weight:700"><img src="${BUILTIN[k]}" width="40" height="40" alt="" style="border-radius:8px;border:1px solid var(--line)">${k}</div>`).join('')}</div>
@@ -1403,7 +1773,7 @@ function openDrawer(html) {
 }
 function closeDrawer() { $('#drawerWrap').hidden = true; $('#drawer').innerHTML = ''; S.pendingFile = null; S.fileTarget = null; }
 const dHead = (t) => `<div class="drawer-head"><h3 id="drawerTitle">${esc(t)}</h3><button class="btn btn-ghost btn-sm" data-action="close-drawer">Close</button></div>`;
-const dropHTML = (src, label) => `<div class="drop" id="dz" data-action="pick-file" tabindex="0" role="button"><img id="dzImg" alt="" ${src ? `src="${esc(src)}"` : 'hidden'}><b>${esc(label)}</b><span>Drop an image, paste a screenshot, or click to choose. PNG, JPEG, WebP or GIF.</span></div>`;
+const dropHTML = (src, label) => `<div class="drop" id="dz" data-action="pick-file" tabindex="0" role="button"><img id="dzImg" alt="" ${src ? `src="${esc(src)}"` : 'hidden'}><b>${esc(label)}</b><span class="btn btn-sm btn-primary">Choose from phone or computer</span><span>Or drop an image here, or paste a screenshot.</span></div>`;
 const CATEGORIES = ['AI & Tools', 'Rocket Mortgage', 'Tours & Conversion', 'Listings', 'Buyer Consults', 'Market Update', 'Training', 'Recognition', 'Operations'];
 
 function spotlightDrawer(id) {
@@ -1422,7 +1792,7 @@ function spotlightDrawer(id) {
     <div class="row2"><label class="field"><span>Prompts or scripts heading</span><input class="input" id="f_pLabel" value="${esc(v.promptsLabel || '')}" placeholder="Try these"></label></div>
     <label class="field"><span>Prompts or scripts</span><textarea class="textarea" id="f_prompts" rows="5" placeholder="One per line">${esc((v.prompts || []).join('\n'))}</textarea><small>One per line. Each shows as a quote block agents can copy.</small></label>
     <label class="field"><span>Public image link (optional)</span><input class="input" id="f_public" value="${esc(v.publicUrl || '')}" placeholder="https://…/infographic.jpg"><small>A public https link makes the image load in every inbox. Leave blank to embed it.</small></label>
-  </div><div class="drawer-foot">${x && canDelete(x) ? `<button class="btn btn-danger" data-action="delete-spotlight" data-id="${esc(x.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-spotlight" data-id="${esc(x ? x.id : '')}">Save spotlight</button></div>`);
+  </div><div class="drawer-foot">${x && canAdd() ? `<button class="btn btn-danger" data-action="trash-spotlight" data-id="${esc(x.id)}" data-close="1" style="margin-right:auto">Move to trash</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-spotlight" data-id="${esc(x ? x.id : '')}">Save spotlight</button></div>`);
 }
 async function saveSpotlight(id, btn) {
   const x = S.spotlights.find((y) => y.id === id);
@@ -1443,11 +1813,6 @@ async function saveSpotlight(id, btn) {
       toast(x ? 'Spotlight updated.' : 'Spotlight added to the library.'); closeDrawer();
     } catch (e) { console.error(e); toast(errMsg(e), 'err'); }
   });
-}
-async function deleteSpotlight(id, btn) {
-  if (!armed(btn)) return; const x = S.spotlights.find((y) => y.id === id); if (!x) return;
-  const ok = await write(() => S.db.collection('spotlights').doc(id).delete(), 'Spotlight deleted.');
-  if (ok) { if (x.assetId && S.assets) S.assets.delete(x.assetId).catch(() => {}); S.draft.spotlightIds = S.draft.spotlightIds.filter((y) => y !== id); saveDraft(); closeDrawer(); }
 }
 
 function headshotDrawer(hsId, managerId) {
@@ -1597,7 +1962,7 @@ function suggestDrawer(sectionId) {
 /* ---------------- events ---------------- */
 function onFile(f) {
   if (!f) return;
-  if (!/^image\/(png|jpeg|webp|gif)$/.test(f.type)) { toast('Use a PNG, JPEG, WebP or GIF image.', 'err'); return; }
+  if (!/^image\//.test(f.type) && !/\.(heic|heif)$/i.test(f.name || '')) { toast('Pick an image file: PNG, JPEG, WebP or GIF.', 'err'); return; }
   if (S.fileTarget && S.fileTarget.kind === 'logo') { const k = S.fileTarget.key; S.fileTarget = null; uploadLogo(k, f); return; }
   if (f.size > 20 * 1024 * 1024) { toast('That file is too large. Use an image under 20 MB.', 'err'); return; }
   S.pendingFile = f;
@@ -1612,7 +1977,7 @@ const handlers = {
   'edit-manager': (a) => managerDrawer(a.dataset.id),
   'save-manager': (a) => saveManager(a.dataset.id, a),
   'delete-manager': (a) => deleteManager(a.dataset.id, a),
-  'pick-subject': (a) => { const i = Number(a.dataset.i); S.draft.subject = subjectOptions(S.draft)[i]; S.draft.subjectAuto = i === 0; const inp = $('#b_subject'); if (inp) inp.value = S.draft.subject; saveDraft(); schedulePreview(); },
+  'pick-subject': (a) => { const i = Number(a.dataset.i); S.draft.subject = subjectOptions(S.draft)[i]; S.draft.subjectAuto = i === 0; const inp = $('#b_subject'); if (inp) inp.value = S.draft.subject; saveDraft(); schedulePreview(); refreshSendBits(); },
   'pick-headshot': (a) => { S.draft.headshotId = a.dataset.id; S.draft.crop = null; saveDraft(); renderHsPicker(); renderCropBox(); renderSendPanel(); updateProgress(); schedulePreview(); },
   'upload-headshot': (a) => headshotDrawer(null, a.dataset.manager),
   'edit-headshot': (a) => headshotDrawer(a.dataset.id),
@@ -1626,7 +1991,6 @@ const handlers = {
   'new-spotlight': () => spotlightDrawer(null),
   'edit-spotlight': (a) => spotlightDrawer(a.dataset.id),
   'save-spotlight': (a) => saveSpotlight(a.dataset.id, a),
-  'delete-spotlight': (a) => deleteSpotlight(a.dataset.id, a),
   'pick-style': (a) => { S.draft.style = a.dataset.style; S.draft.styleInit = true; saveDraft(); renderStylePick(); updateProgress(); schedulePreview(); },
   'copy-email': () => copyEmail(),
   'copy-subject': () => copySubject(),
@@ -1652,7 +2016,25 @@ const handlers = {
   'save-brand': (a) => saveBrand(a),
   'pick-file': () => $('#filePick').click(),
   'replay': () => { S.replay = true; updatePreview(); },
+  'launch-gmail': (a) => { a.href = gmailURL(); copyEmail({ launch: true }); },
+  'copy-bcc': () => { const l = bccList(); if (!l.length) { toast('The BCC list is empty.', 'err'); return; } copyTextMsg(l.join(', '), `Copied ${l.length} BCC address${l.length === 1 ? '' : 'es'}.`); },
+  'copy-bcc-all': () => { const l = S.distribution.filter((r) => r.active !== false).sort(byListOrder).map((r) => r.email).filter(Boolean); if (!l.length) { toast('The list is empty.', 'err'); return; } copyTextMsg(l.join(', '), `Copied ${l.length} address${l.length === 1 ? '' : 'es'}.`); },
+  'toggle-bcc': () => { S.bccOpen = !S.bccOpen; renderSendPanel(); },
+  'move-sec': (a) => moveSection(a.dataset.key, a.dataset.dir),
+  'reset-order': () => { S.draft.order = DEFAULT_ORDER.slice(); saveDraft(); renderToggles(); schedulePreview(); toast('Back to the standard order.'); },
+  'bulk-upload': () => $('#filePickMulti').click(),
+  'sp-filter': (a) => { S.spTrash = a.dataset.trash === '1'; renderLibrary(); },
+  'trash-spotlight': (a) => trashSpotlight(a.dataset.id).then((ok) => { if (ok && a.dataset.close) closeDrawer(); }),
+  'restore-spotlight': (a) => write(() => S.db.collection('spotlights').doc(a.dataset.id).update({ trashedAt: null, trashedBy: null }), 'Restored to the bank.'),
+  'purge-spotlight': (a) => purgeSpotlight(a.dataset.id, a),
+  'new-recip': () => recipDrawer(null),
+  'edit-recip': (a) => recipDrawer(a.dataset.id),
+  'save-recip': (a) => saveRecip(a.dataset.id, a),
+  'delete-recip': (a) => { if (armed(a)) write(() => S.db.collection('distribution').doc(a.dataset.id).delete(), 'Removed from the list.').then((ok) => ok && closeDrawer()); },
+  'paste-recips': () => pasteDrawer(),
+  'save-paste': (a) => savePaste(a),
 };
+async function copyTextMsg(text, msg) { let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = execCopyText(text); } toast(ok ? msg : 'Copy was blocked here. Select the text and copy it manually.', ok ? '' : 'err'); }
 function bindGlobal() {
   document.addEventListener('click', (e) => {
     const tab = e.target.closest('.tab[data-tab]'); if (tab) { showTab(tab.dataset.tab); return; }
@@ -1668,6 +2050,7 @@ function bindGlobal() {
   document.addEventListener('input', (e) => {
     const t = e.target;
     if (t.dataset && t.dataset.bind) { setBind(t.dataset.bind, t.value); return; }
+    if (t.id === 'p_text') { const { all, fresh } = pasteParsed(); const el = $('#p_preview'); if (el) el.textContent = all.length ? `Found ${all.length} address${all.length === 1 ? '' : 'es'}. ${fresh.length} new, ${all.length - fresh.length} already on the list.` : 'Nothing to add yet.'; return; }
     if (t.dataset && t.dataset.crop) {
       S.draft.crop = { zoom: Number($('#b_zoom').value), fy: Number($('#b_fy').value) };
       saveDraft(); drawCrop(false); schedulePreview();
@@ -1675,9 +2058,12 @@ function bindGlobal() {
   });
   document.addEventListener('change', (e) => {
     const t = e.target;
-    if (t.dataset && t.dataset.toggle) { S.draft.toggles[t.dataset.toggle] = t.checked; saveDraft(); schedulePreview(); updateProgress(); renderSendPanel(); }
+    if (t.dataset && t.dataset.toggle) { S.draft.toggles[t.dataset.toggle] = t.checked; const li = t.closest('.sort-item'); if (li) li.classList.toggle('is-off', !t.checked); saveDraft(); schedulePreview(); updateProgress(); renderSendPanel(); }
+    if (t.dataset && t.dataset.bccid) { const off = new Set(S.draft.bccOff || []); if (t.checked) off.delete(t.dataset.bccid); else off.add(t.dataset.bccid); S.draft.bccOff = [...off]; saveDraft(); refreshSendBits(); }
+    if (t.dataset && t.dataset.recipActive) { const id = t.dataset.recipActive; write(() => S.db.collection('distribution').doc(id).update({ active: t.checked, updatedAt: nowISO() }), t.checked ? 'Back on the list.' : 'Paused. They won’t get the email until you turn this back on.'); }
   });
   $('#filePick').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; onFile(f); });
+  $('#filePickMulti').addEventListener('change', (e) => { const fs = Array.from(e.target.files || []); e.target.value = ''; bulkUpload(fs); });
   document.addEventListener('dragover', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) { e.preventDefault(); dz.classList.add('is-over'); } });
   document.addEventListener('dragleave', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) dz.classList.remove('is-over'); });
   document.addEventListener('drop', (e) => { const dz = e.target.closest && e.target.closest('#dz'); if (dz) { e.preventDefault(); dz.classList.remove('is-over'); onFile(e.dataTransfer.files && e.dataTransfer.files[0]); } });
@@ -1697,7 +2083,7 @@ function subscribeAll() {
     } catch (e) { console.warn(coll, e); S.loaded.add(key); }
   };
   on('core', 'core'); on('managers', 'managers'); on('headshots', 'headshots'); on('spotlights', 'spotlights');
-  on('emails', 'emails', (c) => c.orderBy('createdAt', 'desc').limit(60)); on('suggestions', 'suggestions'); on('brand', 'brandDocs');
+  on('emails', 'emails', (c) => c.orderBy('createdAt', 'desc').limit(60)); on('suggestions', 'suggestions'); on('brand', 'brandDocs'); on('distribution', 'distribution');
 }
 function dataChanged(key) {
   if (key === 'brandDocs') {
@@ -1718,11 +2104,12 @@ function flush() {
     }
     if (d.managerId && !d.headshotId && S.loaded.has('headshots')) { const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && mgrHeadshot(mg); if (hs) { d.headshotId = hs.id; saveDraft(); } }
   }
-  if (!d.spInit && S.loaded.has('spotlights') && S.spotlights.length) {
-    const newest = S.spotlights.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0];
+  if (!d.spInit && S.loaded.has('spotlights') && liveSpotlights().length) {
+    const newest = liveSpotlights().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0];
     d.spotlightIds = [newest.id]; d.spInit = true; saveDraft();
   }
-  d.spotlightIds = d.spotlightIds.filter((id) => !S.loaded.has('spotlights') || S.spotlights.some((x) => x.id === id));
+  d.spotlightIds = d.spotlightIds.filter((id) => !S.loaded.has('spotlights') || liveSpotlights().some((x) => x.id === id));
+  const rc = $('#recipCount'); if (rc) rc.textContent = S.distribution.length ? String(S.distribution.filter((r) => r.active !== false).length) : '';
   if (keys.has('managers') || keys.has('headshots')) { renderMgrPicker(); renderHsPicker(); renderCropBox(); }
   if (keys.has('managers') && !$('#mgrFields').contains(document.activeElement)) renderMgrFields();
   if (keys.has('spotlights')) renderSpPicker();
@@ -1745,9 +2132,9 @@ async function refreshPeople() {
 function afterMode() { renderWho(); renderBanner(); renderMgrPicker(); renderMgrFields(); renderHsPicker(); renderSpPicker(); renderSendPanel(); updateProgress(); if (S.tab !== 'build') renderView(S.tab); }
 async function init() {
   const bar = $('.pv-bar'); const play = document.createElement('button'); play.className = 'btn btn-xs'; play.dataset.action = 'replay'; play.textContent = '▶ Play intro'; bar.insertBefore(play, $('#pvDevice'));
-  bindGlobal(); renderSteps(); renderWho(); renderBanner();
+  bindGlobal(); bindSortable(); renderSteps(); renderWho(); renderBanner();
   const h = (location.hash || '').slice(1);
-  showTab(['build', 'library', 'core', 'brand'].includes(h) ? h : 'build');
+  showTab(['build', 'library', 'core', 'recipients', 'brand'].includes(h) ? h : 'build');
   schedulePreview();
   const c = window.claude;
   if (!c || typeof c.use !== 'function') { S.mode = 'offline'; afterMode(); return; }
