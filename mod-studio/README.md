@@ -14,6 +14,7 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 
 ## How it works
 
+- **Schedule** (landing page): who's on duty this weekend, the upcoming rotation by month, find-my-weekends, swaps (both weekends update), add a weekend, and continue the rotation. "That's me" opens the builder with that manager and weekend filled in, and the builder defaults to the scheduled MOD.
 - **Build email**: seven steps (manager, weekend and message, headshot, focus spotlight, sections, style, send) with a live desktop/phone preview. Sections can be dragged into any order, and an optional weekend announcement block can go anywhere.
 - **Send**: To is the manager on duty; BCC is the shared distribution list (the sender is left out automatically). **Launch in Gmail** opens a compose window with To, BCC and subject filled in and copies the designed email to paste in.
 - **Library**: an infographic bank with upload from phone or computer (one or many files), trash, restore and delete forever; headshots grouped by manager; the manager directory; and send history. Anyone with Editor access can add to it.
@@ -28,6 +29,10 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 - **Copy email for Gmail** puts rich HTML on the clipboard with images embedded. **Download .html** saves a web version that also plays CSS entrance animations.
 - Any image can be given a public `https://` link instead, so it loads in every inbox.
 
+## Uploads
+
+Every upload button is a real file input laid over the button, so a tap opens the photo library or file picker directly on phones and computers (no scripted clicks, which some mobile browsers and in-app views block). Headshots and infographics save as soon as they're picked; large photos are resized before upload, and HEIC photos are converted where the device can read them.
+
 ## Data model (artifact database)
 
 | Collection | Written by | Contents |
@@ -35,6 +40,7 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 | `core` | owner | Standard info sections: lines, steps, coverage hours, display flags, review status |
 | `brand` | owner | `settings`: region, program, footer, default style, who edits the distribution list, logo and badge overrides |
 | `distribution` | owner (or editors, per setting) | BCC recipients: name, email, team list or person, included flag, order |
+| `schedule` | contributors | One doc per Saturday (`YYYY-MM-DD`): manager on duty, original manager after a swap, note |
 | `managers` | contributors | Manager profiles and default headshot |
 | `headshots` | contributors | Manager id, asset id, label, crop |
 | `spotlights` | contributors | Infographic asset, title, takeaways, prompts, call to action, trash state |

@@ -61,7 +61,9 @@ p{margin:0}
 .tab:hover{color:var(--ink)}
 .tab.is-active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 .tab-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--warn-tint);color:var(--warn);font-size:11px;font-weight:800;display:inline-grid;place-items:center}
-.who{display:flex;align-items:center;gap:10px;font-size:13px}
+.who{display:flex;align-items:center;gap:10px;font-size:13px;min-width:0}
+.who>span:not(.role):not(.chip){max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:480px){.who>span:not(.role):not(.chip){display:none}}
 .who img{width:30px;height:30px;border-radius:50%;object-fit:cover}
 .role{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--red-tint);color:var(--red-ink)}
 .banner{margin:14px 0 0;padding:12px 16px;border-radius:var(--r-sm);background:var(--warn-tint);color:var(--ink);font-size:14px;display:flex;gap:10px;align-items:flex-start}
@@ -314,6 +316,54 @@ p{margin:0}
 .lib-card.is-trash{opacity:.75}
 .lib-card .img .chip.warn{left:auto;right:10px}
 
+/* Uploads: a real file input laid over the button, so a tap opens the picker directly on every device */
+.upbtn{position:relative;overflow:hidden}
+.upbtn input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px;z-index:2}
+.upbtn:focus-within{outline:2px solid var(--red);outline-offset:2px}
+.drop{position:relative}
+.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2}
+.up-note{font-size:12.5px;color:var(--ink-2);background:var(--warn-tint);border-radius:10px;padding:8px 12px}
+.toast.progress{background:var(--surface);color:var(--ink);border:1px solid var(--line-2);display:flex;gap:10px;align-items:center}
+.toast.progress::before{content:"";width:14px;height:14px;border-radius:50%;border:2px solid var(--red);border-right-color:transparent;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Schedule */
+.sched-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center;padding:28px;border-radius:24px;background:linear-gradient(135deg,#DE3341 0%,#B9232F 100%);color:#fff;box-shadow:var(--shadow-lg);animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.sched-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;border:40px solid rgba(255,255,255,.07);pointer-events:none}
+.sched-av{position:relative;width:132px;height:132px;flex:none}
+.sched-av img,.sched-av .ini{width:132px;height:132px;border-radius:50%;object-fit:cover;object-position:50% 22%;border:4px solid #fff;font-size:40px;background:#fff;color:#B9232F;display:grid;place-items:center}
+.sched-av::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(255,255,255,.7);animation:ping 2.2s ease-out infinite}
+.sched-hero .kick{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.9;display:flex;gap:8px;align-items:center}
+.sched-hero .kick .live{background:#fff}.sched-hero .kick .live::after{border-color:#fff}
+.sched-hero h3{font-size:clamp(28px,4vw,44px);font-weight:900;letter-spacing:-.03em;line-height:1.02;margin-top:6px}
+.sched-hero .meta{opacity:.9;margin-top:4px;font-size:15px}
+.sched-hero .btn-row{margin-top:16px}
+.sched-hero .btn{border-color:rgba(255,255,255,.65);background:transparent;color:#fff}
+.sched-hero .btn.btn-light{background:#fff;color:#B9232F;border-color:#fff}
+.sched-hero .next{margin-top:14px;font-size:13px;opacity:.9}
+@media (max-width:560px){.sched-hero{grid-template-columns:auto minmax(0,1fr);gap:16px;padding:20px;align-items:start}.sched-av,.sched-av img,.sched-av .ini{width:76px;height:76px;font-size:26px}.sched-hero h3{font-size:28px}.sched-hero .btn{white-space:normal;text-align:center}.sched-hero .btn-lg{padding:11px 16px;font-size:14px}}
+.wk-month{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 2px 6px}
+.wk-list{display:grid;gap:8px}
+.wk-row{display:grid;grid-template-columns:74px 44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);transition:border-color .2s,background .2s}
+.wk-row.is-now{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 14%,transparent)}
+.wk-row.is-mine{background:var(--red-tint)}
+.wk-row.is-past{opacity:.6;box-shadow:none}
+.wk-date{text-align:center;border-radius:10px;background:var(--surface-3);padding:6px 4px;line-height:1.1}
+.wk-date b{display:block;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
+.wk-date small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wk-row.is-now .wk-date{background:var(--red);color:#fff}.wk-row.is-now .wk-date small{color:#FFE0E4}
+.wk-row .av{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:50% 20%;display:grid;place-items:center;font-size:14px}
+.wk-row .who b{display:block;font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wk-row .who span{font-size:12.5px;color:var(--muted)}
+.wk-row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:560px){.wk-row{grid-template-columns:66px 40px minmax(0,1fr)}.wk-row .acts{grid-column:1/-1;justify-content:flex-start}.wk-row .av{width:40px;height:40px}}
+.rot{display:grid;gap:8px}
+.rot-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px}
+.rot-row img,.rot-row .ini{width:32px;height:32px;border-radius:50%;object-fit:cover;object-position:50% 20%;font-size:11px}
+.rot-row b{display:block;font-size:14px}
+.sched-chip{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--red-tint);font-size:13px}
+.sched-chip img,.sched-chip .ini{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 20%;font-size:11px}
+
 /* Toasts */
 .toasts{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:80;display:grid;gap:8px;justify-items:center;pointer-events:none;width:min(92vw,520px)}
 .toast{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:var(--shadow-lg);animation:toast .35s cubic-bezier(.2,.8,.2,1) both;pointer-events:auto}
@@ -333,6 +383,7 @@ p{margin:0}
       <span class="brand-name"><small>Weekend</small>MOD Studio</span>
     </div>
     <nav class="tabs" role="tablist" aria-label="Studio sections">
+      <button class="tab" data-tab="schedule" role="tab">Schedule</button>
       <button class="tab is-active" data-tab="build" role="tab">Build email</button>
       <button class="tab" data-tab="library" role="tab">Library</button>
       <button class="tab" data-tab="core" role="tab">Standard info <span class="tab-badge" id="coreBadge" hidden></span></button>
@@ -372,6 +423,7 @@ p{margin:0}
       </div>
     </section>
 
+    <section id="view-schedule" class="view" hidden></section>
     <section id="view-library" class="view" hidden></section>
     <section id="view-core" class="view" hidden></section>
     <section id="view-recipients" class="view" hidden></section>
@@ -496,7 +548,7 @@ const saveDraft = debounce(() => { try { localStorage.setItem(DRAFT_KEY, JSON.st
 const S = {
   mode: 'connecting', db: null, user: null, assets: null, downloads: null,
   me: { id: null, name: '', avatarUrl: '', isOwner: false, canEdit: false }, canWrite: null,
-  core: [], managers: [], headshots: [], spotlights: [], emails: [], suggestions: [], brandDocs: [], brand: {}, distribution: [],
+  core: [], managers: [], headshots: [], spotlights: [], emails: [], suggestions: [], brandDocs: [], brand: {}, distribution: [], schedule: [],
   loaded: new Set(), people: {}, spTrash: false,
   tab: 'build', libTab: 'spotlights', device: 'desktop', replay: false, pendingFile: null,
   draft: loadDraft(),
@@ -1196,6 +1248,53 @@ async function uploadImage(file, maxDim, keepFormat) {
   return S.assets.upload(blob, { type: blob.type || file.type });
 }
 
+const IMG_EXT = /\.(jpe?g|png|gif|webp|heic|heif|bmp|tiff?)$/i;
+const isImageFile = (f) => !!f && (/^image\//.test(f.type || '') || (!f.type && IMG_EXT.test(f.name || '')));
+const fileInput = (kind, attrs = '', multiple = false) => `<input type="file" accept="image/*" ${multiple ? 'multiple' : ''} data-upload="${kind}" ${attrs} aria-label="Choose an image from your phone or computer">`;
+const upBtn = (label, kind, cls = 'btn', attrs = '', multiple = false) => `<label class="${cls} upbtn">${label}${fileInput(kind, attrs, multiple)}</label>`;
+function uploadBlockedNote() {
+  if (S.mode !== 'live' || S.assets) return '';
+  return `<div class="up-note">Uploading isn’t available in this view. It needs Editor access to the Studio. If you have it and uploads still don’t open on your phone, open the Studio link in Safari or Chrome.</div>`;
+}
+function progress(text) {
+  const el = document.createElement('div'); el.className = 'toast progress'; el.setAttribute('role', 'status'); el.textContent = text; $('#toasts').appendChild(el);
+  return { set: (t) => { el.textContent = t; }, done: () => el.remove() };
+}
+function uploadErr(e) {
+  if (e && e.code) return errMsg(e);
+  if (e && /Image failed/.test(e.message || '')) return 'That photo couldn’t be read here. If it’s an iPhone photo in HEIC format, take a screenshot of it (or share it as a JPEG) and upload that.';
+  return 'That upload didn’t go through. Check your connection and try again.';
+}
+async function handleUpload(kind, files, o = {}) {
+  files = files.filter(isImageFile);
+  if (!files.length) { toast('Pick a photo or image file: JPEG, PNG, WebP, GIF or HEIC.', 'err'); return; }
+  if (kind === 'drawer') { onFile(files[0]); return; }
+  if (!canUpload()) { toast(errMsg({ code: 'not_granted' }), 'err'); return; }
+  if (kind === 'logo') { uploadLogo(o.key, files[0]); return; }
+  if (kind === 'spotlights') { bulkUpload(files); return; }
+  if (kind === 'headshot') quickHeadshots(o.mgr, files);
+}
+async function quickHeadshots(managerId, files) {
+  const mg = mgrById(managerId); if (!mg) { toast('Pick or save a manager first.', 'err'); return; }
+  const many = files.length > 1; const prog = progress(many ? `Uploading 1 of ${files.length}…` : 'Uploading photo…');
+  let ok = 0; let firstId = ''; let lastErr = null;
+  const base = S.headshots.filter((h) => h.managerId === managerId).length;
+  for (const [i, f] of files.entries()) {
+    prog.set(many ? `Uploading ${i + 1} of ${files.length}…` : 'Uploading photo…');
+    try {
+      const r = await uploadImage(f, 1200); const id = `hs-${slug(managerId)}-${rid()}`;
+      await S.db.collection('headshots').doc(id).set({ managerId, label: `Photo ${base + ok + 1}`, assetId: r.id, createdBy: S.me.id || '', createdAt: nowISO() });
+      if (!firstId) firstId = id; ok += 1;
+    } catch (e) { console.error(e); lastErr = e; }
+  }
+  prog.done();
+  if (!ok) { toast(uploadErr(lastErr), 'err'); return; }
+  if (!mg.defaultHeadshotId) await write(() => S.db.collection('managers').doc(managerId).update({ defaultHeadshotId: firstId }));
+  if (S.draft.managerId === managerId) { S.draft.headshotId = firstId; S.draft.crop = null; saveDraft(); renderCropBox(); schedulePreview(); updateProgress(); }
+  toast(many ? `${ok} photos saved to ${firstName(mg.name)}’s headshots.` : `Photo saved${S.draft.managerId === managerId ? ' and picked for your email' : ''}. Use Edit to rename it.`);
+  if (lastErr) toast(`Some photos didn’t upload. ${uploadErr(lastErr)}`, 'err');
+}
+
 /* ---------------- shell ---------------- */
 function renderWho() {
   const el = $('#who'); const me = S.me;
@@ -1221,7 +1320,7 @@ function showTab(tab) {
   if (tab !== 'build') renderView(tab);
   window.scrollTo({ top: 0 });
 }
-function renderView(tab) { if (tab === 'library') renderLibrary(); else if (tab === 'core') renderCore(); else if (tab === 'recipients') renderRecipients(); else if (tab === 'brand') renderBrand(); }
+function renderView(tab) { if (tab === 'schedule') renderSchedule(); else if (tab === 'library') renderLibrary(); else if (tab === 'core') renderCore(); else if (tab === 'recipients') renderRecipients(); else if (tab === 'brand') renderBrand(); }
 
 /* ---------------- build steps ---------------- */
 const HOURS = []; for (let h = 5; h <= 23; h += 0.5) HOURS.push(h);
@@ -1246,7 +1345,11 @@ function renderMgrPicker() {
   if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">The manager directory loads from the shared Studio. You can still type your details below.</p>'; return; }
   if (!S.loaded.has('managers')) { el.innerHTML = '<span class="chip">Loading managers…</span>'; return; }
   const list = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
-  el.innerHTML = `<div class="mgr-list">${list.map((mg) => `<button class="mgr ${S.draft.managerId === mg.id ? 'is-active' : ''}" data-action="pick-manager" data-id="${esc(mg.id)}">${mgrAvatarHTML(mg)}${esc(mg.name)}</button>`).join('')}${canAdd() ? '<button class="mgr" data-action="new-manager-inline"><span class="ini">+</span>New manager</button>' : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No managers yet. Fill in your details below and save them to the directory.</p>'}`;
+  const se = schedFor(S.draft.saturday); const sm = se && mgrById(se.managerId); const wk = weekend(S.draft.saturday).short;
+  const chip = sm ? (sm.id !== S.draft.managerId
+    ? `<div class="sched-chip" style="margin-bottom:10px">${avatarFor(sm, '')}<span style="flex:1;min-width:160px">On the schedule for <b>${esc(wk)}</b>: <b>${esc(sm.name)}</b></span><button class="btn btn-xs btn-primary" data-action="pick-manager" data-id="${esc(sm.id)}">Use ${esc(firstName(sm.name))}</button></div>`
+    : `<div class="sched-chip" style="margin-bottom:10px"><span>✓ Matches the MOD schedule for <b>${esc(wk)}</b></span></div>`) : '';
+  el.innerHTML = `${chip}<div class="mgr-list">${list.map((mg) => `<button class="mgr ${S.draft.managerId === mg.id ? 'is-active' : ''}" data-action="pick-manager" data-id="${esc(mg.id)}">${mgrAvatarHTML(mg)}${esc(mg.name)}</button>`).join('')}${canAdd() ? '<button class="mgr" data-action="new-manager-inline"><span class="ini">+</span>New manager</button>' : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No managers yet. Fill in your details below and save them to the directory.</p>'}`;
 }
 function renderMgrFields() {
   const el = $('#mgrFields'); if (!el) return; const mg = S.draft.manager;
@@ -1288,7 +1391,7 @@ function renderHsPicker() {
   if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Headshots load from the shared library. Until then the email shows your initials.</p>'; return; }
   if (!d.managerId) { el.innerHTML = '<p class="muted" style="font-size:13px">Pick or save a manager first to see their headshots. Until then the email shows initials.</p>'; return; }
   const list = S.headshots.filter((h) => h.managerId === d.managerId).sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
-  el.innerHTML = `<div class="hs-grid">${list.map((h) => `<button class="hs ${d.headshotId === h.id ? 'is-active' : ''}" data-action="pick-headshot" data-id="${esc(h.id)}" title="${esc(h.label || 'Headshot')}" aria-label="${esc(h.label || 'Headshot')}"><img src="${esc(assetURL(h.assetId))}" alt="" loading="lazy"><span class="tick">✓</span></button>`).join('')}${canUpload() ? `<button class="add-tile" data-action="upload-headshot" data-manager="${esc(d.managerId)}">+ Add photo</button>` : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No headshots for this manager yet.</p>'}`;
+  el.innerHTML = `<div class="hs-grid">${list.map((h) => `<button class="hs ${d.headshotId === h.id ? 'is-active' : ''}" data-action="pick-headshot" data-id="${esc(h.id)}" title="${esc(h.label || 'Headshot')}" aria-label="${esc(h.label || 'Headshot')}"><img src="${esc(assetURL(h.assetId))}" alt="" loading="lazy"><span class="tick">✓</span></button>`).join('')}${canUpload() ? `<label class="add-tile upbtn">+ Add photo${fileInput('headshot', `data-manager="${esc(d.managerId)}"`, true)}</label>` : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No headshots for this manager yet. Tap + Add photo to pick one from your phone or computer.</p>'}${uploadBlockedNote()}`;
 }
 function renderCropBox() {
   const el = $('#cropBox'); if (!el) return; const d = S.draft;
@@ -1315,7 +1418,7 @@ function renderSpPicker() {
   const el = $('#spPicker'); if (!el) return; const d = S.draft;
   if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Spotlights load from the shared library.</p>'; return; }
   const list = liveSpotlights().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-  el.innerHTML = `<div class="btn-row" style="justify-content:space-between"><p class="muted" style="font-size:13px;flex:1;min-width:200px">Tap to add. Your first pick is featured. Add up to two more as smaller “also on our radar” items.</p>${canUpload() ? '<button class="btn btn-sm" data-action="bulk-upload">Upload from phone or computer</button>' : ''}</div>
+  el.innerHTML = `<div class="btn-row" style="justify-content:space-between"><p class="muted" style="font-size:13px;flex:1;min-width:200px">Tap to add. Your first pick is featured. Add up to two more as smaller “also on our radar” items.</p>${canUpload() ? upBtn('Upload from phone or computer', 'spotlights', 'btn btn-sm', '', true) : ''}</div>${uploadBlockedNote()}
     <div class="sp-pick">${list.map((x) => { const i = d.spotlightIds.indexOf(x.id); return `<button class="sp-opt ${i === 0 ? 'is-featured' : i > 0 ? 'is-extra' : ''}" data-action="toggle-spotlight" data-id="${esc(x.id)}"><span class="badge">${i === 0 ? 'Featured' : 'Also'}</span><span class="thumb" style="${x.assetId ? `background-image:url('${esc(assetURL(x.assetId))}')` : ''}"></span><span class="t"><small>${esc(x.category || 'Spotlight')}</small>${esc(x.title)}</span></button>`; }).join('')}
     ${canAdd() ? '<button class="sp-opt" data-action="new-spotlight" style="justify-content:center;align-items:center;min-height:140px;border-style:dashed;color:var(--muted);font-weight:800">+ New spotlight</button>' : ''}</div>
     ${list.length ? '' : '<p class="muted" style="font-size:13px">The library is empty. Add the first infographic.</p>'}`;
@@ -1471,6 +1574,7 @@ function setBind(path, val) {
   if ((path === 'announceTitle' || path === 'announceBody') && val.trim() && !d.toggles.announce) { d.toggles.announce = true; const sw = $('#t_announce'); if (sw) { sw.checked = true; sw.closest('.sort-item').classList.remove('is-off'); } }
   if (path === 'to' || path === 'bccExtra' || path === 'subject' || path.startsWith('manager.')) refreshSendBits();
   if (path === 'saturday' || path === 'manager.name') refreshSubjectUI();
+  if (path === 'saturday') renderMgrPicker();
   saveDraft(); schedulePreview(); updateProgress();
   if (path.startsWith('manager.') || path === 'saturday') renderSendPanel();
 }
@@ -1520,7 +1624,7 @@ function renderLibrary() {
   const v = $('#view-library'); const t = S.libTab;
   const counts = { spotlights: S.spotlights.length, headshots: S.headshots.length, managers: S.managers.length, history: S.emails.length };
   const actions = {
-    spotlights: `${canUpload() ? '<button class="btn" data-action="bulk-upload">Upload from phone or computer</button>' : ''}${canAdd() ? '<button class="btn btn-primary" data-action="new-spotlight">+ New spotlight</button>' : ''}`,
+    spotlights: `${canUpload() ? upBtn('Upload from phone or computer', 'spotlights', 'btn btn-primary', '', true) : ''}${canAdd() ? '<button class="btn" data-action="new-spotlight">+ New spotlight</button>' : ''}`,
     headshots: canUpload() ? '<button class="btn btn-primary" data-action="upload-headshot">+ Add headshot</button>' : '',
     managers: canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '',
     history: '',
@@ -1538,7 +1642,7 @@ function libSpotlights() {
   const filters = `<div class="filter-row"><button class="subtab ${S.spTrash ? '' : 'is-active'}" data-action="sp-filter" data-trash="0">In the bank <span class="mono" style="opacity:.6">${live.length}</span></button><button class="subtab ${S.spTrash ? 'is-active' : ''}" data-action="sp-filter" data-trash="1">Trash <span class="mono" style="opacity:.6">${trash.length}</span></button></div>`;
   if (!view.length) {
     return filters + (S.spTrash ? emptyHTML('Trash is empty', 'Items you trash land here. Restore them anytime, or delete them for good.')
-      : emptyHTML('No infographics yet', 'Upload graphics from your phone or computer. Each one becomes a ready-made focus section for any manager’s email.', canUpload() ? '<button class="btn btn-primary" data-action="bulk-upload">Upload from phone or computer</button>' : ''));
+      : emptyHTML('No infographics yet', 'Upload graphics from your phone or computer. Each one becomes a ready-made focus section for any manager’s email.', canUpload() ? upBtn('Upload from phone or computer', 'spotlights', 'btn btn-primary', '', true) : ''));
   }
   return `${filters}<div class="card-grid">${view.map((x) => {
     const bare = !x.summary && !(x.takeaways || []).length;
@@ -1552,21 +1656,25 @@ function libSpotlights() {
 }
 const titleFromFile = (n) => { const t = String(n || 'Infographic').replace(/\.[a-z0-9]+$/i, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim(); return t ? t[0].toUpperCase() + t.slice(1) : 'Infographic'; };
 async function bulkUpload(files) {
-  files = Array.from(files || []).filter((f) => /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name));
-  if (!files.length) { toast('Pick image files: PNG, JPEG, WebP or GIF.', 'err'); return; }
+  files = Array.from(files || []).filter(isImageFile);
+  if (!files.length) { toast('Pick image files: JPEG, PNG, WebP, GIF or HEIC.', 'err'); return; }
   if (!canUpload()) { toast(errMsg({ code: 'not_granted' }), 'err'); return; }
-  if (files.length === 1) { spotlightDrawer(null); onFile(files[0]); const t = $('#f_title'); if (t && !t.value) t.value = titleFromFile(files[0].name); return; }
-  toast(`Uploading ${files.length} graphics…`);
-  let ok = 0;
-  for (const f of files) {
+  const many = files.length > 1; const prog = progress(many ? `Uploading 1 of ${files.length}…` : 'Uploading graphic…');
+  let ok = 0; let lastErr = null; let single = null;
+  for (const [i, f] of files.entries()) {
+    prog.set(many ? `Uploading ${i + 1} of ${files.length}…` : 'Uploading graphic…');
     try {
-      const r = await uploadImage(f, 1800); const title = titleFromFile(f.name);
-      await S.db.collection('spotlights').doc(`${slug(title)}-${rid()}`).set({ title, category: '', summary: '', takeaways: [], prompts: [], promptsLabel: '', ctaLabel: '', ctaUrl: '', publicUrl: '', assetId: r.id, createdBy: S.me.id || '', createdAt: nowISO(), updatedAt: nowISO() });
-      ok += 1;
-    } catch (e) { console.error(e); }
+      const r = await uploadImage(f, 1800); const title = titleFromFile(f.name); const id = `${slug(title)}-${rid()}`;
+      const data = { title, category: '', summary: '', takeaways: [], prompts: [], promptsLabel: '', ctaLabel: '', ctaUrl: '', publicUrl: '', assetId: r.id, createdBy: S.me.id || '', createdAt: nowISO(), updatedAt: nowISO() };
+      await S.db.collection('spotlights').doc(id).set(data); single = { id, ...data }; ok += 1;
+    } catch (e) { console.error(e); lastErr = e; }
   }
-  if (ok) { S.spTrash = false; if (S.tab === 'library') { S.libTab = 'spotlights'; renderLibrary(); } }
-  toast(ok ? `${ok} graphic${ok > 1 ? 's' : ''} saved to the bank. Add titles and takeaways anytime.` : 'Those files didn’t upload. Try PNG or JPEG.', ok ? '' : 'err');
+  prog.done();
+  if (!ok) { toast(uploadErr(lastErr), 'err'); return; }
+  S.spTrash = false; if (S.tab === 'library') { S.libTab = 'spotlights'; renderLibrary(); }
+  if (!many && single) { S.editFallback = single; spotlightDrawer(single.id); toast('Saved to the bank. Add a title and takeaways now, or come back later.'); }
+  else toast(`${ok} graphic${ok > 1 ? 's' : ''} saved to the bank. Add titles and takeaways anytime.`);
+  if (lastErr) toast(`Some files didn’t upload. ${uploadErr(lastErr)}`, 'err');
 }
 async function trashSpotlight(id) {
   const ok = await write(() => S.db.collection('spotlights').doc(id).update({ trashedAt: nowISO(), trashedBy: S.me.id || '' }), 'Moved to trash. Restore it anytime from Trash.');
@@ -1588,7 +1696,7 @@ function libHeadshots() {
   if (!mgrs.length && !orphan.length) return emptyHTML('No managers yet', 'Add a manager first, then upload their headshots.', canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '');
   const blocks = mgrs.map((mg) => {
     const list = S.headshots.filter((h) => h.managerId === mg.id);
-    return `<section class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}${mg.title || mg.market ? ' · ' : ''}${list.length} photo${list.length === 1 ? '' : 's'}</div></div><div class="btn-row" style="margin-left:auto">${canUpload() ? `<button class="btn btn-sm" data-action="upload-headshot" data-manager="${esc(mg.id)}">+ Add photo</button>` : ''}</div></div>${list.length ? `<div class="hs-row">${list.map((h) => hsCard(h, mg)).join('')}</div>` : '<p class="muted" style="font-size:13px">No photos yet.</p>'}</section>`;
+    return `<section class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}${mg.title || mg.market ? ' · ' : ''}${list.length} photo${list.length === 1 ? '' : 's'}</div></div><div class="btn-row" style="margin-left:auto">${canUpload() ? upBtn('+ Add photos', 'headshot', 'btn btn-sm btn-primary', `data-manager="${esc(mg.id)}"`, true) : ''}</div></div>${list.length ? `<div class="hs-row">${list.map((h) => hsCard(h, mg)).join('')}</div>` : '<p class="muted" style="font-size:13px">No photos yet.</p>'}</section>`;
   });
   if (orphan.length) blocks.push(`<section class="mgr-block"><div class="mgr-block-head"><div><h4>Unassigned</h4><div class="meta">Photos whose manager was removed</div></div></div><div class="hs-row">${orphan.map((h) => hsCard(h, null)).join('')}</div></section>`);
   return `<div style="display:grid;gap:14px">${blocks.join('')}</div>`;
@@ -1647,6 +1755,115 @@ function flowPanel() {
     <dt>Steps</dt><dd>A numbered playbook card, like the tour hotline order</dd>
     <dt>Tech lane</dt><dd>Side-by-side cards so agents pick the right support team</dd>
     <dt>Links list</dt><dd>The self-serve resources grid</dd></dl></section>`;
+}
+
+/* ---------------- schedule ---------------- */
+const mgrById = (id) => S.managers.find((m) => m.id === id);
+const schedFor = (iso) => S.schedule.find((x) => x.id === iso);
+const schedName = (e) => { const m = e && mgrById(e.managerId); return m ? m.name : (e && e.name) || 'Unassigned'; };
+function currentWeekendISO() { const t = new Date(); const d = new Date(t.getFullYear(), t.getMonth(), t.getDate()); if (d.getDay() === 0) d.setDate(d.getDate() - 1); else d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7)); return isoDay(d); }
+const addDays = (iso, n) => { const d = parseDay(iso); d.setDate(d.getDate() + n); return isoDay(d); };
+const weeksAway = (iso) => Math.round((parseDay(iso) - parseDay(currentWeekendISO())) / (7 * 86400000));
+const canEditSched = () => canAdd();
+function avatarFor(mg, cls = 'av') { const hs = mg && mgrHeadshot(mg); return hs && hs.assetId ? `<img class="${cls}" src="${esc(assetURL(hs.assetId))}" alt="">` : `<span class="${cls} ini">${esc(initials(mg ? mg.name : '?'))}</span>`; }
+function mySchedId() { if (S.schedMine !== undefined) return S.schedMine; try { const v = localStorage.getItem('modstudio.mine'); if (v !== null) return v; } catch (e) { /* ignore */ } const m = S.managers.find((x) => x.userId && x.userId === S.me.id); return m ? m.id : ''; }
+function dateBlock(iso) { const w = weekend(iso); const sm = MON[w.sat.getMonth()], um = MON[w.sun.getMonth()]; return `<div class="wk-date"><small>${sm === um ? sm : `${sm}–${um}`}</small><b>${w.sat.getDate()}–${w.sun.getDate()}</b></div>`; }
+function renderSchedule() {
+  const v = $('#view-schedule'); const list = S.schedule.slice().sort((a, b) => a.id.localeCompare(b.id));
+  const nowIso = currentWeekendISO(); const mine = mySchedId();
+  const cur = list.find((x) => x.id === nowIso) || list.find((x) => x.id > nowIso);
+  const upcoming = list.filter((x) => x.id >= nowIso); const past = list.filter((x) => x.id < nowIso);
+  const shown = S.schedAll ? list : upcoming.slice(0, 12);
+  let hero = '';
+  if (cur) {
+    const mg = mgrById(cur.managerId); const next = list.find((x) => x.id > cur.id); const isNow = cur.id === nowIso; const isMe = mine && mine === cur.managerId;
+    hero = `<section class="sched-hero"><div class="sched-av">${avatarFor(mg, '')}</div><div style="min-width:0">
+      <div class="kick"><span class="live"></span>${isMe ? 'You’re on duty' : isNow ? 'On duty this weekend' : 'Next on duty'} · ${esc(weekend(cur.id).pill)}</div>
+      <h3>${esc(schedName(cur))}</h3><div class="meta">${esc([mg && mg.title, mg && mg.market].filter(Boolean).join(' · ') || 'Manager on Duty')}${cur.note ? ` · ${esc(cur.note)}` : ''}</div>
+      <div class="btn-row"><button class="btn btn-light btn-lg" data-action="sched-me" data-id="${esc(cur.id)}">${isMe ? 'Build my email' : `This is me · build ${esc(firstName(schedName(cur)))}’s email`}</button>${canEditSched() ? `<button class="btn" data-action="edit-sched" data-id="${esc(cur.id)}">Swap or change</button>` : ''}</div>
+      ${next ? `<div class="next">Next up: <b>${esc(schedName(next))}</b> · ${esc(weekend(next.id).short)}</div>` : ''}</div></section>`;
+  }
+  const mgrs = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const mineNext = mine ? upcoming.filter((x) => x.managerId === mine) : [];
+  const mineLine = mine ? (mineNext.length ? `Your next weekend: <b>${esc(weekend(mineNext[0].id).short)}</b> · ${weeksAway(mineNext[0].id) === 0 ? 'this weekend' : `${weeksAway(mineNext[0].id)} week${weeksAway(mineNext[0].id) === 1 ? '' : 's'} away`} · ${mineNext.length} on the schedule from here` : 'No upcoming weekends on the schedule for you.') : 'Pick your name to highlight your weekends.';
+  let month = ''; const rows = shown.map((e) => {
+    const mg = mgrById(e.managerId); const m = `${MONTHS[parseDay(e.id).getMonth()]} ${parseDay(e.id).getFullYear()}`; const head = m !== month ? `<div class="wk-month">${esc(m)}</div>` : ''; month = m;
+    const wa = weeksAway(e.id); const when = wa === 0 ? 'This weekend' : wa < 0 ? 'Past' : wa === 1 ? 'Next weekend' : `In ${wa} weeks`;
+    const changed = e.originalManagerId && e.originalManagerId !== e.managerId ? `<span class="chip warn">Was ${esc(firstName((mgrById(e.originalManagerId) || {}).name || ''))}</span>` : '';
+    return `${head}<div class="wk-row ${e.id === nowIso ? 'is-now' : ''} ${mine && e.managerId === mine ? 'is-mine' : ''} ${e.id < nowIso ? 'is-past' : ''}">${dateBlock(e.id)}${avatarFor(mg)}<div class="who" style="min-width:0"><b>${esc(schedName(e))}</b><span>${esc(when)}${e.note ? ` · ${esc(e.note)}` : ''}</span> ${changed}</div>
+      <div class="acts">${e.id >= nowIso ? `<button class="btn btn-xs btn-primary" data-action="sched-me" data-id="${esc(e.id)}">That’s me</button>` : ''}${canEditSched() ? `<button class="btn btn-xs" data-action="edit-sched" data-id="${esc(e.id)}">Edit</button>` : ''}</div></div>`;
+  }).join('');
+  const rot = mgrs.map((mg) => { const n = upcoming.filter((x) => x.managerId === mg.id); return { mg, n }; }).filter((r) => r.n.length || S.schedule.some((x) => x.managerId === r.mg.id))
+    .sort((a, b) => (a.n[0] ? a.n[0].id : '9999').localeCompare(b.n[0] ? b.n[0].id : '9999'));
+  let body;
+  if (S.mode !== 'live') body = emptyHTML('The schedule isn’t connected', 'Open the Studio from its claude.ai link to load the MOD schedule.');
+  else if (!S.loaded.has('schedule')) body = '<span class="chip">Loading the schedule…</span>';
+  else if (!list.length) body = emptyHTML('No schedule yet', 'Add the first weekend to start the rotation.', canEditSched() ? '<button class="btn btn-primary" data-action="new-sched">+ Add a weekend</button>' : '');
+  else body = `${hero}<div class="two-col" style="margin-top:18px"><div style="min-width:0">
+      <div class="panel" style="margin-bottom:6px"><div class="row2" style="align-items:end"><label class="field"><span>Find my weekends</span><select class="select" id="schedMine"><option value="">Everyone</option>${mgrs.map((m) => `<option value="${esc(m.id)}" ${mine === m.id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label><div style="font-size:13.5px;color:var(--ink-2);padding-bottom:10px">${mineLine}</div></div></div>
+      <div class="wk-list">${rows || '<p class="muted">Nothing scheduled ahead. Add weekends or continue the rotation.</p>'}</div>
+      <div class="btn-row" style="margin-top:14px"><button class="btn btn-sm" data-action="sched-all">${S.schedAll ? 'Show upcoming only' : `Show the whole schedule (${list.length} weekends)`}</button>${past.length && !S.schedAll ? `<span class="muted" style="font-size:12.5px">${past.length} past weekends hidden</span>` : ''}</div>
+    </div><aside style="display:grid;gap:14px;align-content:start">
+      <section class="panel"><h3>Rotation</h3><div class="rot">${rot.map((r) => `<div class="rot-row">${avatarFor(r.mg, '')}<span style="min-width:0"><b>${esc(r.mg.name)}</b><span class="muted">${r.n[0] ? `Next: ${esc(weekend(r.n[0].id).short)}` : 'No upcoming weekends'}</span></span><span class="chip">${r.n.length} ahead</span></div>`).join('')}</div></section>
+      ${canEditSched() ? `<section class="panel"><h3>Keep it current</h3><p style="font-size:14px;color:var(--ink-2)">Swapping weekends? Tap <b>Edit</b> on either weekend and pick who you’re swapping with. Both weekends update for everyone.</p><div class="btn-row"><button class="btn btn-sm" data-action="new-sched">+ Add a weekend</button><button class="btn btn-sm" data-action="extend-sched">Continue the rotation 13 weeks</button></div></section>` : ''}
+    </aside></div>`;
+  v.innerHTML = `<div class="page-head"><div><div class="eyebrow">SoCal MOD rotation · IE · PS · LA · OC · SD</div><h2>MOD schedule</h2><p>Who’s on duty each weekend. Tap your name to start your email with your profile already filled in. If you swap a weekend, update it here so the whole region sees it.</p></div></div>${body}`;
+}
+function schedDrawer(id) {
+  const e = id ? schedFor(id) : null; const nowIso = currentWeekendISO();
+  const mgrs = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  const others = S.schedule.filter((x) => x.id >= nowIso && x.id !== id).sort((a, b) => a.id.localeCompare(b.id)).slice(0, 40);
+  const lastSat = S.schedule.length ? S.schedule.map((x) => x.id).sort().slice(-1)[0] : currentWeekendISO();
+  openDrawer(`${dHead(e ? `Weekend of ${weekend(e.id).short}` : 'Add a weekend')}<div class="drawer-body">
+    ${e ? `<p class="muted">On the schedule: <b>${esc(schedName(e))}</b>${e.originalManagerId && e.originalManagerId !== e.managerId ? ` (originally ${esc((mgrById(e.originalManagerId) || {}).name || '')})` : ''}.</p>` : `<label class="field"><span>Saturday</span><input class="input" type="date" id="s_date" value="${esc(addDays(lastSat, 7))}"></label>`}
+    <label class="field"><span>Manager on duty</span><select class="select" id="s_mgr">${mgrs.map((m) => `<option value="${esc(m.id)}" ${e && e.managerId === m.id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
+    ${e ? `<label class="field"><span>Or swap weekends with</span><select class="select" id="s_swap"><option value="">Don’t swap</option>${others.map((x) => `<option value="${esc(x.id)}">${esc(weekend(x.id).short)} · ${esc(schedName(x))}</option>`).join('')}</select><small>Swapping trades the two weekends: each manager moves to the other date.</small></label>` : ''}
+    <label class="field"><span>Note (optional)</span><input class="input" id="s_note" value="${esc(e ? e.note || '' : '')}" placeholder="Covering for Julie"></label>
+  </div><div class="drawer-foot">${e && S.me.isOwner ? `<button class="btn btn-danger" data-action="delete-sched" data-id="${esc(e.id)}" style="margin-right:auto">Remove weekend</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-sched" data-id="${esc(e ? e.id : '')}">Save</button></div>`);
+}
+async function saveSched(id, btn) {
+  const date = id || ($('#s_date') ? $('#s_date').value : '');
+  if (!date || parseDay(date).getDay() !== 6) { toast('Pick a Saturday.', 'err'); return; }
+  const cur = schedFor(date); const mgrId = $('#s_mgr').value; const note = $('#s_note').value.trim(); const swapWith = $('#s_swap') ? $('#s_swap').value : '';
+  const stamp = { updatedAt: nowISO(), updatedBy: S.me.id || '' };
+  const orig = (e, next) => { const o = (e && (e.originalManagerId || e.managerId)) || ''; return o === next ? '' : o; };
+  if (!id && cur) { toast(`${weekend(date).short} is already on the schedule. Edit it instead.`, 'err'); return; }
+  await busy(btn, 'Saving…', async () => {
+    let ok;
+    if (cur && swapWith) {
+      const other = schedFor(swapWith); if (!other) { toast('That weekend isn’t on the schedule.', 'err'); return; }
+      ok = await write(async () => {
+        await S.db.collection('schedule').doc(cur.id).update({ managerId: other.managerId, originalManagerId: orig(cur, other.managerId), note: note || `Swapped with ${firstName(schedName(cur))}`, ...stamp });
+        await S.db.collection('schedule').doc(other.id).update({ managerId: cur.managerId, originalManagerId: orig(other, cur.managerId), note: `Swapped with ${firstName(schedName(other))}`, ...stamp });
+      }, `Swapped: ${firstName(schedName(other))} has ${weekend(cur.id).short}, ${firstName(schedName(cur))} has ${weekend(other.id).short}.`);
+    } else if (cur) {
+      ok = await write(() => S.db.collection('schedule').doc(cur.id).update({ managerId: mgrId, originalManagerId: orig(cur, mgrId), note, ...stamp }), 'Schedule updated for everyone.');
+    } else {
+      ok = await write(() => S.db.collection('schedule').doc(date).set({ saturday: date, managerId: mgrId, originalManagerId: '', note, createdAt: nowISO(), createdBy: S.me.id || '', ...stamp }), `Added ${weekend(date).short}.`);
+    }
+    if (ok) closeDrawer();
+  });
+}
+async function extendSched(btn) {
+  const list = S.schedule.slice().sort((a, b) => a.id.localeCompare(b.id));
+  if (list.length < 4) { toast('Add a few weekends first so there’s a rotation to continue.', 'err'); return; }
+  const recent = list.slice(-20); const period = new Set(recent.map((x) => x.managerId)).size || 10;
+  const map = new Map(list.map((x) => [x.id, x.managerId])); let last = list[list.length - 1].id; let n = 0;
+  await busy(btn, 'Adding…', async () => {
+    for (let k = 0; k < 13; k += 1) {
+      const date = addDays(last, 7); const src = map.get(addDays(date, -7 * period)); if (!src) break;
+      const ok = await write(() => S.db.collection('schedule').doc(date).set({ saturday: date, managerId: src, originalManagerId: '', note: '', createdAt: nowISO(), createdBy: S.me.id || '', updatedAt: nowISO(), updatedBy: S.me.id || '' }));
+      if (!ok) break; map.set(date, src); last = date; n += 1;
+    }
+  });
+  if (n) toast(`Added ${n} weekends through ${weekend(last).short}, following the ${period}-week rotation.`);
+}
+function schedMe(id) {
+  const e = schedFor(id); if (!e) return; const mg = mgrById(e.managerId);
+  S.draft.saturday = id; if (S.draft.subjectAuto) S.draft.subject = '';
+  if (mg) selectManager(mg.id); else saveDraft();
+  renderWeekendFields(); renderMgrPicker(); updateProgress(); schedulePreview(); showTab('build');
+  toast(mg ? `${mg.name} is set as the MOD for ${weekend(id).short}.` : `Weekend set to ${weekend(id).short}.`);
 }
 
 /* ---------------- recipients ---------------- */
@@ -1724,7 +1941,7 @@ function renderBrand() {
     const slot = b.logos[key] || {}; const src = slot.assetId ? assetURL(slot.assetId) : BUILTIN[key];
     return `<div class="logo-row"><div class="logo-sw" style="background:${bg}"><img src="${esc(src)}" alt="${esc(label)}"></div><div style="display:grid;gap:8px;min-width:0"><b>${esc(label)}</b>
       <label class="field"><span>Public image link (optional)</span><input class="input" id="br_logo_${key}" data-brand="logos.${key}.publicUrl" value="${esc(slot.publicUrl || '')}" placeholder="https://…/logo-${key}.png" ${dis}></label>
-      ${own ? `<div class="btn-row">${canUpload() ? `<button class="btn btn-xs" data-action="upload-logo" data-key="${key}">Replace image</button>` : ''}${slot.assetId ? `<button class="btn btn-xs btn-ghost" data-action="reset-logo" data-key="${key}">Use built-in</button>` : ''}</div>` : ''}</div></div>`;
+      ${own ? `<div class="btn-row">${canUpload() ? upBtn('Replace image', 'logo', 'btn btn-xs', `data-key="${key}"`) : ''}${slot.assetId ? `<button class="btn btn-xs btn-ghost" data-action="reset-logo" data-key="${key}">Use built-in</button>` : ''}</div>` : ''}</div></div>`;
   };
   v.innerHTML = `<div class="page-head"><div><div class="eyebrow">Redfin Powered by Rocket</div><h2>Brand &amp; access</h2><p>Logos, the animated badge, program details, and who can do what.${own ? '' : ` Only ${esc(adminName())} can change these settings.`}</p></div>${own ? '<div class="btn-row"><button class="btn btn-primary" data-action="save-brand">Save brand settings</button></div>' : ''}</div>
     <div class="two-col"><div style="display:grid;gap:14px">
@@ -1769,15 +1986,15 @@ async function resetLogo(key) {
 function openDrawer(html) {
   S.pendingFile = null; S.fileTarget = null;
   $('#drawer').innerHTML = html; $('#drawerWrap').hidden = false;
-  setTimeout(() => { const f = $('#drawer .drawer-body input:not([type=checkbox]):not([disabled]), #drawer .drawer-body textarea'); if (f) f.focus({ preventScroll: true }); }, 80);
+  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) setTimeout(() => { const f = $('#drawer .drawer-body input:not([type=checkbox]):not([type=file]):not([disabled]), #drawer .drawer-body textarea'); if (f) f.focus({ preventScroll: true }); }, 80);
 }
-function closeDrawer() { $('#drawerWrap').hidden = true; $('#drawer').innerHTML = ''; S.pendingFile = null; S.fileTarget = null; }
+function closeDrawer() { $('#drawerWrap').hidden = true; $('#drawer').innerHTML = ''; S.pendingFile = null; S.fileTarget = null; S.editFallback = null; }
 const dHead = (t) => `<div class="drawer-head"><h3 id="drawerTitle">${esc(t)}</h3><button class="btn btn-ghost btn-sm" data-action="close-drawer">Close</button></div>`;
-const dropHTML = (src, label) => `<div class="drop" id="dz" data-action="pick-file" tabindex="0" role="button"><img id="dzImg" alt="" ${src ? `src="${esc(src)}"` : 'hidden'}><b>${esc(label)}</b><span class="btn btn-sm btn-primary">Choose from phone or computer</span><span>Or drop an image here, or paste a screenshot.</span></div>`;
+const dropHTML = (src, label) => `<div class="drop" id="dz"><img id="dzImg" alt="" ${src ? `src="${esc(src)}"` : 'hidden'}><b>${esc(label)}</b><span class="btn btn-sm btn-primary">Choose from phone or computer</span><span>On a computer you can also drop an image here or paste a screenshot.</span>${fileInput('drawer')}</div>`;
 const CATEGORIES = ['AI & Tools', 'Rocket Mortgage', 'Tours & Conversion', 'Listings', 'Buyer Consults', 'Market Update', 'Training', 'Recognition', 'Operations'];
 
 function spotlightDrawer(id) {
-  const x = S.spotlights.find((y) => y.id === id) || null; const v = x || {};
+  const x = S.spotlights.find((y) => y.id === id) || (S.editFallback && S.editFallback.id === id ? S.editFallback : null); const v = x || {};
   const cats = [...new Set([...CATEGORIES, ...S.spotlights.map((y) => y.category).filter(Boolean)])];
   const tk = v.takeaways || [];
   openDrawer(`${dHead(x ? 'Edit spotlight' : 'New spotlight')}<div class="drawer-body">
@@ -1795,7 +2012,7 @@ function spotlightDrawer(id) {
   </div><div class="drawer-foot">${x && canAdd() ? `<button class="btn btn-danger" data-action="trash-spotlight" data-id="${esc(x.id)}" data-close="1" style="margin-right:auto">Move to trash</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-spotlight" data-id="${esc(x ? x.id : '')}">Save spotlight</button></div>`);
 }
 async function saveSpotlight(id, btn) {
-  const x = S.spotlights.find((y) => y.id === id);
+  const x = S.spotlights.find((y) => y.id === id) || (S.editFallback && S.editFallback.id === id ? S.editFallback : null);
   const g = (k) => ($('#' + k) ? $('#' + k).value.trim() : '');
   const title = g('f_title'); if (!title) { toast('Add a title first.', 'err'); return; }
   await busy(btn, 'Saving…', async () => {
@@ -1810,7 +2027,7 @@ async function saveSpotlight(id, btn) {
         if (!S.draft.spotlightIds.length) { S.draft.spotlightIds = [nid]; S.draft.spInit = true; saveDraft(); }
       }
       if (x && x.assetId && x.assetId !== assetId && S.assets) S.assets.delete(x.assetId).catch(() => {});
-      toast(x ? 'Spotlight updated.' : 'Spotlight added to the library.'); closeDrawer();
+      toast(assetId ? (x ? 'Spotlight updated.' : 'Spotlight added to the library.') : 'Saved without an image. Open it again and tap Choose from phone or computer to add the graphic.', assetId ? '' : 'err'); closeDrawer();
     } catch (e) { console.error(e); toast(errMsg(e), 'err'); }
   });
 }
@@ -1962,7 +2179,7 @@ function suggestDrawer(sectionId) {
 /* ---------------- events ---------------- */
 function onFile(f) {
   if (!f) return;
-  if (!/^image\//.test(f.type) && !/\.(heic|heif)$/i.test(f.name || '')) { toast('Pick an image file: PNG, JPEG, WebP or GIF.', 'err'); return; }
+  if (!isImageFile(f)) { toast('Pick a photo or image file: JPEG, PNG, WebP, GIF or HEIC.', 'err'); return; }
   if (S.fileTarget && S.fileTarget.kind === 'logo') { const k = S.fileTarget.key; S.fileTarget = null; uploadLogo(k, f); return; }
   if (f.size > 20 * 1024 * 1024) { toast('That file is too large. Use an image under 20 MB.', 'err'); return; }
   S.pendingFile = f;
@@ -2033,6 +2250,13 @@ const handlers = {
   'delete-recip': (a) => { if (armed(a)) write(() => S.db.collection('distribution').doc(a.dataset.id).delete(), 'Removed from the list.').then((ok) => ok && closeDrawer()); },
   'paste-recips': () => pasteDrawer(),
   'save-paste': (a) => savePaste(a),
+  'sched-me': (a) => schedMe(a.dataset.id),
+  'edit-sched': (a) => schedDrawer(a.dataset.id),
+  'new-sched': () => schedDrawer(null),
+  'save-sched': (a) => saveSched(a.dataset.id, a),
+  'delete-sched': (a) => { if (armed(a)) write(() => S.db.collection('schedule').doc(a.dataset.id).delete(), 'Weekend removed.').then((ok) => ok && closeDrawer()); },
+  'extend-sched': (a) => extendSched(a),
+  'sched-all': () => { S.schedAll = !S.schedAll; renderSchedule(); },
 };
 async function copyTextMsg(text, msg) { let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = execCopyText(text); } toast(ok ? msg : 'Copy was blocked here. Select the text and copy it manually.', ok ? '' : 'err'); }
 function bindGlobal() {
@@ -2058,8 +2282,10 @@ function bindGlobal() {
   });
   document.addEventListener('change', (e) => {
     const t = e.target;
+    if (t.matches && t.matches('input[type=file][data-upload]')) { const files = Array.from(t.files || []); const o = { mgr: t.dataset.manager, key: t.dataset.key }; const kind = t.dataset.upload; t.value = ''; handleUpload(kind, files, o); return; }
     if (t.dataset && t.dataset.toggle) { S.draft.toggles[t.dataset.toggle] = t.checked; const li = t.closest('.sort-item'); if (li) li.classList.toggle('is-off', !t.checked); saveDraft(); schedulePreview(); updateProgress(); renderSendPanel(); }
     if (t.dataset && t.dataset.bccid) { const off = new Set(S.draft.bccOff || []); if (t.checked) off.delete(t.dataset.bccid); else off.add(t.dataset.bccid); S.draft.bccOff = [...off]; saveDraft(); refreshSendBits(); }
+    if (t.id === 'schedMine') { S.schedMine = t.value; try { localStorage.setItem('modstudio.mine', t.value); } catch (err) { /* ignore */ } renderSchedule(); return; }
     if (t.dataset && t.dataset.recipActive) { const id = t.dataset.recipActive; write(() => S.db.collection('distribution').doc(id).update({ active: t.checked, updatedAt: nowISO() }), t.checked ? 'Back on the list.' : 'Paused. They won’t get the email until you turn this back on.'); }
   });
   $('#filePick').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; onFile(f); });
@@ -2083,7 +2309,7 @@ function subscribeAll() {
     } catch (e) { console.warn(coll, e); S.loaded.add(key); }
   };
   on('core', 'core'); on('managers', 'managers'); on('headshots', 'headshots'); on('spotlights', 'spotlights');
-  on('emails', 'emails', (c) => c.orderBy('createdAt', 'desc').limit(60)); on('suggestions', 'suggestions'); on('brand', 'brandDocs'); on('distribution', 'distribution');
+  on('emails', 'emails', (c) => c.orderBy('createdAt', 'desc').limit(60)); on('suggestions', 'suggestions'); on('brand', 'brandDocs'); on('distribution', 'distribution'); on('schedule', 'schedule');
 }
 function dataChanged(key) {
   if (key === 'brandDocs') {
@@ -2098,8 +2324,9 @@ function flush() {
   raf = 0; const keys = pending; pending = new Set(); const d = S.draft;
   if (S.loaded.has('managers')) {
     if (d.managerId && !S.managers.some((m) => m.id === d.managerId)) { d.managerId = ''; saveDraft(); }
-    if (!d.managerId && !d.manager.name) {
-      const mine = S.managers.find((m) => m.userId && m.userId === S.me.id) || (S.me.isOwner && S.managers.find((m) => m.ownerProfile)) || (S.managers.length === 1 ? S.managers[0] : null);
+    if (!d.managerId && !d.manager.name && (S.loaded.has('schedule') || S.mode !== 'live')) {
+      const se = schedFor(d.saturday);
+      const mine = (se && mgrById(se.managerId)) || S.managers.find((m) => m.userId && m.userId === S.me.id) || (S.me.isOwner && S.managers.find((m) => m.ownerProfile)) || (S.managers.length === 1 ? S.managers[0] : null);
       if (mine) selectManager(mine.id);
     }
     if (d.managerId && !d.headshotId && S.loaded.has('headshots')) { const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && mgrHeadshot(mg); if (hs) { d.headshotId = hs.id; saveDraft(); } }
@@ -2110,7 +2337,7 @@ function flush() {
   }
   d.spotlightIds = d.spotlightIds.filter((id) => !S.loaded.has('spotlights') || liveSpotlights().some((x) => x.id === id));
   const rc = $('#recipCount'); if (rc) rc.textContent = S.distribution.length ? String(S.distribution.filter((r) => r.active !== false).length) : '';
-  if (keys.has('managers') || keys.has('headshots')) { renderMgrPicker(); renderHsPicker(); renderCropBox(); }
+  if (keys.has('managers') || keys.has('headshots') || keys.has('schedule')) { renderMgrPicker(); renderHsPicker(); renderCropBox(); }
   if (keys.has('managers') && !$('#mgrFields').contains(document.activeElement)) renderMgrFields();
   if (keys.has('spotlights')) renderSpPicker();
   renderSendPanel(); updateProgress(); updateCoreBadge(); renderWho();
@@ -2134,7 +2361,7 @@ async function init() {
   const bar = $('.pv-bar'); const play = document.createElement('button'); play.className = 'btn btn-xs'; play.dataset.action = 'replay'; play.textContent = '▶ Play intro'; bar.insertBefore(play, $('#pvDevice'));
   bindGlobal(); bindSortable(); renderSteps(); renderWho(); renderBanner();
   const h = (location.hash || '').slice(1);
-  showTab(['build', 'library', 'core', 'recipients', 'brand'].includes(h) ? h : 'build');
+  showTab(['schedule', 'build', 'library', 'core', 'recipients', 'brand'].includes(h) ? h : 'schedule');
   schedulePreview();
   const c = window.claude;
   if (!c || typeof c.use !== 'function') { S.mode = 'offline'; afterMode(); return; }
