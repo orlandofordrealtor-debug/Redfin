@@ -572,6 +572,7 @@ function brandSettings() {
     defaultStyle: b.defaultStyle || 'signature',
     tz: b.tz || 'All times Pacific.',
     listEditors: b.listEditors === 'editors' ? 'editors' : 'owner',
+    textPage: /^https:\/\/\S+$/i.test(b.textPage || '') ? b.textPage : '',
     logos: b.logos || {},
     dots: b.dots || {},
   };
@@ -608,7 +609,17 @@ const ff = (family, size, weight = 400, lh = 1.5, extra = '') => `font-family:${
 const TBL = 'role="presentation" cellpadding="0" cellspacing="0" border="0"';
 const spacer = (h) => `<div style="height:${h}px;line-height:${h}px;font-size:0">&nbsp;</div>`;
 
+// Gmail removes sms: links, so once a text link page is set, every Text link goes through it.
+function textHref(href, name) {
+  const page = brandSettings().textPage; const d = digits(href);
+  if (!page || d.length < 10) return href;
+  return `${page}${page.includes('?') ? '&' : '?'}to=${d}${name ? '&n=' + encodeURIComponent(name) : ''}`;
+}
+const outHref = (h) => (/^sms:/i.test(h || '') ? textHref(h) : h);
+const hasSmsLinks = (html) => /href="sms:/i.test(html);
+
 function ebtn(href, label, bg, fg, o = {}) {
+  href = outHref(href);
   if (!href) return '';
   const pad = o.small ? '9px 16px' : '13px 22px';
   const border = `border:2px solid ${o.border || bg};`;
@@ -637,7 +648,7 @@ function epill(s, img, text) {
   return `<table ${TBL} style="border-collapse:separate"><tr><td bgcolor="${s.pillBg}" style="background:${s.pillBg};border-radius:999px;padding:5px 14px 5px ${img.dot ? 7 : 14}px;white-space:nowrap">${img.dot ? `<img src="${esc(img.dot)}" width="20" height="20" alt="" style="display:inline-block;vertical-align:middle;border:0;width:20px;height:20px">` : ''}<span style="${ff(SANS, 11, 800, 1, `letter-spacing:1.3px;text-transform:uppercase;color:${s.pillInk};vertical-align:middle;padding-left:${img.dot ? 5 : 0}px`)}">${esc(text)}</span></td></tr></table>`;
 }
 function elink(href, text, color, weight = 700) {
-  const h = safeHref(href);
+  const h = outHref(safeHref(href));
   return h ? `<a href="${esc(h)}" target="_blank" style="color:${color};text-decoration:none;font-weight:${weight}">${esc(text)}</a>` : esc(text);
 }
 
@@ -651,7 +662,7 @@ function eHero(m, s, img) {
   const sub = [mg.title, mg.market].filter(Boolean).join(' · ');
   const pillTxt = `On duty · ${m.weekend.pill}`;
   const btns = [
-    tel ? ebtn('sms:' + tel, `Text ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : (mg.email ? ebtn('mailto:' + mg.email, `Email ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : ''),
+    tel ? ebtn(textHref('sms:' + tel, first), `Text ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : (mg.email ? ebtn('mailto:' + mg.email, `Email ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : ''),
     tel ? ebtn('tel:' + tel, 'Call', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
     tel && mg.email ? ebtn('mailto:' + mg.email, 'Email', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
   ].join('');
@@ -717,7 +728,7 @@ function eHero(m, s, img) {
   if (s.hero === 'blueprint') {
     const dash = '#3E6487';
     const row = (k, v) => `<tr><td width="112" valign="top" style="padding:8px 10px 8px 0;border-top:1px dashed ${dash};${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1px;text-transform:uppercase`)}">${k}</td><td valign="top" style="padding:8px 0;border-top:1px dashed ${dash};${ff(SANS, 14, 600, 1.45, `color:${s.heroInk}`)}">${v}</td></tr>`;
-    const spec = `<table ${TBL} width="100%" style="border-bottom:1px dashed ${dash};margin:4px 0 14px">${row('Manager', esc(name))}${sub ? row('Role', esc(sub)) : ''}${row('Weekend', esc(m.weekend.pill))}${tel ? row('First contact', `Text ${elink('sms:' + tel, mg.phone, s.heroInk)}`) : ''}${mg.email ? row('Email', elink('mailto:' + mg.email, mg.email, s.heroInk, 600)) : ''}</table>`;
+    const spec = `<table ${TBL} width="100%" style="border-bottom:1px dashed ${dash};margin:4px 0 14px">${row('Manager', esc(name))}${sub ? row('Role', esc(sub)) : ''}${row('Weekend', esc(m.weekend.pill))}${tel ? row('First contact', `Text ${elink(textHref('sms:' + tel, firstName(mg.name)), mg.phone, s.heroInk)}`) : ''}${mg.email ? row('Email', elink('mailto:' + mg.email, mg.email, s.heroInk, 600)) : ''}</table>`;
     const av = img.headshot ? `<table ${TBL} style="border:1px dashed #5C86B0;border-collapse:separate"><tr><td style="padding:6px"><img src="${esc(img.headshot)}" width="132" height="132" alt="${esc(name)}" style="display:block;width:132px;height:132px;border:0"></td></tr></table><div style="${ff(MONO, 10, 700, 1.4, `color:${s.heroMuted};letter-spacing:1px;margin:6px 0 14px`)}">FIG. 1 · ON DUTY</div>` : '';
     const inner = `${img.logo ? `<img src="${esc(img.logo)}" width="130" alt="Redfin Powered by Rocket" style="display:block;width:130px;height:auto;border:0;margin:0 0 20px">` : ''}${epill(s, img, pillTxt)}${spacer(16)}
       <div style="${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1.5px;text-transform:uppercase`)}">Sheet A-1 · Weekend MOD plan · ${esc(m.weekend.short)}</div>
@@ -850,7 +861,7 @@ function eCoverage(m, s) {
 function eRouting(m, s) {
   const rows = [];
   const mg = m.manager; const first = firstName(mg.name); const tel = e164(mg.phone);
-  if (mg.name) rows.push({ need: 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? 'sms:' + tel : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
+  if (mg.name) rows.push({ need: 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? textHref('sms:' + tel, first) : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
   m.core.filter((c) => c.visible !== false && c.need && c.kind !== 'links' && !(c.group === 'tech' && m.toggles.tech)).forEach((c) => {
     const l = (c.lines || [])[0] || {}; const detailed = (c.steps || []).length || c.group === 'tech';
     rows.push({ need: c.need, title: c.title, href: l.href || l.value, value: l.value, hours: c.hoursText, summary: detailed ? '' : c.summary, note: detailed ? '' : c.note });
@@ -1539,7 +1550,9 @@ function renderSendPanel() {
   ];
   const review = S.core.filter((c) => c.needsReview && c.visible !== false).length;
   const actives = S.distribution.filter((r) => r.active !== false).sort(byListOrder);
-  el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}</div>
+  const smsBreaks = !brandSettings().textPage && (!!e164(d.manager.phone) || S.core.some((c) => c.visible !== false && (c.lines || []).some((l) => /^sms:/i.test(l.href || ''))));
+  const smsNote = smsBreaks ? `<div><span class="no">!</span><span>Gmail removes Text links, so the Text buttons won’t open Messages for agents reading in Gmail. Call and Email still work. ${S.me.isOwner || S.mode !== 'live' ? '<a href="#brand" data-action="go-brand">Set up the text link page</a> to fix it.' : `Ask ${esc(adminName())} to set up the text link page in Brand &amp; access.`}</span></div>` : '';
+  el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}${smsNote}</div>
     <div class="send-to">
       <div class="rowline"><span>To</span><input class="input" id="b_to" data-bind="to" value="${esc(d.to)}" placeholder="${esc(d.manager.email || 'your.name@redfin.com')}" inputmode="email" aria-label="To"></div>
       <div class="rowline"><span>BCC</span><div style="font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b id="bccCount">${esc(bccSummary())}</b><button class="btn btn-xs btn-ghost" data-action="toggle-bcc">${S.bccOpen ? 'Done' : 'Adjust for this email'}</button></div></div>
@@ -1952,6 +1965,9 @@ function renderBrand() {
         <div class="row2"><label class="field"><span>Admin name in help text</span><input class="input" id="br_admin" data-brand="adminName" value="${esc(b.adminName)}" ${dis}></label><label class="field"><span>Time zone note</span><input class="input" id="br_tz" data-brand="tz" value="${esc(b.tz)}" ${dis}></label></div>
         <label class="field"><span>Who can edit the distribution list</span><select class="select" id="br_list" data-brand="listEditors" ${dis}><option value="owner" ${b.listEditors === 'owner' ? 'selected' : ''}>Only ${esc(b.adminName || 'the owner')}</option><option value="editors" ${b.listEditors === 'editors' ? 'selected' : ''}>${esc(b.adminName || 'The owner')} and every Editor</option></select></label>
         <label class="field"><span>Default style for new drafts</span><select class="select" id="br_style" data-brand="defaultStyle" ${dis}>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}" ${b.defaultStyle === k ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></section>
+      <section class="panel"><h3>Text links</h3><p class="muted" style="font-size:13.5px">Gmail removes Text (sms:) links from emails, so on their own the Text buttons do nothing for agents reading in Gmail. Add the web address of the text link page here, and every Text button and texting link in the email opens Messages with the number already filled in.</p>
+        <label class="field"><span>Text link page (https)</span><input class="input" id="br_textpage" data-brand="textPage" value="${esc((S.brand && S.brand.textPage) || '')}" placeholder="https://…/text.html" inputmode="url" ${dis}></label>
+        <div class="btn-row" style="align-items:center"><span style="font-size:13px;font-weight:700;color:${b.textPage ? 'var(--ok, #1E7F4F)' : 'var(--red, #DE3341)'}">${b.textPage ? '✓ On. Text buttons open Messages in Gmail.' : '• Off. Text buttons won’t work in Gmail.'}</span>${b.textPage ? `<a class="btn btn-xs" href="${esc(textHref('sms:' + (e164(S.draft.manager.phone) || '+13105550123'), firstName(S.draft.manager.name) || 'Test'))}" target="_blank" rel="noopener">Test on this device</a>` : ''}</div></section>
       <section class="panel"><h3>Animated “On duty” badge</h3><p class="muted" style="font-size:13.5px">A pulsing dot GIF that animates in Gmail and Apple Mail. Each style uses the version that matches its background.</p>
         <div style="display:flex;gap:16px;flex-wrap:wrap">${['light', 'dark', 'tint', 'red'].map((k) => `<div style="display:grid;gap:6px;justify-items:center;font-size:12px;font-weight:700"><img src="${BUILTIN[k]}" width="40" height="40" alt="" style="border-radius:8px;border:1px solid var(--line)">${k}</div>`).join('')}</div>
         ${['light', 'dark', 'tint', 'red'].map((k) => `<label class="field"><span>Public link · ${k} (optional)</span><input class="input" id="br_dot_${k}" data-brand="dots.${k}.publicUrl" value="${esc((b.dots[k] || {}).publicUrl || '')}" placeholder="https://…/live-dot-${k}.gif" ${dis}></label>`).join('')}</section>
@@ -1967,6 +1983,7 @@ function setPath(o, path, val) { const ks = path.split('.'); let t = o; ks.slice
 async function saveBrand(btn) {
   const cur = JSON.parse(JSON.stringify(S.brand || {}));
   $$('[data-brand]').forEach((i) => setPath(cur, i.dataset.brand, i.value.trim()));
+  if (cur.textPage && !/^https:\/\/\S+$/i.test(cur.textPage)) { toast('The text link page must be a full https:// address.', 'err'); $('#br_textpage').focus(); return; }
   cur.updatedAt = nowISO();
   await busy(btn, 'Saving…', () => write(() => S.db.collection('brand').doc('settings').set(cur), 'Brand settings saved.'));
 }
@@ -2215,6 +2232,7 @@ const handlers = {
   'download-html': (a) => downloadHtml(a),
   'save-history': (a) => saveHistory(a),
   'go-core': (a, e) => { e.preventDefault(); showTab('core'); },
+  'go-brand': (a, e) => { e.preventDefault(); showTab('brand'); },
   'lib-tab': (a) => { S.libTab = a.dataset.tab; renderLibrary(); },
   'reuse-email': (a) => reuseEmail(a.dataset.id),
   'new-core': () => coreDrawer(null),

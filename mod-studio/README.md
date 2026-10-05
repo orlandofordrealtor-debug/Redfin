@@ -11,6 +11,7 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 | `index.html` | The whole Studio: UI, email renderer and export. Published as the artifact page. |
 | `brand/logo-*.png` | Redfin Powered by Rocket lockups (primary, reverse, white), cut from the official brand sheet. |
 | `brand/live-dot-*.gif` | Pulsing "on duty" dot, one per email style background (light, dark, tint, red, navy). Animates in Gmail and Apple Mail. |
+| `text.html` | Text link page. Opens Messages with the manager's number filled in. Must be hosted at a public https address (see Text links below). |
 
 ## How it works
 
@@ -28,6 +29,18 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 - Ten styles. Classic: Signature Red, After Hours, Golden Hour, Executive Brief, Billboard. Creative: Open House, Featured Listing, Weekend Edition, Blueprint, Postcard.
 - **Copy email for Gmail** puts rich HTML on the clipboard with images embedded. **Download .html** saves a web version that also plays CSS entrance animations.
 - Any image can be given a public `https://` link instead, so it loads in every inbox.
+
+## Text links
+
+Gmail (web and app), Outlook and Yahoo remove `sms:` links from emails, so a plain Text button does nothing there. Call (`tel:`) and Email (`mailto:`) links are kept.
+
+The fix is `text.html`, a one-file page:
+
+1. Host `text.html` at any public https address, such as GitHub Pages or a Redfin web server.
+2. In the Studio, open **Brand & access → Text links** and paste that address.
+3. Every Text button and texting link in the email, Standard info hotlines included, now points to `text.html?to=<digits>&n=<first name>`. On a phone the page opens Messages with the number filled in right away, with a big Text button as a backup. On a computer it waits for a tap.
+
+The page reads only digits from the link and only ever opens `sms:` or `tel:` for that number. It loads nothing from other sites and has no tracking. Until a page address is set, the Send step shows a reminder.
 
 ## Uploads
 
