@@ -90,7 +90,7 @@ def main():
         doc = dict(r)
         rf = dict(doc.get("redfin") or {})
         thumbs = rf.pop("thumbs", []) or []
-        thumbs = [shrink(t, 480 if i == 0 else 200, 66 if i == 0 else 56) for i, t in enumerate(thumbs[:6])]
+        thumbs = [shrink(t, 480 if i == 0 else 200, 66 if i == 0 else 54) for i, t in enumerate(thumbs[:15])]
         rf["thumbCount"] = len(thumbs)
         doc["redfin"] = rf
         doc["history"] = hist
@@ -130,7 +130,7 @@ def main():
         if m["collection"] in ("playbook", "market"):
             continue
         b = os.path.getsize(os.path.join(out, m["file"]))
-        if cur and (cur_bytes + b > 850_000 or len(cur) >= 50):
+        if cur and (cur_bytes + b > 980_000 or len(cur) >= 50):
             batches.append(cur); cur, cur_bytes = [], 0
         cur.append({"op": "set", "collection": m["collection"], "doc_id": m["doc_id"], "file_path": os.path.join(out, m["file"])}); cur_bytes += b
     if cur:

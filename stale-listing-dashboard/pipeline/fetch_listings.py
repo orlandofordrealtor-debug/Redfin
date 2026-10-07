@@ -16,7 +16,7 @@ Usage:
   python3 fetch_listings.py --csv ... --limit 3           # smoke test
   python3 fetch_listings.py --csv ... --no-photos         # faster
 """
-import argparse, base64, csv, datetime as dt, html as htmlmod, io, json, os, re, sys, time, urllib.parse, urllib.request
+import argparse, base64, csv, datetime as dt, html as htmlmod, io, json, math, os, re, sys, time, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -206,6 +206,62 @@ def thumb_data_uri(url, width, quality=70):
     }
 
 
+PHOTO_TARGET = 15
+
+
+def haversine(lat1, lon1, lat2, lon2):
+    r = 3958.8
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
+
+
+def gis_csv(lat, lng, miles=1.0, sold_days=None):
+    """Redfin map search inside a square of +/- `miles` around the subject.
+    Returns rows (dicts) with LATITUDE/LONGITUDE so distance can be computed."""
+    dlat = miles / 69.0
+    dlon = miles / (69.0 * math.cos(math.radians(lat)))
+    pts = [(lng - dlon, lat - dlat), (lng + dlon, lat - dlat), (lng + dlon, lat + dlat), (lng - dlon, lat + dlat), (lng - dlon, lat - dlat)]
+    poly = ",".join(f"{x:.6f} {y:.6f}" for x, y in pts)
+    q = {"al": 1, "market": "socal", "num_homes": 350, "ord": "redfin-recommended-asc", "page_number": 1,
+         "poly": poly, "v": 8, "include_nearby_homes": "true", "mpt": 99,
+         "status": 9 if sold_days else 1}
+    if sold_days:
+        q["sold_within_days"] = sold_days
+    else:
+        q["sf"] = "1,2,3,5,6,7"
+        q["uipt"] = "1,2,3,4,5,6,7,8"
+    text = get(BASE + "/stingray/api/gis-csv?" + urllib.parse.urlencode(q)).decode("utf-8", "replace")
+    if text.startswith("In accordance"):
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+    rows = []
+    for r in csv.DictReader(io.StringIO(text)):
+        if not r.get("LATITUDE"):
+            continue
+        rows.append(r)
+    return rows
+
+
+def fetch_thumbs(atf, limit=PHOTO_TARGET):
+    photos = (atf.get("mediaBrowserInfo") or {}).get("photos") or []
+    thumbs = []
+    for i, ph in enumerate(photos[:limit]):
+        pu = ph.get("photoUrls") or {}
+        u = pu.get("nonFullScreenPhotoUrlCompressed") or pu.get("nonFullScreenPhotoUrl") or (ph.get("thumbnailData") or {}).get("thumbnailUrl")
+        if not u:
+            continue
+        try:
+            t = thumb_data_uri(u, 560 if i == 0 else 220, 72 if i == 0 else 60)
+            if t:
+                t["origW"], t["origH"] = ph.get("width"), ph.get("height")
+                thumbs.append(t)
+        except Exception as e:
+            thumbs.append({"error": str(e)})
+        time.sleep(0.12)
+    return thumbs
+
+
 def enrich(row, asof, want_photos=True, cache_days=6):
     deal_id = row["Deal Id"].strip()
     os.makedirs(RAW_DIR, exist_ok=True)
@@ -267,6 +323,27 @@ def enrich(row, asof, want_photos=True, cache_days=6):
                         raw["thumbs"] = thumbs
             except Exception as e:
                 raw["error"] = f"{type(e).__name__}: {e}"
+        json.dump(raw, open(cache_path, "w"))
+    # stage 2: radius search + full photo set (incremental, so cached rows get it too)
+    changed = False
+    atf = raw.get("atf") or {}
+    ll = (atf.get("addressSectionInfo") or {}).get("latLong") or {}
+    if ll.get("latitude") and not raw.get("error"):
+        if "gisActive" not in raw:
+            try:
+                raw["gisActive"] = gis_csv(ll["latitude"], ll["longitude"], 1.0, None)
+                time.sleep(0.3)
+                raw["gisSold"] = gis_csv(ll["latitude"], ll["longitude"], 1.0, 180)
+                raw["gisFetchedAt"] = asof
+            except Exception as e:
+                raw["gisError"] = f"{type(e).__name__}: {e}"
+            changed = True
+        have = [t for t in (raw.get("thumbs") or []) if "src" in t]
+        n_avail = len((atf.get("mediaBrowserInfo") or {}).get("photos") or [])
+        if want_photos and len(have) < min(PHOTO_TARGET, n_avail):
+            raw["thumbs"] = fetch_thumbs(atf)
+            changed = True
+    if changed:
         json.dump(raw, open(cache_path, "w"))
     return raw
 
@@ -363,36 +440,125 @@ def shape(row, raw, asof):
         def shape_sim(h):
             lp = (h.get("price") or {}).get("value")
             dom = (h.get("dom") or {}).get("value")
-            tor = (h.get("timeOnRedfin") or {}).get("value")
             return {
                 "address": ((h.get("streetLine") or {}).get("value") or "") + ((" " + (h.get("unitNumber") or {}).get("value")) if (h.get("unitNumber") or {}).get("value") else ""),
                 "city": h.get("city"), "zip": h.get("zip"), "price": lp, "sqft": (h.get("sqFt") or {}).get("value"),
                 "ppsf": (h.get("pricePerSqFt") or {}).get("value"), "beds": h.get("beds"), "baths": h.get("baths"),
                 "dom": dom, "status": h.get("searchStatus"), "soldDate": dt.datetime.fromtimestamp(h["soldDate"] / 1000, dt.timezone.utc).date().isoformat() if h.get("soldDate") and h.get("searchStatus") in (4, 5) else None,
-                "url": BASE + h["url"] if h.get("url") else None, "propertyId": h.get("propertyId"), "isRedfin": bool(h.get("isRedfin")),
+                "url": BASE + h["url"] if h.get("url") else None, "propertyId": h.get("propertyId"), "isRedfin": bool(h.get("isRedfin")), "distance": None, "source": "similar",
             }
-        sims = [shape_sim(h) for h in (raw.get("simListings") or {}).get("homes", [])]
-        solds = [shape_sim(h) for h in (raw.get("simSolds") or {}).get("homes", [])]
-        rf["similarActive"] = sims
-        rf["similarSold"] = solds
-        # competition analysis: new listings that came on after ours
+
+        def num_(v):
+            try:
+                return float(str(v).replace(",", "")) if str(v).strip() not in ("", "None") else None
+            except ValueError:
+                return None
+
+        def shape_gis(g, sold):
+            lat, lng = num_(g.get("LATITUDE")), num_(g.get("LONGITUDE"))
+            d = haversine(rf["lat"], rf["lng"], lat, lng) if (rf.get("lat") and lat) else None
+            price = num_(g.get("PRICE")); sqft = num_(g.get("SQUARE FEET"))
+            sd = (g.get("SOLD DATE") or "").strip()
+            sold_iso = None
+            if sd:
+                for fmt in ("%B-%d-%Y", "%m/%d/%Y", "%Y-%m-%d"):
+                    try:
+                        sold_iso = dt.datetime.strptime(sd, fmt).date().isoformat(); break
+                    except ValueError:
+                        pass
+            return {
+                "address": (g.get("ADDRESS") or "").strip(), "city": g.get("CITY"), "zip": g.get("ZIP OR POSTAL CODE"),
+                "price": int(price) if price else None, "sqft": int(sqft) if sqft else None,
+                "ppsf": int(num_(g.get("$/SQUARE FEET"))) if num_(g.get("$/SQUARE FEET")) else (round(price / sqft) if price and sqft else None),
+                "beds": num_(g.get("BEDS")), "baths": num_(g.get("BATHS")), "lot": num_(g.get("LOT SIZE")), "yearBuilt": int(num_(g.get("YEAR BUILT"))) if num_(g.get("YEAR BUILT")) else None,
+                "dom": int(num_(g.get("DAYS ON MARKET"))) if num_(g.get("DAYS ON MARKET")) is not None else None,
+                "hoa": num_(g.get("HOA/MONTH")), "propertyType": g.get("PROPERTY TYPE"), "mlsStatus": g.get("STATUS"),
+                "status": 4 if sold else 1, "soldDate": sold_iso if sold else None, "url": g.get("URL (SEE https://www.redfin.com/buy-a-home/comparative-market-analysis FOR INFO ON PRICING)") or g.get("URL"),
+                "mls": g.get("MLS#"), "lat": lat, "lng": lng, "distance": round(d, 2) if d is not None else None, "source": "radius",
+                "isRedfin": "redfin" in (g.get("SOURCE") or "").lower(),
+            }
+
+        subj_sqft = rf.get("sqft") or rf.get("totalSqft")
+        subj_type = (rf.get("propertyTypeName") or "")
+        subj_url = (raw.get("url") or "")
+
+        def comp_score(c, sold=True):
+            sc = 100.0
+            if subj_sqft and c.get("sqft"):
+                sc -= min(40, abs(c["sqft"] - subj_sqft) / subj_sqft * 100 * 0.8)
+            else:
+                sc -= 15
+            if rf.get("beds") is not None and c.get("beds") is not None:
+                sc -= min(16, abs(c["beds"] - rf["beds"]) * 8)
+            if rf.get("baths") is not None and c.get("baths") is not None:
+                sc -= min(10, abs(c["baths"] - rf["baths"]) * 5)
+            if c.get("distance") is not None:
+                sc -= min(20, c["distance"] * 15)
+            if sold and c.get("soldDate"):
+                try:
+                    age = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(c["soldDate"])).days
+                    sc -= min(20, age / 30 * 2.5)
+                except Exception:
+                    pass
+            pt = (c.get("propertyType") or "")
+            if subj_type and pt and (("Condo" in subj_type) != ("Condo" in pt) or ("Townhouse" in subj_type) != ("Townhouse" in pt)):
+                sc -= 15
+            if rf.get("yearBuilt") and c.get("yearBuilt"):
+                sc -= min(10, abs(c["yearBuilt"] - rf["yearBuilt"]) / 10)
+            return round(max(0, sc), 1)
+
+        g_act = [shape_gis(g, False) for g in (raw.get("gisActive") or [])]
+        g_sold = [shape_gis(g, True) for g in (raw.get("gisSold") or [])]
+        g_act = [c for c in g_act if c["distance"] is not None and c["distance"] <= 1.0 and subj_url and subj_url not in (c["url"] or "") and c["price"]]
+        g_sold = [c for c in g_sold if c["distance"] is not None and c["distance"] <= 1.0 and c["price"] and subj_url and subj_url not in (c["url"] or "")]
+        for c in g_act:
+            c["score"] = comp_score(c, False)
+        for c in g_sold:
+            c["score"] = comp_score(c, True)
+        sim_act = [shape_sim(h) for h in (raw.get("simListings") or {}).get("homes", [])]
+        sim_sold = [shape_sim(h) for h in (raw.get("simSolds") or {}).get("homes", [])]
+        rf["radiusOk"] = bool(raw.get("gisActive") is not None and not raw.get("gisError"))
+        actives = sorted(g_act, key=lambda c: (c["distance"], -c["score"])) if rf["radiusOk"] else sim_act
+        solds = sorted(g_sold, key=lambda c: -c["score"]) if rf["radiusOk"] else sim_sold
+        rf["similarActive"] = actives[:60]
+        rf["similarSold"] = solds[:40]
+        rf["bestComps"] = [c for c in solds if c.get("sqft")][:5]
         our_dom = r["dom"] or 0
-        newer = [s for s in sims if s["dom"] is not None and s["dom"] < our_dom]
-        rf["newerCompetitors"] = len(newer)
-        prices = [s["price"] for s in sims if s["price"]]
-        rf["activeMedianPrice"] = sorted(prices)[len(prices) // 2] if prices else None
-        ppsf = [s["ppsf"] for s in sims if s["ppsf"]]
-        rf["activeMedianPpsf"] = sorted(ppsf)[len(ppsf) // 2] if ppsf else None
-        sold_ppsf = [s["ppsf"] for s in solds if s["ppsf"]]
-        rf["soldMedianPpsf"] = sorted(sold_ppsf)[len(sold_ppsf) // 2] if sold_ppsf else None
-        sold_prices = [s["price"] for s in solds if s["price"]]
-        rf["soldMedianPrice"] = sorted(sold_prices)[len(sold_prices) // 2] if sold_prices else None
-        sold_dom = [s["dom"] for s in solds if s["dom"] is not None]
-        rf["soldMedianDom"] = sorted(sold_dom)[len(sold_dom) // 2] if sold_dom else None
-        active_dom = [s["dom"] for s in sims if s["dom"] is not None]
-        rf["activeMedianDom"] = sorted(active_dom)[len(active_dom) // 2] if active_dom else None
-        cheaper = [s for s in sims if s["price"] and r["currentPrice"] and s["price"] < r["currentPrice"]]
-        rf["cheaperCompetitors"] = len(cheaper)
+
+        def stats(lst_a, lst_s):
+            prices = sorted(x["price"] for x in lst_a if x["price"])
+            ppsf = sorted(x["ppsf"] for x in lst_a if x.get("ppsf"))
+            sppsf = sorted(x["ppsf"] for x in lst_s if x.get("ppsf"))
+            sprice = sorted(x["price"] for x in lst_s if x["price"])
+            sdom = sorted(x["dom"] for x in lst_s if x.get("dom") is not None)
+            adom = sorted(x["dom"] for x in lst_a if x.get("dom") is not None)
+            med = lambda a: (a[len(a) // 2] if a else None)
+            return {"activeCount": len(lst_a), "newer": sum(1 for x in lst_a if x.get("dom") is not None and x["dom"] < our_dom),
+                    "cheaper": sum(1 for x in lst_a if x["price"] and r["currentPrice"] and x["price"] < r["currentPrice"]),
+                    "activeMedianPrice": med(prices), "activeMedianPpsf": med(ppsf), "activeMedianDom": med(adom),
+                    "soldCount": len(lst_s), "soldMedianPrice": med(sprice), "soldMedianPpsf": med(sppsf), "soldMedianDom": med(sdom),
+                    "soldLowPpsf": sppsf[max(0, len(sppsf) // 4)] if sppsf else None, "soldHighPpsf": sppsf[min(len(sppsf) - 1, (3 * len(sppsf)) // 4)] if sppsf else None}
+        rf["radius"] = {
+            "half": stats([c for c in actives if (c.get("distance") or 9) <= 0.5], [c for c in solds if (c.get("distance") or 9) <= 0.5]),
+            "one": stats(actives, solds),
+        }
+        one = rf["radius"]["one"]
+        rf["newerCompetitors"] = one["newer"]
+        rf["cheaperCompetitors"] = one["cheaper"]
+        rf["activeMedianPrice"] = one["activeMedianPrice"]
+        rf["activeMedianPpsf"] = one["activeMedianPpsf"]
+        rf["activeMedianDom"] = one["activeMedianDom"]
+        rf["soldMedianPpsf"] = one["soldMedianPpsf"]
+        rf["soldMedianPrice"] = one["soldMedianPrice"]
+        rf["soldMedianDom"] = one["soldMedianDom"]
+        # value implied by the best comparable sales: score-weighted $/sqft x subject sqft
+        bc = [c for c in rf["bestComps"] if c.get("ppsf")]
+        if bc and subj_sqft:
+            w = sum(c["score"] for c in bc) or 1
+            rf["bestCompPpsf"] = round(sum(c["ppsf"] * c["score"] for c in bc) / w)
+            rf["bestCompValue"] = int(rf["bestCompPpsf"] * subj_sqft)
+        else:
+            rf["bestCompPpsf"] = rf["bestCompValue"] = None
         rf["thumbs"] = [t for t in (raw.get("thumbs") or []) if "src" in t]
     r["redfin"] = rf
     return r
