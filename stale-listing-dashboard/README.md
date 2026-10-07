@@ -57,7 +57,7 @@ Sending Claude the new sheet link runs steps 1 to 5.
 | `meta/current` | pipeline, CSV upload | as-of date, tier counts, week-over-week changes |
 | `market/current` | Claude | rates, stats, narrative, talking points |
 | `playbook/current` | Claude | moves, diagnostics, tier plays, pricing rules, scripts, stats |
-| `teams/current` | the page | sales manager to agent mapping |
+
 
 ## Model assumptions (editable in the page under ⚙ Assumptions)
 
