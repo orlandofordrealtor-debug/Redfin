@@ -1,0 +1,756 @@
+<title>Stale Listing Command Center</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: sticky brand bar + tab nav; Overview is a KPI row over two columns (queue + charts); Listings is a filter rail over a dense table; a property opens as a full-width work surface with a left fact column and right coaching column. */
+:root{
+  --bg:#f6f4f2; --surface:#ffffff; --surface-2:#f0ebe8; --surface-3:#e7e0dc; --fg:#1a1716; --muted:#6a605c; --line:#e1d9d4; --line-2:#cfc4bd;
+  --accent:#de3341; --accent-ink:#b8202d; --accent-soft:#fcebec; --ink:#111111;
+  --t-watch:#5b6470; --t-stale:#b07a0a; --t-ultra:#d0582d; --t-extreme:#c3242f;
+  --t-watch-soft:#eceef1; --t-stale-soft:#fdf2d6; --t-ultra-soft:#fde6dc; --t-extreme-soft:#fbe0e2;
+  --good:#1f7a4d; --good-soft:#e2f3e9; --info:#2a5fa8; --info-soft:#e4edf9;
+  --viz-1:#2a78d6; --viz-2:#eb6834; --viz-gray:#b9b2ad; --grid:#e8e2de;
+  --font-display:"Outfit",system-ui,sans-serif; --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --radius:12px; --shadow:0 1px 2px rgba(20,10,10,.06),0 6px 20px -12px rgba(20,10,10,.18);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#151211; --surface:#1f1b1a; --surface-2:#282322; --surface-3:#332c2a; --fg:#f2edeb; --muted:#a69c97; --line:#372f2d; --line-2:#4a403d;
+  --accent:#ee5a66; --accent-ink:#f07b84; --accent-soft:#3a1d20; --ink:#f2edeb;
+  --t-watch:#9aa3ae; --t-stale:#e0b254; --t-ultra:#f08a62; --t-extreme:#f06a74;
+  --t-watch-soft:#2a2e34; --t-stale-soft:#3a2f14; --t-ultra-soft:#3d2418; --t-extreme-soft:#3f1d20;
+  --good:#5fc48f; --good-soft:#1c3327; --info:#7ea9e6; --info-soft:#1d2a3d;
+  --viz-1:#3987e5; --viz-2:#d95926; --viz-gray:#5f5753; --grid:#2e2826; --shadow:none; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#151211; --surface:#1f1b1a; --surface-2:#282322; --surface-3:#332c2a; --fg:#f2edeb; --muted:#a69c97; --line:#372f2d; --line-2:#4a403d;
+  --accent:#ee5a66; --accent-ink:#f07b84; --accent-soft:#3a1d20; --ink:#f2edeb;
+  --t-watch:#9aa3ae; --t-stale:#e0b254; --t-ultra:#f08a62; --t-extreme:#f06a74;
+  --t-watch-soft:#2a2e34; --t-stale-soft:#3a2f14; --t-ultra-soft:#3d2418; --t-extreme-soft:#3f1d20;
+  --good:#5fc48f; --good-soft:#1c3327; --info:#7ea9e6; --info-soft:#1d2a3d;
+  --viz-1:#3987e5; --viz-2:#d95926; --viz-gray:#5f5753; --grid:#2e2826; --shadow:none; color-scheme:dark; }
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--info)}
+.logo-dark{display:none} @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo-light{display:none} :root:not([data-theme="light"]) .logo-dark{display:inline} }
+:root[data-theme="dark"] .logo-light{display:none} :root[data-theme="dark"] .logo-dark{display:inline}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:1480px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topbar img{height:34px;width:auto;display:block}
+.title{font-family:var(--font-display);font-weight:700;font-size:17px;letter-spacing:.01em;line-height:1.1}
+.title small{display:block;font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted);letter-spacing:0}
+.spacer{flex:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;min-width:220px;flex:1;max-width:420px}
+.search input{border:0;background:transparent;outline:none;flex:1;min-width:0}
+.nav{display:flex;gap:2px;max-width:1480px;margin:0 auto;padding:0 16px;overflow-x:auto}
+.nav button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.nav button:hover{color:var(--fg)} .nav button.on{color:var(--accent);border-bottom-color:var(--accent)}
+.nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+main{max-width:1480px;margin:0 auto;padding-block:18px 60px;padding-inline:16px}
+h1,h2,h3,h4{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.2}
+h2{font-size:20px;font-weight:700} h3{font-size:16px;font-weight:600} h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sec{margin-top:22px}
+.sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.sec-head .sub{color:var(--muted);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;min-width:0}
+.kpi .v{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-display);font-weight:600}
+.kpi .d{font-size:12px;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi.stale .v{color:var(--t-stale)} .kpi.ultra .v{color:var(--t-ultra)} .kpi.extreme .v{color:var(--t-extreme)} .kpi.watch .v{color:var(--t-watch)}
+.two{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)} @media (max-width:900px){.two{grid-template-columns:1fr}}
+.three{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;font-family:var(--font-display);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;line-height:1.6}
+.badge i{font-style:normal;font-size:10px}
+.b-watch{background:var(--t-watch-soft);color:var(--t-watch)} .b-stale{background:var(--t-stale-soft);color:var(--t-stale)} .b-ultra{background:var(--t-ultra-soft);color:var(--t-ultra)} .b-extreme{background:var(--t-extreme-soft);color:var(--t-extreme)} .b-unknown{background:var(--surface-2);color:var(--muted)}
+.b-good{background:var(--good-soft);color:var(--good)} .b-info{background:var(--info-soft);color:var(--info)} .b-accent{background:var(--accent-soft);color:var(--accent-ink)} .b-muted{background:var(--surface-2);color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:99px;padding:4px 11px;font-size:13px;cursor:pointer;font-family:var(--font-display);font-weight:600}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.chip:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:9px;padding:7px 13px;font-family:var(--font-display);font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)} .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} .btn.primary:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.btn.sm{padding:4px 9px;font-size:12.5px} .btn:disabled{opacity:.55;cursor:default} .btn.ghost{border-color:transparent;background:transparent}
+select,input[type=text],input[type=number],input[type=date],textarea{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 9px;min-width:0}
+textarea{width:100%;resize:vertical;line-height:1.45}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filters select{max-width:200px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-family:var(--font-display);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none}
+th.sorted{color:var(--accent-ink)}
+td{padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:14px}
+tr.row{cursor:pointer} tr.row:hover td{background:var(--surface-2)}
+.tbl{overflow-x:auto}
+.num{text-align:right} .nowrap{white-space:nowrap}
+.addr{font-weight:600} .addr small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.meter{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden;min-width:60px}
+.meter i{display:block;height:100%;border-radius:99px}
+.hs{display:flex;align-items:center;gap:8px;min-width:110px}
+.hs b{font-family:var(--font-display);font-variant-numeric:tabular-nums;width:28px;text-align:right}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.empty b{display:block;font-family:var(--font-display);font-size:16px;color:var(--fg);margin-bottom:4px}
+.queue{display:grid;gap:8px}
+.qitem{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface)}
+.qitem:hover{border-color:var(--accent)}
+.qitem .rank{font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--muted);width:26px;text-align:center}
+.qitem .why{font-size:13px;color:var(--muted);margin-top:2px}
+.qitem .r{text-align:right;font-size:13px;white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+/* property work surface */
+.prop-head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.prop-head h2{font-size:24px} .prop-head .meta{color:var(--muted);font-size:14px;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.prop-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px} @media (max-width:1000px){.prop-grid{grid-template-columns:1fr}}
+.col{display:grid;gap:14px;align-content:start;min-width:0}
+.photos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.photos .hero{grid-column:1/-1;aspect-ratio:3/2;max-width:100%;border-radius:10px;overflow:hidden;background:var(--surface-2)}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.photos .th{aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--surface-2)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.fact{background:var(--surface-2);border-radius:8px;padding:8px 10px;min-width:0}
+.fact b{display:block;font-family:var(--font-display);font-size:17px;font-variant-numeric:tabular-nums;line-height:1.15}
+.fact span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-display);font-weight:600}
+.diag{display:grid;gap:8px}
+.dx{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+.dx .sev{width:10px;border-radius:99px;align-self:stretch}
+.dx.high .sev{background:var(--t-extreme)} .dx.med .sev{background:var(--t-stale)} .dx.low .sev{background:var(--t-watch)}
+.dx b{font-family:var(--font-display)} .dx p{margin:2px 0 0;font-size:13.5px;color:var(--muted)} .dx .mv{margin-top:4px;font-size:13px}
+.bands{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} @media (max-width:640px){.bands{grid-template-columns:1fr}}
+.band{border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--surface)}
+.band.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.band h4{color:var(--fg)} .band .p{font-family:var(--font-display);font-weight:700;font-size:22px;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.band .s{font-size:12.5px;color:var(--muted)} .band ul{margin:6px 0 0;padding-left:16px;font-size:12.5px}
+.remarks{font-size:14px;line-height:1.5;max-height:180px;overflow:auto;padding:10px 12px;background:var(--surface-2);border-radius:8px;white-space:pre-wrap}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px} .kv dt{color:var(--muted)} .kv dd{margin:0;font-variant-numeric:tabular-nums}
+.timeline{display:grid;gap:4px;font-size:13px} .timeline div{display:grid;grid-template-columns:90px 1fr auto;gap:8px} .timeline span:first-child{color:var(--muted)}
+.moves{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.move{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--surface);font-size:13px}
+.move.on{border-color:var(--accent);background:var(--accent-soft)} .move.rec{border-style:dashed}
+.move input{margin-top:3px;accent-color:var(--accent)} .move b{display:block;font-family:var(--font-display);font-weight:600;font-size:13px} .move small{color:var(--muted)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px} .form label{display:grid;gap:3px;font-size:12px;color:var(--muted);font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:10px}
+.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;padding:6px 10px;font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--muted);cursor:pointer}
+.tabs button.on{color:var(--accent-ink);border-bottom-color:var(--accent)}
+.share textarea{min-height:220px;font-family:var(--font-body);font-size:13.5px}
+.notes{display:grid;gap:8px} .note{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;font-size:13.5px}
+.note img{width:28px;height:28px;border-radius:50%} .note .who{font-weight:600;font-family:var(--font-display);font-size:12.5px} .note .when{color:var(--muted);font-weight:400;margin-left:6px}
+.eng{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.ai{border:1px solid var(--accent);border-radius:12px;padding:14px 16px;background:var(--surface)}
+.ai .status{font-size:13px;color:var(--muted)}
+.sr-only{position:absolute;left:-9999px}
+.chart{width:100%;height:auto;display:block} .chart text{font-family:var(--font-body);fill:var(--muted);font-size:11px} .chart .grid line{stroke:var(--grid)} .chart .axis{stroke:var(--line-2)}
+.tip{position:fixed;z-index:70;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:7px;font-size:12px;opacity:0;transition:opacity .1s;max-width:260px}
+.tip.show{opacity:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:6px} .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap}
+.help{font-size:12.5px;color:var(--muted)}
+.assump{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.assump label{display:grid;gap:2px;font-size:11.5px;color:var(--muted);font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.print-report{background:#fff;color:#111}
+.agent-row td:first-child{font-weight:600}
+.stat-strip{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)} .stat-strip b{color:var(--fg);font-variant-numeric:tabular-nums}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:18px;text-align:center;color:var(--muted)}
+.hist-chip{display:inline-flex;gap:6px;align-items:center;background:var(--surface-2);border-radius:8px;padding:4px 8px;font-size:12.5px;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:640px){ .kpi .v{font-size:22px} .prop-head h2{font-size:20px} main{padding-inline:16px} }
+</style>
+
+<div class="topbar">
+  <div class="in">
+    <a href="#overview" aria-label="Redfin Powered by Rocket"><img class="logo-light" src="brand/logo.svg" alt="Redfin Powered by Rocket"><img class="logo-dark" src="brand/logo-reversed.svg" alt="Redfin Powered by Rocket"></a>
+    <div class="title">Stale Listing Command Center<small id="asof">Loading weekly snapshot…</small></div>
+    <div class="spacer"></div>
+    <div class="search" role="search">🔎 <input id="q" type="text" placeholder="Search address, agent, city, deal ID" aria-label="Search listings"></div>
+    <button class="btn sm" id="btn-settings">⚙ Assumptions</button>
+  </div>
+  <nav class="nav" id="nav">
+    <button data-v="overview" class="on">Overview</button>
+    <button data-v="listings">Listings</button>
+    <button data-v="agents">Agents</button>
+    <button data-v="teams">Teams</button>
+    <button data-v="market">Market</button>
+    <button data-v="playbook">Playbook</button>
+    <button data-v="upload">Weekly upload</button>
+  </nav>
+</div>
+<main id="main"><div class="empty"><b>Loading the weekly snapshot</b>Listings, coaching notes and market context load from the dashboard's shared database.</div></main>
+<div class="toast" id="toast"></div>
+<div class="tip" id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+"use strict";
+/* ============================================================ state */
+const S = {
+  listings:{}, coaching:{}, photos:{}, meta:null, market:null, playbook:null, teams:{managers:[]},
+  view:"overview", sel:null, ptab:"plan", stab:"slack", band:"intermediate",
+  f:{q:"", tiers:[], agent:"", city:"", band:"", team:"", flags:[], sort:"priority", dir:"desc"},
+  db:null, user:null, me:null, sample:null, downloads:null, canWrite:null, imagesOk:false,
+  a:{rate:7.28, down:20, carryPct:1.8, driftPct:-0.4, discStale:1.5, discUltra:3, discExtreme:5, urgencyPct:0.5, closingPct:6},
+  pendingWrites:{}, aiBusy:{}, loaded:false,
+};
+const TIERS = {watch:{label:"Watch",icon:"◔",order:0,min:0}, stale:{label:"Stale",icon:"◑",order:1,min:30}, ultra:{label:"Ultra Stale",icon:"◕",order:2,min:60}, extreme:{label:"Extremely Stale",icon:"●",order:3,min:90}, unknown:{label:"No DOM",icon:"○",order:-1,min:0}};
+const BANDS = {under750:"Under $750K", "750to1500":"$750K to $1.5M", "1500to3000":"$1.5M to $3M", over3000:"$3M+", unknown:"No price"};
+const DEFAULT_MOVES = [
+  {id:"PRICE_ADJUST",label:"Price adjustment",desc:"Reduce to a band that re-ranks the home against today's competition.",group:"Price"},
+  {id:"PRICE_BRACKET",label:"Reposition on a search bracket",desc:"Price at a round-number threshold so the home appears in two buyer search ranges.",group:"Price"},
+  {id:"RATE_BUYDOWN",label:"Rocket rate buydown offer",desc:"Advertise a seller-funded 2-1 or permanent buydown and lead with the monthly payment.",group:"Financing"},
+  {id:"BUYER_INCENTIVE",label:"Buyer incentive or concession",desc:"Closing-cost credit, HOA prepay, or repair credit called out in remarks.",group:"Financing"},
+  {id:"PHOTO_REFRESH",label:"Photo refresh",desc:"Reshoot with a pro, reorder so the strongest exterior leads, cut weak or dark frames.",group:"Presentation"},
+  {id:"TWILIGHT_VIDEO",label:"Twilight, drone or video",desc:"Add a twilight hero, aerial context, and a 60 second walkthrough.",group:"Presentation"},
+  {id:"REMARKS_REWRITE",label:"Remarks rewrite",desc:"Lead with the buyer benefit, add the incentive, remove filler, end with a call to action.",group:"Presentation"},
+  {id:"STAGING",label:"Staging or declutter",desc:"Stage key rooms or virtually stage vacant spaces; refresh curb appeal.",group:"Presentation"},
+  {id:"PRE_INSPECTION",label:"Pre-inspection and repairs",desc:"Get ahead of objections with a pre-inspection, fix the obvious, publish the report.",group:"Condition"},
+  {id:"SHOWING_ACCESS",label:"Open up showing access",desc:"Remove notice windows, add a lockbox, widen hours, allow weekday evenings.",group:"Exposure"},
+  {id:"OPEN_HOUSE_BLITZ",label:"Open house blitz",desc:"Back-to-back weekend opens with neighbor invites and social promotion.",group:"Exposure"},
+  {id:"BROKER_OPEN",label:"Broker open and agent outreach",desc:"Reverse-prospect agents with recent buyers in the band; host a broker preview.",group:"Exposure"},
+  {id:"SOCIAL_PUSH",label:"Paid social and email push",desc:"Targeted ads to the price band and feeder zips; feature in the weekly buyer email.",group:"Exposure"},
+  {id:"FEEDBACK_LOOP",label:"Collect showing feedback",desc:"Call every showing agent within 24 hours; log objections and share with the seller.",group:"Process"},
+  {id:"RELAUNCH",label:"Relaunch (withdraw and relist)",desc:"Only with a real change: new price, new photos, new copy. Cumulative DOM still shows on Redfin.",group:"Process"},
+  {id:"SELLER_CONVERSATION",label:"Seller strategy meeting",desc:"Sit down with the seller, walk the data, agree the plan and the date to revisit.",group:"Process"},
+  {id:"EXPIRATION_PLAN",label:"Listing agreement extension",desc:"Address the expiration date before it becomes the seller's leverage.",group:"Process"},
+  {id:"NO_CHANGE",label:"No change (with reason)",desc:"Document why the listing stays as is and when it will be reviewed again.",group:"Process"},
+];
+/* ============================================================ utils */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt$ = (n,opt={})=>{ if(n==null||isNaN(n)) return "—"; const a=Math.abs(n); if(opt.k&&a>=1000) return (n<0?"-":"")+"$"+(a>=1e6?(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,"")+"M":Math.round(a/1000)+"K"); return (n<0?"-":"")+"$"+Math.round(a).toLocaleString(); };
+const pct = (n,d=1)=> n==null||isNaN(n)?"—":(n>0?"+":"")+n.toFixed(d)+"%";
+const num = n=> n==null||isNaN(n)?"—":Math.round(n).toLocaleString();
+const dstr = s=> s? new Date(s+"T12:00:00").toLocaleDateString([], {month:"short",day:"numeric",year:"2-digit"}):"—";
+const todayISO = ()=> new Date().toISOString().slice(0,10);
+const daysBetween=(a,b)=> Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/86400000);
+const first=n=>String(n||"").trim().split(/\s+/)[0]||"";
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2400); }
+async function copyText(txt){ try{ await navigator.clipboard.writeText(txt); toast("Copied"); }catch(e){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); toast("Copied");}catch(_){ toast("Select the text and copy it manually"); } ta.remove(); } }
+function tierOf(dom){ if(dom==null) return "unknown"; return dom>=90?"extreme":dom>=60?"ultra":dom>=30?"stale":"watch"; }
+function bandOf(p){ if(!p) return "unknown"; return p<750000?"under750":p<1500000?"750to1500":p<3000000?"1500to3000":"over3000"; }
+function badge(t){ const T=TIERS[t]||TIERS.unknown; return `<span class="badge b-${t}"><i>${T.icon}</i>${T.label}</span>`; }
+function payment(price, rate=S.a.rate, down=S.a.down){ const P=price*(1-down/100); const r=rate/100/12; const n=360; if(!P||!r) return 0; return P*r/(1-Math.pow(1+r,-n)); }
+function priceForPayment(pay, rate, down=S.a.down){ const r=rate/100/12, n=360; const P=pay*(1-Math.pow(1+r,-n))/r; return P/(1-down/100); }
+function roundPrice(p){ if(!p) return p; const step=p>=2000000?25000:p>=1000000?10000:5000; let r=Math.round(p/step)*step; return r; }
+function managerOf(agent){ for(const m of (S.teams.managers||[])) if((m.agents||[]).includes(agent)) return m.name; return ""; }
+function moves(){ return (S.playbook&&S.playbook.moves&&S.playbook.moves.length)?S.playbook.moves:DEFAULT_MOVES; }
+function moveById(id){ return moves().find(m=>m.id===id)||{id,label:id,desc:""}; }
+function latestEngagement(c){ const e=(c&&c.engagement||[]).slice().sort((a,b)=>a.date<b.date?1:-1); return e[0]||null; }
+function prevEngagement(c){ const e=(c&&c.engagement||[]).slice().sort((a,b)=>a.date<b.date?1:-1); return e[1]||null; }
+
+/* ============================================================ rule engine */
+function anchors(l){
+  const rf=l.redfin||{}; const sqft=rf.sqft||rf.totalSqft; const out={};
+  if(l.redfinEstimate) out.estimate=l.redfinEstimate; else if(rf.estimate) out.estimate=Math.round(rf.estimate);
+  if(l.predictedClose) out.predicted=l.predictedClose;
+  if(rf.soldMedianPpsf&&sqft) out.compSold=Math.round(rf.soldMedianPpsf*sqft);
+  if(rf.activeMedianPpsf&&sqft) out.compActive=Math.round(rf.activeMedianPpsf*sqft);
+  const vals=[out.estimate,out.predicted,out.compSold].filter(v=>v>0).sort((a,b)=>a-b);
+  out.marketValue = vals.length? (vals.length%2? vals[(vals.length-1)/2] : Math.round((vals[vals.length/2-1]+vals[vals.length/2])/2)) : null;
+  return out;
+}
+function analyze(l, c){
+  const rf=l.redfin||{}; const dom=l.dom; const tier=l.tier||tierOf(dom); const price=l.currentPrice; const an=anchors(l);
+  const dx=[]; let score=100; const flags=[];
+  const tierPenalty={watch:0,stale:15,ultra:28,extreme:40,unknown:10}[tier]||0; score-=tierPenalty;
+  const gapMV = (price&&an.marketValue)? (price-an.marketValue)/an.marketValue*100 : null;
+  const gapEst = l.gapToEstimatePct;
+  if(gapMV!=null && gapMV>3){ const sev=gapMV>8?"high":"med"; score-=gapMV>8?18:10; flags.push("overpriced");
+    dx.push({sev, cause:"Priced above what the market is saying", evidence:`List price is ${pct(gapMV)} above the blended market value of ${fmt$(an.marketValue)} (Redfin Estimate ${fmt$(an.estimate)}, predicted close ${fmt$(an.predicted)}${an.compSold?`, sold comps ${fmt$(an.compSold)}`:""}).`, move:["PRICE_ADJUST","SELLER_CONVERSATION"]}); }
+  else if(gapMV!=null && gapMV>0 && tier!=="watch"){ score-=4; dx.push({sev:"low", cause:"Slightly above market with no urgency signal", evidence:`List price sits ${pct(gapMV)} above blended market value. At ${dom} days, buyers read that as room to wait.`, move:["PRICE_BRACKET","RATE_BUYDOWN"]}); }
+  if(rf.ok){
+    if(rf.activeMedianPpsf && rf.pricePerSqft && rf.pricePerSqft > rf.activeMedianPpsf*1.05){ score-=6; flags.push("ppsf-high"); dx.push({sev:"med", cause:"Price per square foot is above the active competition", evidence:`${fmt$(rf.pricePerSqft)}/sqft versus a ${fmt$(rf.activeMedianPpsf)}/sqft median across ${rf.similarActive.length} similar actives${rf.soldMedianPpsf?`; recent solds closed near ${fmt$(rf.soldMedianPpsf)}/sqft`:""}.`, move:["PRICE_ADJUST"]}); }
+    if((rf.newerCompetitors||0)>=3 || (rf.cheaperCompetitors||0)>=3){ score-=8; flags.push("competition"); dx.push({sev:(rf.newerCompetitors>=6||rf.cheaperCompetitors>=5)?"high":"med", cause:"Fresher and cheaper competition came on after this listing", evidence:`${rf.newerCompetitors} similar homes listed after this one and ${rf.cheaperCompetitors} are priced lower. Buyers in this band see those first.`, move:["PRICE_ADJUST","PHOTO_REFRESH","RATE_BUYDOWN"]}); }
+    const hero=(rf.thumbs&&rf.thumbs[0])||null;
+    if((rf.photoCount||0)<18 || (rf.lowResPhotos||0)>0 || (hero&&hero.darkShare>0.35)){ score-=7; flags.push("photos"); const bits=[]; if((rf.photoCount||0)<18) bits.push(`only ${rf.photoCount} photos (top listings in this band run 25 to 40)`); if(rf.lowResPhotos) bits.push(`${rf.lowResPhotos} low resolution frames`); if(hero&&hero.darkShare>0.35) bits.push("the lead photo reads dark"); dx.push({sev:"med", cause:"Photo set is not pulling its weight", evidence:bits.join("; ")+".", move:["PHOTO_REFRESH","TWILIGHT_VIDEO"]}); }
+    const rem=rf.remarks||""; const caps=rem.replace(/[^A-Z]/g,"").length/Math.max(rem.replace(/[^A-Za-z]/g,"").length,1);
+    if(rem.length<450 || caps>0.5 || !/offer|credit|buydown|incentive|motivated|priced to|reduced|new price|rate/i.test(rem)){ score-=5; flags.push("remarks"); const bits=[]; if(rem.length<450) bits.push(`remarks are short (${rem.length} characters)`); if(caps>0.5) bits.push("written mostly in capitals"); if(!/offer|credit|buydown|incentive|motivated|priced to|reduced|new price|rate/i.test(rem)) bits.push("no incentive, pricing or financing hook for a buyer to act on"); dx.push({sev:"low", cause:"Remarks describe the house but do not sell the deal", evidence:bits.join("; ")+".", move:["REMARKS_REWRITE","BUYER_INCENTIVE"]}); }
+    if(!rf.isHot && tier!=="watch"){ score-=3; }
+    if(!rf.hasOpenHouse && tier!=="watch"){ score-=3; flags.push("no-open"); }
+    if((rf.history||[]).some(e=>/relist/i.test(e.event||""))){ flags.push("relisted"); dx.push({sev:"med", cause:"Already relisted once without a visible change", evidence:"Redfin shows a relist event and still displays cumulative days on market, so a reset alone did not help. The next move has to be a real change buyers can see.", move:["PRICE_ADJUST","PHOTO_REFRESH","REMARKS_REWRITE"]}); }
+  } else if(l.dataIssues&&l.dataIssues.length){ flags.push("data"); }
+  if(tier!=="watch"){
+    const sinceCut = l.lastReductionDate? daysBetween(l.lastReductionDate, l.asOf||todayISO()) : null;
+    if(!l.priceDrop){ score-=10; flags.push("no-reduction"); dx.push({sev:tier==="extreme"?"high":"med", cause:"No price response to market feedback", evidence:`${dom} days without a reduction. The market has voted every week and the listing has not answered.`, move:["SELLER_CONVERSATION","PRICE_ADJUST"]}); }
+    else if(sinceCut!=null && sinceCut>45){ score-=6; flags.push("stale-reduction"); dx.push({sev:"med", cause:"Last reduction has worn off", evidence:`Last price change was ${sinceCut} days ago. A reduction buys roughly two to three weeks of renewed attention and this one is spent.`, move:["PRICE_ADJUST","RELAUNCH"]}); }
+    if(l.priceDrop && l.priceDropAmt && l.originalPrice && l.priceDropAmt/l.originalPrice<0.02){ score-=4; flags.push("small-cut"); dx.push({sev:"low", cause:"Reductions have been too small to re-rank the home", evidence:`Total reduction is ${pct(l.priceDropAmt/l.originalPrice*100).replace("+","")} of the original price. Buyers do not refresh their search for a sub-2% change.`, move:["PRICE_BRACKET","PRICE_ADJUST"]}); }
+  }
+  if(l.daysToExpiration!=null && l.daysToExpiration<=45){ score-=5; flags.push("expiring"); dx.push({sev:l.daysToExpiration<=21?"high":"med", cause:"Listing agreement is close to expiring", evidence:`${l.daysToExpiration} days to expiration (${dstr(l.expirationDate)}). Agree the relaunch plan and the extension in the same conversation.`, move:["EXPIRATION_PLAN","SELLER_CONVERSATION"]}); }
+  const e1=latestEngagement(c), e0=prevEngagement(c);
+  if(e1){ const fav=(e1.favorites||0), views=(e1.views||0); const ratio=views?fav/views:0;
+    if(e0 && e0.views && views < e0.views*0.7){ score-=5; flags.push("traffic-down"); dx.push({sev:"med", cause:"Online traffic is falling week over week", evidence:`Views dropped from ${num(e0.views)} to ${num(views)}; favorites ${num(e0.favorites)} to ${num(fav)}. Fewer buyers are even looking.`, move:["PRICE_ADJUST","PHOTO_REFRESH","SOCIAL_PUSH"]}); }
+    else if(views>=200 && ratio<0.02){ score-=5; flags.push("looking-not-saving"); dx.push({sev:"med", cause:"Buyers look but do not save", evidence:`${num(views)} views and only ${num(fav)} favorites (${(ratio*100).toFixed(1)}%). A healthy listing in this band saves at 3% to 5%. That pattern is price or photos.`, move:["PRICE_ADJUST","PHOTO_REFRESH"]}); }
+    else if(fav>=15 && (e1.tours||0)<=1){ score-=4; flags.push("saving-not-touring"); dx.push({sev:"low", cause:"Buyers save it but do not tour", evidence:`${num(fav)} favorites and ${num(e1.tours||0)} tours. Interest exists; access, price anchoring or an incentive is the missing nudge.`, move:["SHOWING_ACCESS","RATE_BUYDOWN","OPEN_HOUSE_BLITZ"]}); }
+  } else if(tier!=="watch"){ flags.push("no-engagement-data"); }
+  if(!(c&&c.plan&&c.plan.moves&&c.plan.moves.length) && tier!=="watch"){ score-=5; flags.push("no-plan"); dx.push({sev:"low", cause:"No action plan on file", evidence:"Nothing is logged for this listing yet. Pick the moves below, assign an owner and a date.", move:["SELLER_CONVERSATION"]}); }
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  const sevOrder={high:0,med:1,low:2}; dx.sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
+  const rec=[]; for(const d of dx) for(const m of d.move) if(!rec.includes(m)) rec.push(m);
+  if(tier!=="watch" && !rec.includes("RATE_BUYDOWN")) rec.push("RATE_BUYDOWN");
+  if(tier==="extreme" && !rec.includes("RELAUNCH")) rec.push("RELAUNCH");
+  if(tier!=="watch" && !rec.includes("FEEDBACK_LOOP")) rec.push("FEEDBACK_LOOP");
+  const priority = Math.round((100-score) * (1 + Math.min((price||500000)/2000000, 1.5)));
+  return {score, flags, dx, rec, anchors:an, priority, gapMV};
+}
+function priceBands(l, A){
+  const price=l.currentPrice; const an=A.anchors; const rf=l.redfin||{}; if(!price) return null;
+  const mv=an.marketValue||an.estimate||an.predicted||price*0.97;
+  const gap=Math.max(0,(price-mv)/price);
+  const cons=roundPrice(price*(1-Math.max(0.025, gap/2)));
+  const inter=roundPrice(Math.min(mv, price*0.975));
+  const aggr=roundPrice(Math.min(mv*0.96, price*0.94));
+  const actives=(rf.similarActive||[]).filter(s=>s.price);
+  const mk=(name,p,label,desc)=>{ const cut=price-p; const below=actives.filter(s=>s.price<p).length; const thr=[500000,750000,1000000,1250000,1500000,2000000,2500000,3000000,4000000,5000000].find(t=>Math.abs(p-t)/t<0.02); const pay=payment(p);
+    return {name,price:p,cutAmt:cut,cutPct:cut/price*100,label,desc,pay,belowCount:below,activeCount:actives.length,bracket:thr||null}; };
+  return {
+    conservative: mk("conservative",cons,"Conservative","Narrows the gap and buys a fresh look without changing the seller's story. Expect a modest bump in traffic for two to three weeks."),
+    intermediate: mk("intermediate",inter,"Intermediate","Lands at blended market value. This is where the listing re-ranks against the competition and tours restart."),
+    aggressive: mk("aggressive",aggr,"Aggressive","Priced below market to create urgency and multiple-offer tension. Best for motivated timelines or when carrying costs are high."),
+  };
+}
+function costOfWaiting(l, A, bands){
+  const price=l.currentPrice; if(!price) return null; const a=S.a; const dom=l.dom||0; const out=[];
+  const disc=t=>({watch:0,stale:a.discStale,ultra:a.discUltra,extreme:a.discExtreme}[t]||0)/100;
+  const carryM=price*a.carryPct/100/12 + (l._mortgage||0);
+  const target=bands?bands[S.band].price:price*0.97;
+  for(let d=0; d<=120; d+=15){
+    const t=tierOf(dom+d); const drift=1+(a.driftPct/100)*(d/30);
+    const holdSale = price*drift*(1-disc(t));
+    const holdNet = holdSale*(1-a.closingPct/100) - carryM*(d/30);
+    const repSale = target*(1+a.urgencyPct/100);
+    const repNet = d<30 ? null : repSale*(1-a.closingPct/100) - carryM*1;
+    out.push({d, tier:t, holdSale, holdNet, repSale, repNet});
+  }
+  return out;
+}
+/* ============================================================ text generators */
+function slackText(l, A, bands, c){
+  const rf=l.redfin||{}; const b=bands?bands[S.band]:null; const plan=c&&c.plan||{}; const chosen=(plan.moves&&plan.moves.length?plan.moves:A.rec.slice(0,4)).map(moveById);
+  const T=TIERS[l.tier]||TIERS.unknown; const e=latestEngagement(c);
+  let s=`🏠 *${l.address}, ${l.city}* — ${T.label.toUpperCase()} at ${l.dom} days\n`;
+  s+=`Agent: ${l.agent}${managerOf(l.agent)?` | Team: ${managerOf(l.agent)}`:""}\n\n`;
+  s+=`📊 *Where it stands*\n• List ${fmt$(l.currentPrice)}${l.originalPrice&&l.originalPrice!==l.currentPrice?` (was ${fmt$(l.originalPrice)})`:""} | Redfin Estimate ${fmt$(A.anchors.estimate)} | Predicted close ${fmt$(A.anchors.predicted)}\n`;
+  if(rf.ok) s+=`• ${rf.similarActive.length} similar actives, ${rf.newerCompetitors} listed after us, ${rf.cheaperCompetitors} priced lower | ${rf.photoCount} photos${rf.isHot?" | 🔥 Hot Home":""}\n`;
+  if(e) s+=`• Redfin traffic: ${num(e.views)} views, ${num(e.favorites)} favorites, ${num(e.tours||0)} tours (${dstr(e.date)})\n`;
+  s+=`• Listing health ${A.score}/100\n\n`;
+  s+=`🔍 *What the market is telling us*\n`+A.dx.slice(0,3).map(d=>`• ${d.cause}: ${d.evidence}`).join("\n")+"\n\n";
+  s+=`✅ *The plan*\n`+chosen.map(m=>`• ${m.label}`).join("\n")+"\n";
+  if(b) s+=`• Pricing: ${b.label.toLowerCase()} band at *${fmt$(b.price)}* (${fmt$(b.cutAmt)} / ${b.cutPct.toFixed(1)}% move). Buyer payment at ${S.a.rate}% with ${S.a.down}% down: ~${fmt$(b.pay)}/mo.\n`;
+  if(plan.targetPrice) s+=`• Target price agreed: ${fmt$(plan.targetPrice)}\n`;
+  s+=`\n⏳ *Why now*: ${waitLine(l,A,bands)}\n`;
+  s+=`\n📅 Owner: ${plan.owner||l.agent} | Due: ${plan.due?dstr(plan.due):"this week"}${plan.notes?`\n📝 ${plan.notes}`:""}\n`;
+  s+=`\nLet's get this one moving. Reply with the seller call date and I'll back you on the conversation. 💪`;
+  return s;
+}
+function waitLine(l,A,bands){ const cw=costOfWaiting(l,A,bands); if(!cw) return "Every 30 days adds carrying cost and a bigger stale discount."; const h90=cw.find(x=>x.d===90), h0=cw[0], r=cw.find(x=>x.d===30); const loss=h0.holdNet-h90.holdNet; const vs= r&&r.repNet? (r.repNet-h90.holdNet):null; return `holding another 90 days projects about ${fmt$(loss,{k:true})} less net to the seller than today${vs!=null?`, and ${vs>=0?fmt$(vs,{k:true})+" less":fmt$(-vs,{k:true})+" more"} than repricing now and selling in 30`:""}.`; }
+function emailText(l, A, bands, c){
+  const b=bands?bands[S.band]:null; const plan=c&&c.plan||{}; const chosen=(plan.moves&&plan.moves.length?plan.moves:A.rec.slice(0,4)).map(moveById); const rf=l.redfin||{};
+  const subject=`${l.address}, ${l.city} — ${TIERS[l.tier].label} at ${l.dom} days: our relaunch plan`;
+  let body=`Hi ${first(l.agent)},\n\nI went through ${l.address} on Redfin.com and the market around it this week. Here is where it stands and what I recommend. All of this is a starting point for us to adjust together.\n\n`;
+  body+=`WHERE IT STANDS\n- ${l.dom} days on market (${TIERS[l.tier].label}), listing health ${A.score}/100\n- List price ${fmt$(l.currentPrice)}; Redfin Estimate ${fmt$(A.anchors.estimate)}; predicted close ${fmt$(A.anchors.predicted)}${A.anchors.compSold?`; sold comps imply ${fmt$(A.anchors.compSold)}`:""}\n`;
+  if(rf.ok) body+=`- ${rf.similarActive.length} similar actives nearby, ${rf.newerCompetitors} came on after ours and ${rf.cheaperCompetitors} are priced lower\n- ${rf.photoCount} photos; remarks ${rf.remarksLength} characters${rf.hasOpenHouse?"; open house scheduled":"; no open house scheduled"}\n`;
+  body+=`\nWHAT THE MARKET IS SAYING\n`+A.dx.map(d=>`- ${d.cause}. ${d.evidence}`).join("\n")+"\n";
+  body+=`\nTHE PLAN\n`+chosen.map((m,i)=>`${i+1}. ${m.label}: ${m.desc}`).join("\n")+"\n";
+  if(b) body+=`\nPRICING\n${b.label} band: ${fmt$(b.price)} (a ${fmt$(b.cutAmt)} or ${b.cutPct.toFixed(1)}% move). ${b.desc} At ${S.a.rate}% with ${S.a.down}% down the buyer's payment is about ${fmt$(b.pay)} per month.${b.bracket?` This lands on the ${fmt$(b.bracket,{k:true})} search bracket so the home shows up in two buyer searches.`:""}\n`;
+  body+=`\nWHY NOW\nThe cost of waiting is real: ${waitLine(l,A,bands)}\n`;
+  body+=`\nNEXT STEPS\n- Owner: ${plan.owner||l.agent}\n- Due: ${plan.due?dstr(plan.due):"end of this week"}\n- Seller conversation: use the Seller Guide in the dashboard; I am happy to join the call.\n${plan.notes?`- Notes: ${plan.notes}\n`:""}`;
+  body+=`\nYou have put real work into this listing and the seller trusts you. Let's give them a clear plan and a date, and get it sold.\n\nThanks,\n`;
+  return {subject, body};
+}
+function sellerGuide(l, A, bands){
+  const b=bands?bands[S.band]:null; const rf=l.redfin||{}; const cw=costOfWaiting(l,A,bands); const h90=cw?cw.find(x=>x.d===90):null;
+  let s=`SELLER CONVERSATION GUIDE — ${l.address}, ${l.city}\nFor ${l.agent} | Prepared ${dstr(todayISO())}\n\n`;
+  s+=`1. OPEN WITH THE FACTS (2 minutes)\n"We have been on the market ${l.dom} days. In that time ${rf.ok?`${rf.similarActive.length} similar homes have been competing with us and ${rf.newerCompetitors} of them came on after we did`:"the competition has changed"}. Buyers are seeing those first. I want to walk you through what the data says and give you three options."\n\n`;
+  s+=`2. WHAT BUYERS ARE SEEING\n- Redfin Estimate: ${fmt$(A.anchors.estimate)} | Our price: ${fmt$(l.currentPrice)}${A.gapMV!=null?` | Gap to blended market value: ${pct(A.gapMV)}`:""}\n${rf.ok?`- Active competition median: ${fmt$(rf.activeMedianPrice)} | Sold comps median: ${fmt$(rf.soldMedianPrice)} (${num(rf.soldMedianDom)} days to sell)\n`:""}- At ${S.a.rate}% today, a buyer with ${S.a.down}% down pays about ${fmt$(payment(l.currentPrice))}/month for our home. Every ${fmt$(25000)} off saves them roughly ${fmt$(payment(25000))}/month.\n\n`;
+  if(bands) s+=`3. THREE PATHS (let the seller pick based on their timeline)\n- Conservative: ${fmt$(bands.conservative.price)} — ${bands.conservative.desc}\n- Intermediate: ${fmt$(bands.intermediate.price)} — ${bands.intermediate.desc}\n- Aggressive: ${fmt$(bands.aggressive.price)} — ${bands.aggressive.desc}\n\n`;
+  s+=`4. THE COST OF WAITING (say it plainly)\n"If we hold where we are, the home keeps aging. Buyers assume something is wrong past 90 days and offers come in lower. ${h90?`My projection is roughly ${fmt$(cw[0].holdNet-h90.holdNet,{k:true})} less in your pocket if we are still here in 90 days, once carrying costs and the stale discount are counted.`:""} Repricing now gets you to the finish line sooner and usually at a better net."\n\n`;
+  s+=`5. WHAT WE WILL DO BESIDES PRICE\n`+A.rec.filter(m=>!/PRICE/.test(m)).slice(0,4).map(moveById).map(m=>`- ${m.label}: ${m.desc}`).join("\n")+"\n\n";
+  s+=`6. FINANCING LEVER (Rocket)\n"Instead of only cutting price, we can offer a rate buydown through Rocket. A seller-paid 2-1 buydown on this price costs roughly ${fmt$(buydownCost(l.currentPrice))} and drops the buyer's first-year payment by about ${fmt$(payment(l.currentPrice)-payment(l.currentPrice,S.a.rate-2))}/month. Buyers shop by payment; this is a headline we can market."\n\n`;
+  s+=`7. CLOSE WITH A DECISION\n"Which path fits your timeline? Let's pick one today, I will have the new price, photos and copy live within 72 hours, and we will review traffic together next ${nextWeekday()}."\n\n`;
+  s+=`QUESTIONS TO ASK THE SELLER\n- What changes for you if this takes another 90 days?\n- Is there a number where it no longer makes sense to sell?\n- Would a payment-focused offer (buydown) feel better than a price cut?\n`;
+  return s;
+}
+function buydownCost(price){ const P=price*(1-S.a.down/100); const p0=payment(price), p1=payment(price,S.a.rate-2), p2=payment(price,S.a.rate-1); return (p0-p1)*12+(p0-p2)*12; }
+function nextWeekday(){ const d=new Date(); d.setDate(d.getDate()+7); return d.toLocaleDateString([], {weekday:"long"}); }
+function reportHTML(l, A, bands, c){
+  const rf=l.redfin||{}; const ph=S.photos[l.dealId]||rf.thumbs||[]; const b=bands?bands[S.band]:null; const plan=c&&c.plan||{}; const chosen=(plan.moves&&plan.moves.length?plan.moves:A.rec.slice(0,5)).map(moveById); const e=latestEngagement(c); const cw=costOfWaiting(l,A,bands);
+  const css=`body{font-family:Helvetica,Arial,sans-serif;color:#111;margin:0;padding:28px;font-size:13px;line-height:1.45}h1{font-size:22px;margin:0}h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#de3341;margin:20px 0 6px;border-bottom:2px solid #de3341;padding-bottom:3px}.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}.brand{font-weight:700;color:#de3341;font-size:16px}.brand span{color:#111;font-weight:400}.tier{display:inline-block;border:1px solid #111;border-radius:99px;padding:2px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}.k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.k div{border:1px solid #ddd;border-radius:8px;padding:8px}.k b{display:block;font-size:17px}.k span{font-size:11px;color:#666;text-transform:uppercase}.ph{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.ph img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px}.ph img.hero{grid-column:1/-1;aspect-ratio:3/1}ul{margin:4px 0;padding-left:18px}.bands{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.band{border:1px solid #ddd;border-radius:8px;padding:8px}.band b{display:block;font-size:16px}.band.on{border-color:#de3341;background:#fcebec}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #eee;padding:4px 6px;text-align:left}th{color:#666;font-weight:600}.muted{color:#666}.foot{margin-top:24px;font-size:11px;color:#777;border-top:1px solid #ddd;padding-top:8px}@media print{body{padding:12px}}`;
+  let h=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Listing Health Report — ${esc(l.address)}</title><style>${css}</style></head><body>`;
+  h+=`<div class="hdr"><div><div class="brand">Redfin <span>Powered by Rocket</span></div><h1>${esc(l.address)}, ${esc(l.city)}</h1><div class="muted">Listing Health Report · ${esc(l.agent)}${managerOf(l.agent)?` · Team ${esc(managerOf(l.agent))}`:""} · prepared ${dstr(todayISO())}</div></div><div><span class="tier">${TIERS[l.tier].label} · ${l.dom} days</span><div style="text-align:right;margin-top:6px;font-size:20px;font-weight:700">${A.score}<span class="muted" style="font-size:11px">/100 health</span></div></div></div>`;
+  h+=`<div class="k" style="margin-top:12px"><div><b>${fmt$(l.currentPrice)}</b><span>List price${l.originalPrice&&l.originalPrice!==l.currentPrice?` (was ${fmt$(l.originalPrice)})`:""}</span></div><div><b>${fmt$(A.anchors.estimate)}</b><span>Redfin Estimate</span></div><div><b>${fmt$(A.anchors.predicted)}</b><span>Predicted close</span></div><div><b>${A.gapMV!=null?pct(A.gapMV):"—"}</b><span>vs blended market value</span></div></div>`;
+  if(ph.length) h+=`<h2>On Redfin.com</h2><div class="ph">${ph.slice(0,5).map((p,i)=>`<img class="${i?"":"hero"}" src="${p.src}" alt="">`).join("")}</div><p class="muted">${rf.photoCount||0} photos · remarks ${rf.remarksLength||0} characters · ${rf.isHot?"Hot Home":"not flagged Hot"} · ${rf.hasOpenHouse?"open house scheduled":"no open house"}${e?` · ${num(e.views)} views / ${num(e.favorites)} favorites / ${num(e.tours||0)} tours as of ${dstr(e.date)}`:""}</p>`;
+  if(rf.ok) h+=`<h2>Competition</h2><p>${rf.similarActive.length} similar active listings; <b>${rf.newerCompetitors}</b> listed after this home and <b>${rf.cheaperCompetitors}</b> priced lower. Active median ${fmt$(rf.activeMedianPrice)} (${fmt$(rf.activeMedianPpsf)}/sqft); sold comps median ${fmt$(rf.soldMedianPrice)} (${fmt$(rf.soldMedianPpsf)}/sqft, ${num(rf.soldMedianDom)} days). This home: ${fmt$(rf.pricePerSqft)}/sqft.</p><table><tr><th>Competing listing</th><th>Price</th><th>$/sqft</th><th>Beds/Baths</th><th>DOM</th></tr>${rf.similarActive.slice(0,6).map(s=>`<tr><td>${esc(s.address)}, ${esc(s.city)}</td><td>${fmt$(s.price)}</td><td>${fmt$(s.ppsf)}</td><td>${s.beds||"—"}/${s.baths||"—"}</td><td>${s.dom??"—"}</td></tr>`).join("")}</table>`;
+  h+=`<h2>Diagnosis</h2><ul>${A.dx.map(d=>`<li><b>${esc(d.cause)}.</b> ${esc(d.evidence)}</li>`).join("")}</ul>`;
+  if(bands) h+=`<h2>Pricing paths</h2><div class="bands">${["conservative","intermediate","aggressive"].map(k=>`<div class="band ${k===S.band?"on":""}"><span class="muted">${bands[k].label}</span><b>${fmt$(bands[k].price)}</b><span class="muted">${fmt$(bands[k].cutAmt)} · ${bands[k].cutPct.toFixed(1)}% · ~${fmt$(bands[k].pay)}/mo</span><div style="font-size:11.5px;margin-top:4px">${esc(bands[k].desc)}</div></div>`).join("")}</div>`;
+  h+=`<h2>Action plan</h2><ol>${chosen.map(m=>`<li><b>${esc(m.label)}.</b> ${esc(m.desc)}</li>`).join("")}</ol><p><b>Owner:</b> ${esc(plan.owner||l.agent)} &nbsp; <b>Due:</b> ${plan.due?dstr(plan.due):"this week"}${plan.notes?`<br><b>Notes:</b> ${esc(plan.notes)}`:""}</p>`;
+  if(cw) h+=`<h2>Cost of waiting</h2><table><tr><th>Days from today</th><th>Tier</th><th>Expected sale if held</th><th>Net to seller if held</th><th>Net if repriced now (${S.band})</th></tr>${cw.filter(x=>[0,30,60,90].includes(x.d)).map(x=>`<tr><td>${x.d}</td><td>${TIERS[x.tier].label}</td><td>${fmt$(x.holdSale)}</td><td>${fmt$(x.holdNet)}</td><td>${x.repNet?fmt$(x.repNet):"—"}</td></tr>`).join("")}</table><p class="muted">Assumptions: ${S.a.rate}% rate, ${S.a.down}% down, carrying ${S.a.carryPct}%/yr, market drift ${S.a.driftPct}%/mo, stale discounts ${S.a.discStale}/${S.a.discUltra}/${S.a.discExtreme}%, closing costs ${S.a.closingPct}%. Edit these in the dashboard.</p>`;
+  h+=`<div class="foot">Prepared with the Stale Listing Command Center. Market context: ${S.market?esc(S.market.asOf||""):""}. Figures are planning estimates, not appraisals.</div></body></html>`;
+  return h;
+}
+/* ============================================================ data access */
+function listingsArr(){ return Object.values(S.listings); }
+function analyzeAll(){ const out={}; for(const l of listingsArr()) out[l.dealId]=analyze(l,S.coaching[l.dealId]); return out; }
+function filtered(){
+  const A=S._A||analyzeAll(); S._A=A; const f=S.f; const q=f.q.trim().toLowerCase();
+  let arr=listingsArr().filter(l=>{
+    if(q && !(`${l.address} ${l.city} ${l.agent} ${l.dealId}`.toLowerCase().includes(q))) return false;
+    if(f.tiers.length && !f.tiers.includes(l.tier)) return false;
+    if(f.agent && l.agent!==f.agent) return false;
+    if(f.city && l.city!==f.city) return false;
+    if(f.band && l.band!==f.band) return false;
+    if(f.team && managerOf(l.agent)!==f.team) return false;
+    for(const fl of f.flags){ const a=A[l.dealId]; if(fl==="hasPlan"){ const c=S.coaching[l.dealId]; if(!(c&&c.plan&&c.plan.moves&&c.plan.moves.length)) return false; } else if(fl==="noPlan"){ const c=S.coaching[l.dealId]; if(c&&c.plan&&c.plan.moves&&c.plan.moves.length) return false; } else if(!a.flags.includes(fl)) return false; }
+    return true;
+  });
+  const key={priority:l=>A[l.dealId].priority, dom:l=>l.dom||0, price:l=>l.currentPrice||0, health:l=>A[l.dealId].score, agent:l=>l.agent, city:l=>l.city, gap:l=>A[l.dealId].gapMV??-999, competitors:l=>(l.redfin&&l.redfin.newerCompetitors)||0, expiration:l=>l.daysToExpiration??9999, address:l=>l.address}[f.sort]||(l=>A[l.dealId].priority);
+  arr.sort((a,b)=>{ const x=key(a), y=key(b); const r = typeof x==="string"? x.localeCompare(y) : (x-y); return f.dir==="desc"?-r:r; });
+  return arr;
+}
+/* ============================================================ charts */
+function svgTier(counts, prev){
+  const keys=["watch","stale","ultra","extreme"]; const total=keys.reduce((s,k)=>s+(counts[k]||0),0)||1; let x=0; const W=600,H=28; let g="";
+  for(const k of keys){ const w=(counts[k]||0)/total*W; if(w>0){ g+=`<rect x="${x}" y="0" width="${Math.max(0,w-2)}" height="${H}" rx="4" fill="var(--t-${k})" data-tip="${TIERS[k].label}: ${counts[k]} (${Math.round((counts[k]||0)/total*100)}%)"></rect>`; if(w>40) g+=`<text x="${x+8}" y="19" style="fill:#fff;font-weight:600;font-size:12px">${counts[k]}</text>`; x+=w; } }
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tier distribution">${g}</svg><div class="legend">${keys.map(k=>`<span><i style="background:var(--t-${k})"></i>${TIERS[k].label} ${counts[k]||0}${prev&&prev[k]!=null?` <span class="muted">(${(counts[k]||0)-(prev[k]||0)>=0?"+":""}${(counts[k]||0)-(prev[k]||0)} wk)</span>`:""}</span>`).join("")}</div>`;
+}
+function svgHist(arr){
+  const bins=[[0,14],[15,29],[30,44],[45,59],[60,74],[75,89],[90,119],[120,179],[180,9999]]; const c=bins.map(([a,b])=>arr.filter(l=>l.dom!=null&&l.dom>=a&&l.dom<=b).length); const mx=Math.max(...c,1);
+  const W=600,H=170,pl=30,pb=28,pt=10; const bw=(W-pl-10)/bins.length; let g=`<g class="grid">${[0,.5,1].map(t=>`<line x1="${pl}" x2="${W-10}" y1="${pt+(H-pt-pb)*(1-t)}" y2="${pt+(H-pt-pb)*(1-t)}"></line>`).join("")}</g>`;
+  g+=`<text x="${pl-4}" y="${pt+4}" text-anchor="end">${mx}</text><text x="${pl-4}" y="${H-pb+4}" text-anchor="end">0</text>`;
+  bins.forEach(([a,b],i)=>{ const h=c[i]/mx*(H-pt-pb); const t=tierOf(a); const x=pl+i*bw+4; g+=`<rect x="${x}" y="${H-pb-h}" width="${bw-8}" height="${h}" rx="4" fill="var(--t-${t})" data-tip="${a}${b>999?"+":"–"+b} days: ${c[i]} listings"></rect><text x="${x+(bw-8)/2}" y="${H-pb+14}" text-anchor="middle">${a}${b>999?"+":"–"+b}</text>${c[i]?`<text x="${x+(bw-8)/2}" y="${H-pb-h-4}" text-anchor="middle" style="fill:var(--fg);font-weight:600">${c[i]}</text>`:""}`; });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Days on market histogram">${g}</svg>`;
+}
+function svgLines(series, opts={}){
+  // series: [{name,color,points:[{x,y,label}]}] ; x numeric
+  const W=600,H=opts.h||200,pl=56,pr=14,pt=14,pb=28; const all=series.flatMap(s=>s.points.filter(p=>p.y!=null)); if(!all.length) return "";
+  const xs=all.map(p=>p.x), ys=all.map(p=>p.y); const x0=Math.min(...xs), x1=Math.max(...xs); let y0=Math.min(...ys), y1=Math.max(...ys); if(y0===y1){y0*=0.98;y1*=1.02;} const pad=(y1-y0)*0.08; y0-=pad; y1+=pad;
+  const X=x=>pl+(x-x0)/((x1-x0)||1)*(W-pl-pr), Y=y=>pt+(1-(y-y0)/((y1-y0)||1))*(H-pt-pb);
+  const ticks=[0,.5,1].map(t=>y0+(y1-y0)*t);
+  let g=`<g class="grid">${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${Y(t)}" y2="${Y(t)}"></line>`).join("")}</g>${ticks.map(t=>`<text x="${pl-6}" y="${Y(t)+4}" text-anchor="end">${opts.fmtY?opts.fmtY(t):Math.round(t)}</text>`).join("")}`;
+  const xt=opts.xTicks||[...new Set(xs)].filter((v,i,a)=>a.length<=8||i%Math.ceil(a.length/8)===0);
+  g+=xt.map(x=>`<text x="${X(x)}" y="${H-pb+16}" text-anchor="middle">${opts.fmtX?opts.fmtX(x):x}</text>`).join("");
+  for(const s of series){ const pts=s.points.filter(p=>p.y!=null); if(!pts.length) continue; const d=pts.map((p,i)=>`${i?"L":"M"}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join(" ");
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" ${s.dash?'stroke-dasharray="5 4"':""}></path>`;
+    pts.forEach((p,i)=>{ const last=i===pts.length-1; g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${last?5:4}" fill="${s.color}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(s.name)} · ${esc(p.label||"")}"></circle>`; });
+    const lp=pts[pts.length-1]; g+=`<text x="${Math.min(X(lp.x)+6,W-pr-40)}" y="${Y(lp.y)-8}" style="fill:var(--fg);font-weight:600">${esc(s.name)}</text>`; }
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label||"chart")}">${g}</svg>`;
+}
+/* ============================================================ views */
+function render(){
+  const main=$("#main"); document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===S.view && !S.sel));
+  if(!S.loaded){ main.innerHTML=`<div class="empty"><b>Loading the weekly snapshot</b>Listings, coaching notes and market context load from the dashboard's shared database.</div>`; return; }
+  if(!listingsArr().length){ main.innerHTML=`<div class="empty"><b>No listings yet</b>Upload this week's sheet under Weekly upload, or ask Claude to run the enrichment pipeline.</div>`; return; }
+  S._A=analyzeAll();
+  if(S.sel && S.listings[S.sel]) main.innerHTML=viewProperty(S.listings[S.sel]);
+  else main.innerHTML=({overview:viewOverview,listings:viewListings,agents:viewAgents,teams:viewTeams,market:viewMarket,playbook:viewPlaybook,upload:viewUpload}[S.view]||viewOverview)();
+  bindTips(); afterRender();
+}
+function tierCounts(arr){ const c={watch:0,stale:0,ultra:0,extreme:0,unknown:0}; for(const l of arr) c[l.tier]=(c[l.tier]||0)+1; return c; }
+function viewOverview(){
+  const arr=listingsArr(); const A=S._A; const c=tierCounts(arr); const prev=S.meta&&S.meta.prevTiers||null; const staleArr=arr.filter(l=>["stale","ultra","extreme"].includes(l.tier));
+  const vol=staleArr.reduce((s,l)=>s+(l.currentPrice||0),0); const avgDom=arr.length?arr.reduce((s,l)=>s+(l.dom||0),0)/arr.length:0; const drops=staleArr.filter(l=>l.priceDrop).length; const gaps=staleArr.map(l=>A[l.dealId].gapMV).filter(g=>g!=null); const avgGap=gaps.length?gaps.reduce((a,b)=>a+b,0)/gaps.length:null;
+  const queue=arr.filter(l=>l.tier!=="watch").sort((a,b)=>A[b.dealId].priority-A[a.dealId].priority).slice(0,10);
+  const exp=arr.filter(l=>l.daysToExpiration!=null&&l.daysToExpiration<=45).sort((a,b)=>a.daysToExpiration-b.daysToExpiration);
+  const byAgent={}; for(const l of staleArr){ (byAgent[l.agent]=byAgent[l.agent]||{n:0,vol:0,ex:0}); byAgent[l.agent].n++; byAgent[l.agent].vol+=l.currentPrice||0; if(l.tier==="extreme") byAgent[l.agent].ex++; }
+  const agents=Object.entries(byAgent).sort((a,b)=>b[1].n-a[1].n||b[1].vol-a[1].vol).slice(0,8);
+  const changes=S.meta&&S.meta.changes||null; const mk=S.market;
+  const cw=staleArr.reduce((s,l)=>{ const w=costOfWaiting(l,A[l.dealId],null); return s+(w?(w[0].holdNet-w.find(x=>x.d===90).holdNet):0); },0);
+  return `
+  <div class="sec-head"><h2>Executive summary</h2><span class="sub">Week of ${dstr(S.meta&&S.meta.asOf||todayISO())} · ${arr.length} active listings · ${staleArr.length} stale or worse</span></div>
+  <div class="grid kpis">
+    <div class="kpi"><div class="v">${arr.length}</div><div class="l">Active listings</div><div class="d">${S.meta&&S.meta.prevCount!=null?`${arr.length-S.meta.prevCount>=0?"+":""}${arr.length-S.meta.prevCount} vs last week`:"&nbsp;"}</div></div>
+    <div class="kpi stale"><div class="v">${c.stale}</div><div class="l">Stale · 30 to 59</div><div class="d">${prev?`${c.stale-(prev.stale||0)>=0?"+":""}${c.stale-(prev.stale||0)} wk`:"&nbsp;"}</div></div>
+    <div class="kpi ultra"><div class="v">${c.ultra}</div><div class="l">Ultra · 60 to 89</div><div class="d">${prev?`${c.ultra-(prev.ultra||0)>=0?"+":""}${c.ultra-(prev.ultra||0)} wk`:"&nbsp;"}</div></div>
+    <div class="kpi extreme"><div class="v">${c.extreme}</div><div class="l">Extreme · 90+</div><div class="d">${prev?`${c.extreme-(prev.extreme||0)>=0?"+":""}${c.extreme-(prev.extreme||0)} wk`:"&nbsp;"}</div></div>
+    <div class="kpi"><div class="v">${fmt$(vol,{k:true})}</div><div class="l">Stale volume</div><div class="d">${drops} of ${staleArr.length} have cut price</div></div>
+    <div class="kpi"><div class="v">${fmt$(cw,{k:true})}</div><div class="l">90-day cost of waiting</div><div class="d">projected seller net at risk</div></div>
+    <div class="kpi"><div class="v">${avgGap!=null?pct(avgGap):"—"}</div><div class="l">Avg gap to market value</div><div class="d">stale listings · avg DOM ${Math.round(avgDom)}</div></div>
+    ${mk&&mk.rates?`<div class="kpi"><div class="v">${mk.rates.rate30}%</div><div class="l">30-yr fixed</div><div class="d">${mk.rates.rate30_1mo?`${(mk.rates.rate30-mk.rates.rate30_1mo)>=0?"+":""}${(mk.rates.rate30-mk.rates.rate30_1mo).toFixed(2)} vs 1 mo`:""} · ${esc(mk.rates.asOf||"")}</div></div>`:""}
+  </div>
+  <div class="grid two sec">
+    <div class="col">
+      <div class="card"><div class="sec-head"><h3>Needs attention this week</h3><span class="sub">ranked by health, price and tier</span></div><div class="queue">${queue.map((l,i)=>qitem(l,i+1)).join("")||`<div class="empty">Nothing stale. Nice.</div>`}</div><div style="margin-top:10px"><button class="btn sm" data-go="listings">Open the full list →</button></div></div>
+      ${changes?`<div class="card"><div class="sec-head"><h3>What changed since last week</h3></div><div class="pill-row">${(changes.newStale||[]).length?`<span class="badge b-stale">◑ ${changes.newStale.length} crossed 30 days</span>`:""}${(changes.newUltra||[]).length?`<span class="badge b-ultra">◕ ${changes.newUltra.length} crossed 60 days</span>`:""}${(changes.newExtreme||[]).length?`<span class="badge b-extreme">● ${changes.newExtreme.length} crossed 90 days</span>`:""}${(changes.priceDrops||[]).length?`<span class="badge b-info">↓ ${changes.priceDrops.length} price drops</span>`:""}${(changes.gone||[]).length?`<span class="badge b-good">✓ ${changes.gone.length} left the list</span>`:""}${(changes.added||[]).length?`<span class="badge b-muted">+ ${changes.added.length} new listings</span>`:""}</div>
+        ${["newExtreme","newUltra","newStale","priceDrops"].map(k=>(changes[k]||[]).length?`<div style="margin-top:8px"><h4>${{newExtreme:"Crossed 90 days",newUltra:"Crossed 60 days",newStale:"Crossed 30 days",priceDrops:"Price drops this week"}[k]}</h4><div class="pill-row" style="margin-top:4px">${changes[k].map(id=>S.listings[id]?`<button class="chip" data-open="${id}">${esc(S.listings[id].address)} · ${esc(S.listings[id].agent)}</button>`:"").join("")}</div></div>`:"").join("")}</div>`:""}
+    </div>
+    <div class="col">
+      <div class="card"><h3>Tier mix</h3><div style="margin-top:8px">${svgTier(c,prev)}</div></div>
+      <div class="card"><h3>Days on market</h3>${svgHist(arr)}</div>
+      <div class="card"><div class="sec-head"><h3>Agents carrying the most stale inventory</h3></div><div class="tbl"><table><tr><th>Agent</th><th class="num">Stale+</th><th class="num">90+</th><th class="num">Volume</th><th>Team</th></tr>${agents.map(([a,v])=>`<tr class="row" data-agent="${esc(a)}"><td>${esc(a)}</td><td class="num">${v.n}</td><td class="num">${v.ex}</td><td class="num">${fmt$(v.vol,{k:true})}</td><td>${esc(managerOf(a)||"—")}</td></tr>`).join("")}</table></div></div>
+      ${exp.length?`<div class="card"><h3>Expiring within 45 days</h3><div class="queue" style="margin-top:8px">${exp.slice(0,6).map(l=>`<div class="qitem" data-open="${l.dealId}"><div class="rank">${l.daysToExpiration}d</div><div><div class="addr">${esc(l.address)}, ${esc(l.city)}</div><div class="why">${esc(l.agent)} · ${badge(l.tier)} ${l.dom} days</div></div><div class="r">${dstr(l.expirationDate)}</div></div>`).join("")}</div></div>`:""}
+    </div>
+  </div>`;
+}
+function qitem(l,i){ const a=S._A[l.dealId]; const top=a.dx[0]; return `<div class="qitem" data-open="${l.dealId}"><div class="rank">${i}</div><div><div class="addr">${esc(l.address)}, ${esc(l.city)} <span style="font-weight:400;color:var(--muted)">· ${esc(l.agent)}</span></div><div class="why">${badge(l.tier)} ${l.dom} days · ${top?esc(top.cause):"Review"}</div></div><div class="r">${fmt$(l.currentPrice,{k:true})}<br><span class="muted">health ${a.score}</span></div></div>`; }
+function viewListings(){
+  const arr=filtered(); const A=S._A; const f=S.f; const all=listingsArr();
+  const agents=[...new Set(all.map(l=>l.agent))].sort(); const cities=[...new Set(all.map(l=>l.city))].sort(); const teams=(S.teams.managers||[]).map(m=>m.name);
+  const flagOpts=[["overpriced","Over market"],["competition","Newer/cheaper competition"],["photos","Weak photos"],["remarks","Weak remarks"],["no-reduction","No price cut yet"],["stale-reduction","Cut has worn off"],["expiring","Expiring ≤45d"],["relisted","Relisted before"],["traffic-down","Traffic falling"],["noPlan","No plan on file"],["hasPlan","Has a plan"],["no-engagement-data","Needs views/favorites entry"]];
+  const th=(k,label,cls="")=>`<th class="${cls} ${f.sort===k?"sorted":""}" data-sort="${k}">${label}${f.sort===k?(f.dir==="desc"?" ↓":" ↑"):""}</th>`;
+  return `<div class="sec-head"><h2>Listings</h2><span class="sub">${arr.length} of ${all.length} shown</span></div>
+  <div class="filters">${Object.keys(TIERS).filter(k=>k!=="unknown").map(k=>`<button class="chip ${f.tiers.includes(k)?"on":""}" data-tier="${k}">${TIERS[k].icon} ${TIERS[k].label}</button>`).join("")}
+    <select id="f-agent" aria-label="Agent"><option value="">All agents</option>${agents.map(a=>`<option ${f.agent===a?"selected":""}>${esc(a)}</option>`).join("")}</select>
+    <select id="f-city" aria-label="City"><option value="">All cities</option>${cities.map(a=>`<option ${f.city===a?"selected":""}>${esc(a)}</option>`).join("")}</select>
+    <select id="f-band" aria-label="Price band"><option value="">All price bands</option>${Object.entries(BANDS).map(([k,v])=>`<option value="${k}" ${f.band===k?"selected":""}>${v}</option>`).join("")}</select>
+    ${teams.length?`<select id="f-team" aria-label="Team"><option value="">All teams</option>${teams.map(t=>`<option ${f.team===t?"selected":""}>${esc(t)}</option>`).join("")}</select>`:""}
+    <select id="f-flag" aria-label="Add a flag filter"><option value="">+ Flag filter</option>${flagOpts.map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select>
+    ${f.flags.map(fl=>`<button class="chip on" data-unflag="${fl}">${(flagOpts.find(x=>x[0]===fl)||[fl,fl])[1]} ✕</button>`).join("")}
+    ${(f.tiers.length||f.agent||f.city||f.band||f.team||f.flags.length||f.q)?`<button class="btn sm ghost" id="f-clear">Clear filters</button>`:""}
+  </div>
+  <div class="card" style="padding:0"><div class="tbl"><table><thead><tr>${th("address","Property")}${th("agent","Agent")}${th("dom","DOM","num")}${th("price","Price","num")}${th("gap","vs market","num")}${th("competitors","Newer comps","num")}<th>Signals</th>${th("health","Health")}<th>Plan</th></tr></thead><tbody>
+  ${arr.map(l=>{ const a=A[l.dealId]; const c=S.coaching[l.dealId]; const rf=l.redfin||{}; const plan=c&&c.plan; const col=a.score>=70?"var(--good)":a.score>=45?"var(--t-stale)":"var(--t-extreme)";
+    return `<tr class="row" data-open="${l.dealId}"><td><div class="addr">${esc(l.address)}<small>${esc(l.city)} · ${BANDS[l.band]}${l.dataIssues&&l.dataIssues.length?` · <span style="color:var(--t-extreme)">${esc(l.dataIssues[0])}</span>`:""}</small></div></td><td>${esc(l.agent)}${managerOf(l.agent)?`<br><small class="muted">${esc(managerOf(l.agent))}</small>`:""}</td><td class="num nowrap">${badge(l.tier)}<br>${l.dom??"—"}</td><td class="num nowrap">${fmt$(l.currentPrice)}${l.priceDrop?`<br><small class="muted">↓ ${fmt$(l.priceDropAmt,{k:true})}</small>`:""}</td><td class="num">${a.gapMV!=null?pct(a.gapMV):"—"}</td><td class="num">${rf.ok?`${rf.newerCompetitors}<br><small class="muted">${rf.cheaperCompetitors} cheaper</small>`:"—"}</td><td><div class="pill-row">${rf.isHot?'<span class="badge b-accent">🔥 Hot</span>':""}${a.flags.includes("photos")?'<span class="badge b-muted">📷</span>':""}${a.flags.includes("remarks")?'<span class="badge b-muted">✎</span>':""}${a.flags.includes("expiring")?'<span class="badge b-extreme">⏰</span>':""}${a.flags.includes("relisted")?'<span class="badge b-muted">↻</span>':""}${latestEngagement(c)?`<span class="badge b-info">👁 ${num(latestEngagement(c).views)}</span>`:""}</div></td><td><div class="hs"><div class="meter"><i style="width:${a.score}%;background:${col}"></i></div><b>${a.score}</b></div></td><td>${plan&&plan.moves&&plan.moves.length?`<span class="badge b-good">✓ ${plan.moves.length} moves</span><br><small class="muted">${plan.status||"planned"}${plan.due?" · "+dstr(plan.due):""}</small>`:'<span class="badge b-muted">none</span>'}</td></tr>`; }).join("")}
+  </tbody></table></div>${arr.length?"":`<div class="empty"><b>No listings match</b>Loosen a filter.</div>`}</div>`;
+}
+function viewAgents(){
+  const A=S._A; const m={}; for(const l of listingsArr()){ const r=(m[l.agent]=m[l.agent]||{n:0,watch:0,stale:0,ultra:0,extreme:0,vol:0,dom:0,plans:0,health:0}); r.n++; r[l.tier]=(r[l.tier]||0)+1; r.vol+=l.currentPrice||0; r.dom+=l.dom||0; r.health+=A[l.dealId].score; const c=S.coaching[l.dealId]; if(l.tier!=="watch"&&c&&c.plan&&c.plan.moves&&c.plan.moves.length) r.plans++; }
+  const rows=Object.entries(m).sort((a,b)=>(b[1].stale+b[1].ultra+b[1].extreme)-(a[1].stale+a[1].ultra+a[1].extreme)||b[1].n-a[1].n);
+  return `<div class="sec-head"><h2>Agents</h2><span class="sub">${rows.length} agents · click a row to see their listings</span></div><div class="card" style="padding:0"><div class="tbl"><table><thead><tr><th>Agent</th><th>Team</th><th class="num">Active</th><th class="num">Watch</th><th class="num">Stale</th><th class="num">Ultra</th><th class="num">Extreme</th><th class="num">Volume</th><th class="num">Avg DOM</th><th class="num">Avg health</th><th class="num">Plans on file</th></tr></thead><tbody>${rows.map(([a,r])=>`<tr class="row agent-row" data-agent="${esc(a)}"><td>${esc(a)}</td><td>${esc(managerOf(a)||"—")}</td><td class="num">${r.n}</td><td class="num">${r.watch}</td><td class="num" style="color:var(--t-stale)">${r.stale}</td><td class="num" style="color:var(--t-ultra)">${r.ultra}</td><td class="num" style="color:var(--t-extreme)">${r.extreme}</td><td class="num">${fmt$(r.vol,{k:true})}</td><td class="num">${Math.round(r.dom/r.n)}</td><td class="num">${Math.round(r.health/r.n)}</td><td class="num">${r.plans}/${r.stale+r.ultra+r.extreme}</td></tr>`).join("")}</tbody></table></div></div>`;
+}
+function viewTeams(){
+  const agents=[...new Set(listingsArr().map(l=>l.agent))].sort(); const ms=S.teams.managers||[]; const canEdit=S.canWrite!==false;
+  return `<div class="sec-head"><h2>Teams</h2><span class="sub">Map agents to their sales manager so each leader can filter to their own inventory.</span></div>
+  <div class="grid three">${ms.map((m,i)=>`<div class="card"><div class="sec-head"><h3>${esc(m.name)}</h3><span class="sub">${(m.agents||[]).length} agents</span><span class="spacer"></span>${canEdit?`<button class="btn sm ghost" data-del-mgr="${i}">Remove</button>`:""}</div><div class="pill-row">${(m.agents||[]).map(a=>`<span class="chip">${esc(a)}${canEdit?` <span data-unassign="${i}|${esc(a)}" style="cursor:pointer">✕</span>`:""}</span>`).join("")||'<span class="help">No agents yet.</span>'}</div>${canEdit?`<div style="margin-top:10px"><select data-assign="${i}"><option value="">Add an agent…</option>${agents.filter(a=>!(m.agents||[]).includes(a)).map(a=>`<option>${esc(a)}</option>`).join("")}</select></div>`:""}<div style="margin-top:10px"><button class="btn sm" data-team-filter="${esc(m.name)}">See this team's listings →</button></div></div>`).join("")}
+  ${canEdit?`<div class="card"><h3>Add a sales manager</h3><div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="new-mgr" placeholder="Manager name"><button class="btn primary" id="add-mgr">Add</button></div><p class="help">Unassigned agents: ${agents.filter(a=>!managerOf(a)).length}</p></div>`:""}</div>`;
+}
+function viewMarket(){
+  const mk=S.market; if(!mk) return `<div class="empty"><b>Market context is loading</b>Rates, local stats and the narrative appear here once Claude seeds them.</div>`;
+  const rows=(mk.stats||[]);
+  const price=S._calcPrice||1000000; const r=mk.rates&&mk.rates.rate30||S.a.rate;
+  return `<div class="sec-head"><h2>Market context</h2><span class="sub">as of ${esc(mk.asOf||"")}</span></div>
+  <div class="grid two"><div class="col">
+    <div class="card"><h3>What this means for a seller sitting at 60+ days</h3><div style="margin-top:8px;white-space:pre-wrap;line-height:1.55">${esc(mk.narrative||"")}</div></div>
+    ${mk.talkingPoints?`<div class="card"><h3>Talking points by price band</h3>${Object.entries(mk.talkingPoints).map(([k,v])=>`<div style="margin-top:8px"><h4>${esc(BANDS[k]||k)}</h4><ul style="margin:4px 0;padding-left:18px">${(v||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div>`:""}
+  </div><div class="col">
+    <div class="card"><h3>Rates and affordability</h3>${mk.rates?`<div class="facts" style="margin-top:8px"><div class="fact"><b>${mk.rates.rate30}%</b><span>30-yr fixed</span></div><div class="fact"><b>${mk.rates.rate15??"—"}%</b><span>15-yr fixed</span></div><div class="fact"><b>${mk.rates.rate30_1mo??"—"}%</b><span>1 month ago</span></div><div class="fact"><b>${mk.rates.rate30_12mo??"—"}%</b><span>1 year ago</span></div></div><p class="help">Source: ${esc(mk.rates.source||"Freddie Mac PMMS")} · ${esc(mk.rates.asOf||"")}</p>`:""}
+      <div style="margin-top:10px"><label class="help">Buyer payment calculator · price <input type="number" id="calc-price" value="${price}" step="5000" style="width:130px"></label><div class="facts" style="margin-top:6px"><div class="fact"><b>${fmt$(payment(price,r))}</b><span>P&I at ${r}%, ${S.a.down}% down</span></div><div class="fact"><b>${fmt$(payment(price,r+0.5))}</b><span>if rates +0.5</span></div><div class="fact"><b>${fmt$(priceForPayment(payment(price,r),r+0.5),{k:true})}</b><span>max price at same payment, +0.5</span></div><div class="fact"><b>${fmt$(payment(price,r-2))}</b><span>yr-1 payment with 2-1 buydown</span></div><div class="fact"><b>${fmt$(buydownCost(price))}</b><span>seller cost of 2-1 buydown</span></div></div></div></div>
+    <div class="card"><h3>Local and national stats</h3><div class="tbl"><table><thead><tr><th>Metric</th><th>Geography</th><th class="num">Value</th><th>Period</th></tr></thead><tbody>${rows.map(s=>`<tr><td>${esc(s.metric)}</td><td>${esc(s.geo)}</td><td class="num">${esc(s.value)}</td><td><small class="muted">${esc(s.period||"")}${s.source?` · <a href="${esc(s.source)}" target="_blank" rel="noopener">source</a>`:""}</small></td></tr>`).join("")||`<tr><td colspan="4" class="help">No stats loaded yet.</td></tr>`}</tbody></table></div></div>
+  </div></div>`;
+}
+function viewPlaybook(){
+  const pb=S.playbook||{}; const groups={}; for(const m of moves()) (groups[m.group||"Other"]=groups[m.group||"Other"]||[]).push(m);
+  return `<div class="sec-head"><h2>Stale listing playbook</h2><span class="sub">the framework behind every recommendation</span></div>
+  <div class="grid two"><div class="col">
+    ${pb.tierPlays?Object.entries(pb.tierPlays).map(([t,v])=>`<div class="card"><div class="sec-head">${badge(t)}<h3>${esc(v.title||"")}</h3></div><p class="help">${esc(v.goal||"")}</p><ol style="padding-left:18px;margin:6px 0">${(v.steps||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol>${v.rules&&v.rules.length?`<h4>Decision rules</h4><ul style="padding-left:18px;margin:4px 0">${v.rules.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`:""}</div>`).join(""):`<div class="card"><h3>Tiered playbook</h3><p class="help">Loads once Claude seeds the research.</p></div>`}
+    ${pb.diagnostics?`<div class="card"><h3>Diagnostic framework</h3><div class="tbl"><table><thead><tr><th>Cause</th><th>Observable signals</th><th>Fix</th></tr></thead><tbody>${pb.diagnostics.map(d=>`<tr><td><b>${esc(d.cause)}</b></td><td>${esc(d.signals)}</td><td>${esc(d.fix)}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+  </div><div class="col">
+    <div class="card"><h3>Coaching moves</h3>${Object.entries(groups).map(([g,ms])=>`<h4 style="margin-top:10px">${esc(g)}</h4><div class="diag" style="margin-top:4px">${ms.map(m=>`<div class="dx low"><div class="sev"></div><div><b>${esc(m.label)}</b><p>${esc(m.desc)}</p></div></div>`).join("")}</div>`).join("")}</div>
+    ${pb.pricing?`<div class="card"><h3>Price reduction rules</h3><ul style="padding-left:18px;margin:6px 0">${pb.pricing.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}
+    ${pb.scripts?`<div class="card"><h3>Seller scripts</h3>${pb.scripts.map(s=>`<div style="margin-top:8px"><h4>${esc(s.title)}</h4><div style="white-space:pre-wrap;font-size:13.5px;margin-top:4px">${esc(s.text)}</div>${s.source?`<small class="muted">Source: ${esc(s.source)}</small>`:""}</div>`).join("")}</div>`:""}
+    ${pb.stats?`<div class="card"><h3>Stats worth quoting</h3><div class="tbl"><table><tbody>${pb.stats.map(s=>`<tr><td>${esc(s.stat)}</td><td><small class="muted">${esc(s.source||"")}${s.url?` · <a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>`:""}</small></td></tr>`).join("")}</tbody></table></div></div>`:""}
+    ${pb.relaunch?`<div class="card"><h3>Relaunch rules (CRMLS / California)</h3><ul style="padding-left:18px;margin:6px 0">${pb.relaunch.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}
+  </div></div>`;
+}
+function viewUpload(){
+  return `<div class="sec-head"><h2>Weekly upload</h2><span class="sub">Drop the new sheet export here each week.</span></div>
+  <div class="grid two"><div class="col"><div class="card"><div class="drop" id="drop"><b>Drag the CSV here or</b><div style="margin-top:8px"><input type="file" id="csv" accept=".csv,text/csv"></div><p class="help" style="margin-top:8px">Same columns as the Redfin sheet: Deal Id, Deal Status, List Date, Check In Date, Listing Expiration Date, Agent Name, Street Address, City, State Code, Price Drop?, Price Drop Amt, Last Price Reduction Date, Days On Mkt, Deal URL, Suggested Price Amount, Original Price Amount, Current Price, Current Redfin Estimate, Predicted Close Price Amount, Hot Home Score.</p></div><div id="upload-out" style="margin-top:12px"></div></div></div>
+  <div class="col"><div class="card"><h3>How the weekly cycle works</h3><ol style="padding-left:18px;margin:6px 0;line-height:1.6"><li><b>Upload the sheet here.</b> Base fields, tiers and week-over-week history update immediately for every Deal ID. Coaching notes, plans and engagement entries carry over.</li><li><b>Send Claude the sheet link.</b> The enrichment pipeline re-pulls every Redfin.com page (photos, remarks, competition, price history) and refreshes market context. Listings show "enrichment pending" until then.</li><li><b>Run the stale listings hour.</b> Work the queue, log plans and send feedback.</li></ol><p class="help">Snapshot on file: ${S.meta?esc(S.meta.asOf):"none"} · ${listingsArr().length} listings.</p></div></div></div>`;
+}
+/* --------------------------------------------------- property view */
+function viewProperty(l){
+  const c=S.coaching[l.dealId]||{}; const A=analyze(l,c); const bands=priceBands(l,A); const rf=l.redfin||{}; const ph=S.photos[l.dealId]||rf.thumbs||[]; const plan=c.plan||{}; const e=latestEngagement(c); const hist=l.history||[];
+  const cw=costOfWaiting(l,A,bands);
+  const mgr=managerOf(l.agent);
+  return `<div><button class="btn sm ghost" id="back">← Back to ${S.view==="overview"?"overview":"listings"}</button></div>
+  <div class="prop-head" style="margin-top:8px"><div style="flex:1;min-width:260px"><h2>${esc(l.address)}, ${esc(l.city)}</h2><div class="meta">${badge(l.tier)} <b>${l.dom??"—"} days</b>${rf.cumulativeDom&&rf.cumulativeDom!==l.dom?` <span class="help">(Redfin shows ${rf.cumulativeDom} cumulative)</span>`:""} · ${esc(l.agent)}${mgr?` · Team ${esc(mgr)}`:""} · Listed ${dstr(l.listDate)} · Expires ${dstr(l.expirationDate)}${l.daysToExpiration!=null?` (${l.daysToExpiration}d)`:""} · ${rf.isHot?'<span class="badge b-accent">🔥 Hot Home</span>':""}${rf.hasOpenHouse?'<span class="badge b-info">Open house</span>':""}</div>
+    <div class="pill-row" style="margin-top:8px">${rf.url?`<a class="btn sm" href="${esc(rf.url)}" target="_blank" rel="noopener">Open on Redfin.com ↗</a>`:""}<a class="btn sm" href="${esc(l.dealUrl)}" target="_blank" rel="noopener">Deal tools ↗</a><button class="btn sm" data-copy-link="${l.dealId}">Copy link to this property</button></div></div>
+    <div class="card" style="min-width:200px;text-align:center"><div style="font-family:var(--font-display);font-weight:700;font-size:38px;line-height:1;color:${A.score>=70?"var(--good)":A.score>=45?"var(--t-stale)":"var(--t-extreme)"}">${A.score}</div><div class="help">listing health · priority ${A.priority}</div><div class="meter" style="margin-top:6px"><i style="width:${A.score}%;background:${A.score>=70?"var(--good)":A.score>=45?"var(--t-stale)":"var(--t-extreme)"}"></i></div></div></div>
+  ${l.dataIssues&&l.dataIssues.length?`<div class="card" style="border-color:var(--t-extreme);margin-bottom:12px"><b>Data issue:</b> ${esc(l.dataIssues.join("; "))}. Fix the sheet row and re-upload.</div>`:""}
+  <div class="prop-grid"><div class="col">
+    <div class="card"><div class="sec-head"><h3>On Redfin.com</h3><span class="sub">${rf.ok?`${rf.photoCount} photos · pulled ${dstr(l.asOf)}`:(rf.error?esc(rf.error):"enrichment pending")}</span></div>
+      ${ph.length?`<div class="photos"><div class="hero"><img src="${ph[0].src}" alt="Lead photo"></div>${ph.slice(1,9).map(p=>`<div class="th"><img src="${p.src}" alt=""></div>`).join("")}</div>`:`<div class="empty">No photos cached yet.</div>`}
+      ${ph[0]?`<div class="stat-strip" style="margin-top:8px"><span>Lead photo brightness <b>${ph[0].brightness}</b>/255</span><span>dark share <b>${Math.round(ph[0].darkShare*100)}%</b></span><span>source <b>${ph[0].origW||"?"}×${ph[0].origH||"?"}</b></span><span>low-res frames <b>${rf.lowResPhotos||0}</b></span></div>`:""}
+      <div class="facts" style="margin-top:10px"><div class="fact"><b>${fmt$(l.currentPrice)}</b><span>List price</span></div><div class="fact"><b>${fmt$(A.anchors.estimate)}</b><span>Redfin Estimate</span></div><div class="fact"><b>${fmt$(A.anchors.predicted)}</b><span>Predicted close</span></div><div class="fact"><b>${A.anchors.compSold?fmt$(A.anchors.compSold):"—"}</b><span>Sold-comp value</span></div><div class="fact"><b>${rf.beds??"—"}/${rf.baths??"—"}</b><span>Bed / bath</span></div><div class="fact"><b>${num(rf.sqft||rf.totalSqft)}</b><span>Sq ft · ${fmt$(rf.pricePerSqft)}/sf</span></div><div class="fact"><b>${rf.yearBuilt||"—"}</b><span>Built · lot ${num(rf.lotSize)}</span></div><div class="fact"><b>${fmt$(l.originalPrice)}</b><span>Original · cut ${l.reductionPct?l.reductionPct+"%":"0%"}</span></div></div>
+      <div style="margin-top:10px"><h4>Agent remarks <span class="help">(${rf.remarksLength||0} chars)</span></h4><div class="remarks">${esc(rf.remarks||"No remarks captured.")}</div></div>
+      ${rf.history&&rf.history.length?`<div style="margin-top:10px"><h4>Price history</h4><div class="timeline" style="margin-top:4px">${rf.history.slice(0,8).map(h=>`<div><span>${dstr(h.date)}</span><span>${esc(h.event)}</span><span>${h.price?fmt$(h.price):""}</span></div>`).join("")}</div></div>`:""}
+    </div>
+    <div class="card"><div class="sec-head"><h3>Buyer engagement</h3><span class="sub">views, favorites and X-outs from Redfin tools; log them weekly</span></div>
+      ${e?`<div class="facts"><div class="fact"><b>${num(e.views)}</b><span>Views</span></div><div class="fact"><b>${num(e.favorites)}</b><span>Favorites · ${e.views?((e.favorites||0)/e.views*100).toFixed(1):"0"}%</span></div><div class="fact"><b>${num(e.xouts||0)}</b><span>X-outs</span></div><div class="fact"><b>${num(e.tours||0)}</b><span>Tours</span></div><div class="fact"><b>${num(e.offers||0)}</b><span>Offers</span></div></div>`:`<p class="help">No entries yet. Add this week's numbers from the Redfin listing tools.</p>`}
+      ${(c.engagement||[]).length>1?svgLines([{name:"Views",color:"var(--viz-1)",points:(c.engagement||[]).slice().sort((a,b)=>a.date<b.date?-1:1).map(x=>({x:new Date(x.date).getTime(),y:x.views||0,label:`${dstr(x.date)}: ${num(x.views)} views`}))},{name:"Favorites",color:"var(--viz-2)",points:(c.engagement||[]).slice().sort((a,b)=>a.date<b.date?-1:1).map(x=>({x:new Date(x.date).getTime(),y:x.favorites||0,label:`${dstr(x.date)}: ${num(x.favorites)} favorites`}))}],{h:160,fmtX:x=>new Date(x).toLocaleDateString([], {month:"short",day:"numeric"}),label:"Engagement trend"}):""}
+      <div class="form" style="margin-top:10px"><label>Date<input type="date" id="e-date" value="${todayISO()}"></label><label>Views<input type="number" id="e-views" min="0"></label><label>Favorites<input type="number" id="e-fav" min="0"></label><label>X-outs<input type="number" id="e-x" min="0"></label><label>Tours<input type="number" id="e-tours" min="0"></label><label>Offers<input type="number" id="e-offers" min="0"></label></div><div style="margin-top:8px"><button class="btn sm primary" id="e-add">Log this week</button> <span class="help">${(c.engagement||[]).length} entries</span></div>
+    </div>
+    <div class="card"><div class="sec-head"><h3>Competition</h3><span class="sub">${rf.ok?`${rf.similarActive.length} similar actives · ${rf.similarSold.length} recent solds`:"pending"}</span></div>
+      ${rf.ok?`<div class="facts"><div class="fact"><b>${rf.newerCompetitors}</b><span>Listed after ours</span></div><div class="fact"><b>${rf.cheaperCompetitors}</b><span>Priced lower</span></div><div class="fact"><b>${fmt$(rf.activeMedianPpsf)}</b><span>Active $/sf · ours ${fmt$(rf.pricePerSqft)}</span></div><div class="fact"><b>${fmt$(rf.soldMedianPpsf)}</b><span>Sold $/sf · ${num(rf.soldMedianDom)} days</span></div></div>
+      <div class="tbl" style="margin-top:8px"><table><thead><tr><th>Active competitor</th><th class="num">Price</th><th class="num">$/sf</th><th class="num">Bd/Ba</th><th class="num">Sq ft</th><th class="num">DOM</th></tr></thead><tbody>${rf.similarActive.slice().sort((a,b)=>(a.dom??999)-(b.dom??999)).slice(0,10).map(s=>`<tr style="${s.dom!=null&&s.dom<(l.dom||0)?"":"opacity:.75"}"><td>${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.address)}</a>`:esc(s.address)}<small class="muted"> ${esc(s.city)}${s.isRedfin?" · Redfin":""}</small></td><td class="num">${fmt$(s.price)}${s.price&&l.currentPrice&&s.price<l.currentPrice?' <span style="color:var(--t-ultra)">▼</span>':""}</td><td class="num">${fmt$(s.ppsf)}</td><td class="num">${s.beds??"—"}/${s.baths??"—"}</td><td class="num">${num(s.sqft)}</td><td class="num">${s.dom??"—"}${s.dom!=null&&s.dom<(l.dom||0)?' <span class="badge b-info">newer</span>':""}</td></tr>`).join("")}</tbody></table></div>
+      <details style="margin-top:8px"><summary class="help">Recent solds (${rf.similarSold.length})</summary><div class="tbl"><table><thead><tr><th>Sold</th><th class="num">Price</th><th class="num">$/sf</th><th class="num">DOM</th><th>Date</th></tr></thead><tbody>${rf.similarSold.slice(0,10).map(s=>`<tr><td>${esc(s.address)}<small class="muted"> ${esc(s.city)}</small></td><td class="num">${fmt$(s.price)}</td><td class="num">${fmt$(s.ppsf)}</td><td class="num">${s.dom??"—"}</td><td>${dstr(s.soldDate)}</td></tr>`).join("")}</tbody></table></div></details>`:`<p class="help">Competition loads once the enrichment pipeline runs.</p>`}
+      <div style="margin-top:8px"><h4>Your comps and notes</h4><textarea id="comp-notes" rows="2" placeholder="Paste manual comps or override the read here…">${esc(c.compNotes||"")}</textarea></div>
+    </div>
+    ${hist.length>1?`<div class="card"><h3>Week over week</h3><div class="tbl" style="margin-top:6px"><table><thead><tr><th>Week</th><th class="num">DOM</th><th class="num">Price</th><th class="num">Estimate</th><th>Tier</th><th>Hot</th></tr></thead><tbody>${hist.slice(-8).reverse().map(h=>`<tr><td>${dstr(h.asOf)}</td><td class="num">${h.dom??"—"}</td><td class="num">${fmt$(h.price)}</td><td class="num">${fmt$(h.estimate)}</td><td>${badge(h.tier||tierOf(h.dom))}</td><td>${h.hot?"🔥":""}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+  </div>
+  <div class="col">
+    <div class="card"><div class="sec-head"><h3>Diagnosis</h3><span class="sub">what the data says is holding this listing back</span></div><div class="diag">${A.dx.map(d=>`<div class="dx ${d.sev}"><div class="sev"></div><div><b>${esc(d.cause)}</b><p>${esc(d.evidence)}</p><div class="mv">→ ${d.move.map(m=>esc(moveById(m).label)).join(" · ")}</div></div></div>`).join("")||`<div class="dx low"><div class="sev"></div><div><b>No red flags from the data</b><p>Keep the plan simple: confirm engagement numbers and hold the seller to the review date.</p></div></div>`}</div></div>
+    ${bands?`<div class="card"><div class="sec-head"><h3>Pricing paths</h3><span class="sub">blended market value ${fmt$(A.anchors.marketValue)} · gap ${A.gapMV!=null?pct(A.gapMV):"—"}</span></div><div class="bands">${["conservative","intermediate","aggressive"].map(k=>{const b=bands[k];return `<div class="band ${S.band===k?"on":""}" data-band="${k}"><h4>${b.label}</h4><div class="p">${fmt$(b.price)}</div><div class="s">${fmt$(b.cutAmt)} · ${b.cutPct.toFixed(1)}% · ~${fmt$(b.pay)}/mo</div><ul><li>${esc(b.desc)}</li><li>${b.belowCount} of ${b.activeCount} competitors would still be cheaper</li>${b.bracket?`<li>Lands on the ${fmt$(b.bracket,{k:true})} search bracket</li>`:""}</ul></div>`;}).join("")}</div>
+      <div class="stat-strip" style="margin-top:10px"><span>Buyer payment today <b>${fmt$(payment(l.currentPrice))}/mo</b></span><span>2-1 buydown year-1 <b>${fmt$(payment(l.currentPrice,S.a.rate-2))}/mo</b> (seller cost ~<b>${fmt$(buydownCost(l.currentPrice),{k:true})}</b>)</span><span>Price a buyer needs for the same payment if rates +0.5: <b>${fmt$(priceForPayment(payment(l.currentPrice),S.a.rate+0.5),{k:true})}</b></span></div></div>`:""}
+    ${cw?`<div class="card"><div class="sec-head"><h3>Cost of waiting</h3><span class="sub">net to seller, hold vs reprice to the ${S.band} band</span></div>${svgLines([{name:"Hold current price",color:"var(--viz-gray)",points:cw.map(x=>({x:x.d,y:x.holdNet,label:`day +${x.d} (${TIERS[x.tier].label}): net ${fmt$(x.holdNet)}`}))},{name:"Reprice now",color:"var(--accent)",points:cw.map(x=>({x:x.d,y:x.repNet,label:`day +${x.d}: net ${fmt$(x.repNet)}`}))}],{h:190,fmtY:v=>fmt$(v,{k:true}),fmtX:v=>"+"+v+"d",xTicks:[0,30,60,90,120],label:"Cost of waiting"})}<div class="stat-strip" style="margin-top:6px"><span>Carrying cost <b>${fmt$(l.currentPrice*S.a.carryPct/100/12+(l._mortgage||0))}/mo</b></span><span>90-day hold vs today <b>${fmt$(cw[0].holdNet-cw.find(x=>x.d===90).holdNet,{k:true})}</b></span><span>Reprice & sell in 30 vs hold 90 <b>${fmt$((cw.find(x=>x.d===30).repNet||0)-cw.find(x=>x.d===90).holdNet,{k:true})}</b></span></div><p class="help">${esc(waitLine(l,A,bands))} Edit assumptions with the ⚙ button.</p></div>`:""}
+    <div class="card"><div class="tabs">${[["plan","Action plan"],["ai","Claude coaching"],["share","Share-outs"],["notes","Team notes"]].map(([k,v])=>`<button class="${S.ptab===k?"on":""}" data-ptab="${k}">${v}</button>`).join("")}</div>
+      ${S.ptab==="plan"?planPanel(l,c,A):S.ptab==="ai"?aiPanel(l,c,A):S.ptab==="share"?sharePanel(l,c,A,bands):notesPanel(l,c)}
+    </div>
+  </div></div>`;
+}
+function planPanel(l,c,A){ const plan=c.plan||{}; const sel=plan.moves||[]; const groups={}; for(const m of moves()) (groups[m.group||"Other"]=groups[m.group||"Other"]||[]).push(m);
+  return `<p class="help">Recommended moves are outlined. Tick what you and ${esc(first(l.agent))} agree to; everything saves for the team.</p>
+  ${Object.entries(groups).map(([g,ms])=>`<h4 style="margin-top:10px">${esc(g)}</h4><div class="moves" style="margin-top:4px">${ms.map(m=>`<label class="move ${sel.includes(m.id)?"on":""} ${A.rec.includes(m.id)?"rec":""}"><input type="checkbox" data-move="${m.id}" ${sel.includes(m.id)?"checked":""}><span><b>${esc(m.label)}${A.rec.includes(m.id)?' <span class="badge b-accent">rec</span>':""}</b><small>${esc(m.desc)}</small></span></label>`).join("")}</div>`).join("")}
+  <div class="form" style="margin-top:12px"><label>Price path<select id="p-band"><option value="">Not decided</option>${["conservative","intermediate","aggressive"].map(k=>`<option value="${k}" ${plan.band===k?"selected":""}>${k[0].toUpperCase()+k.slice(1)}</option>`).join("")}</select></label><label>Target price<input type="number" id="p-target" step="1000" value="${plan.targetPrice||""}"></label><label>Owner<input type="text" id="p-owner" value="${esc(plan.owner||l.agent)}"></label><label>Due<input type="date" id="p-due" value="${plan.due||""}"></label><label>Status<select id="p-status">${["planned","in progress","done","seller declined"].map(s=>`<option ${plan.status===s?"selected":""}>${s}</option>`).join("")}</select></label><label>Seller mortgage pmt / mo (optional)<input type="number" id="p-mortgage" value="${l._mortgage||plan.mortgage||""}" placeholder="for carrying cost"></label></div>
+  <div style="margin-top:8px"><label class="help">Plan notes</label><textarea id="p-notes" rows="3" placeholder="What was agreed, objections, next review date…">${esc(plan.notes||"")}</textarea></div>
+  <div class="pill-row" style="margin-top:8px"><button class="btn primary" id="p-save">Save plan</button><span class="help" id="p-status-msg">${plan.updatedAt?`Last saved ${new Date(plan.updatedAt).toLocaleString()}`:"Not saved yet"}</span></div>`; }
+function aiPanel(l,c,A){ const ai=c.ai||null; const busy=S.aiBusy[l.dealId];
+  return `<div class="ai"><div class="sec-head"><h3>Ask Claude for a full coaching read</h3></div><p class="help">Claude reads this property's Redfin data, photos, remarks, competition, engagement, market context and the playbook, then writes the diagnosis, pricing rationale, a remarks rewrite, the agent message in Orlando's voice and the seller guide. You can edit everything before sharing.</p>
+  <div class="pill-row" style="margin-top:8px"><button class="btn primary" id="ai-run" ${busy||!S.sample?"disabled":""}>${busy?"Thinking…":ai?"Regenerate":"Generate coaching"}</button>${busy?'<button class="btn" id="ai-stop">Stop</button>':""}${!S.sample?'<span class="help">Claude access is not available in this view.</span>':""}</div>
+  <div id="ai-out" style="margin-top:10px">${busy?`<div class="status">${esc(busy)}</div>`:""}${ai?aiRender(ai):""}</div></div>`; }
+function aiRender(ai){ return `<div class="help" style="margin-bottom:6px">Generated ${ai.at?new Date(ai.at).toLocaleString():""}</div>${ai.headline?`<h3>${esc(ai.headline)}</h3>`:""}${ai.diagnosis?`<ul style="padding-left:18px">${ai.diagnosis.map(d=>`<li>${esc(d)}</li>`).join("")}</ul>`:""}${ai.pricing?`<h4>Pricing rationale</h4><p style="white-space:pre-wrap;font-size:13.5px">${esc(ai.pricing)}</p>`:""}${ai.photoNotes?`<h4>Photo and presentation notes</h4><p style="white-space:pre-wrap;font-size:13.5px">${esc(ai.photoNotes)}</p>`:""}${ai.remarksRewrite?`<h4>Remarks rewrite</h4><div class="remarks">${esc(ai.remarksRewrite)}</div><button class="btn sm" data-copy-text="remarksRewrite" style="margin-top:4px">Copy remarks</button>`:""}${ai.rocketAngle?`<h4>Rocket angle</h4><p style="white-space:pre-wrap;font-size:13.5px">${esc(ai.rocketAngle)}</p>`:""}<p class="help">The agent message and seller guide Claude wrote are loaded into Share-outs.</p>`; }
+function sharePanel(l,c,A,bands){ const ai=c.ai||{}; const ov=c.shareouts||{}; const em=emailText(l,A,bands,c);
+  const texts={slack: ov.slack ?? ai.slackPost ?? slackText(l,A,bands,c), email: ov.email ?? ai.emailBody ?? em.body, subject: ov.subject ?? ai.emailSubject ?? em.subject, seller: ov.seller ?? ai.sellerGuide ?? sellerGuide(l,A,bands)};
+  S._share=texts;
+  const gmail=`https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(texts.subject)}&body=${encodeURIComponent(texts.email)}`;
+  return `<div class="tabs">${[["slack","Slack message"],["email","Email"],["seller","Seller guide"],["report","Health report"]].map(([k,v])=>`<button class="${S.stab===k?"on":""}" data-stab="${k}">${v}</button>`).join("")}</div>
+  <div class="share">${S.stab==="slack"?`<textarea id="sh-slack">${esc(texts.slack)}</textarea><div class="pill-row" style="margin-top:8px"><button class="btn primary" data-copy-share="slack">Copy for Slack</button><button class="btn" data-reset-share="slack">Reset to generated</button><button class="btn" data-log-send="slack">Log as sent</button></div>`:
+    S.stab==="email"?`<label class="help">Subject</label><input type="text" id="sh-subject" value="${esc(texts.subject)}" style="width:100%;margin-bottom:6px"><textarea id="sh-email">${esc(texts.email)}</textarea><div class="pill-row" style="margin-top:8px"><a class="btn primary" href="${gmail}" target="_blank" rel="noopener">Open in Gmail ↗</a><button class="btn" data-copy-share="email">Copy email</button><button class="btn" data-reset-share="email">Reset</button><button class="btn" data-log-send="email">Log as sent</button></div>`:
+    S.stab==="seller"?`<textarea id="sh-seller">${esc(texts.seller)}</textarea><div class="pill-row" style="margin-top:8px"><button class="btn primary" data-copy-share="seller">Copy seller guide</button><button class="btn" data-reset-share="seller">Reset</button></div>`:
+    `<p class="help">A one-page branded Listing Health Report with photos, competition, diagnosis, pricing paths, the plan and the cost of waiting. Download it as a web page (prints cleanly to PDF from any browser) or as a PDF.</p><div class="pill-row"><button class="btn primary" id="dl-html">Download report (.html)</button><button class="btn" id="dl-pdf">Download PDF</button><button class="btn" id="preview-report">Preview</button></div><div id="report-preview" style="margin-top:10px"></div>`}
+  ${(c.sent||[]).length?`<p class="help" style="margin-top:8px">Sent: ${c.sent.slice(-5).map(s=>`${s.channel} ${new Date(s.at).toLocaleDateString()}`).join(" · ")}</p>`:""}</div>`; }
+function notesPanel(l,c){ const notes=(c.notes||[]).slice().sort((a,b)=>a.at<b.at?1:-1);
+  return `<div class="notes" id="notes-list">${notes.map(n=>`<div class="note"><img src="${n.avatar||avatarFor(n.by)}" alt=""><div><div class="who"><span data-uid="${esc(n.by||"")}">${esc(n.name||"Someone")}</span><span class="when">${new Date(n.at).toLocaleString()}</span></div><div>${esc(n.text)}</div></div></div>`).join("")||'<p class="help">No notes yet. Use this during the stale listings hour to capture ideas, seller feedback and decisions.</p>'}</div>
+  <div style="margin-top:10px"><textarea id="n-text" rows="2" placeholder="Add a note for the team…"></textarea><div class="pill-row" style="margin-top:6px"><button class="btn primary" id="n-add">Post note</button></div></div>`; }
+function avatarFor(uid){ return "data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#de3341"/><text x="14" y="19" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#fff">${(uid||"?").slice(2,3).toUpperCase()}</text></svg>`); }
+
+/* ============================================================ tooltips & events */
+function bindTips(){ const tip=$("#tip"); document.querySelectorAll("[data-tip]").forEach(el=>{ el.addEventListener("mousemove",e=>{ tip.textContent=el.dataset.tip; tip.style.left=(e.clientX+12)+"px"; tip.style.top=(e.clientY+12)+"px"; tip.classList.add("show"); }); el.addEventListener("mouseleave",()=>tip.classList.remove("show")); }); }
+function afterRender(){
+  if(S.ptab==="notes"&&S.sel&&S.user) resolveNames();
+  const cp=$("#calc-price"); if(cp) cp.addEventListener("change",()=>{ S._calcPrice=+cp.value||1000000; render(); });
+  const csv=$("#csv"); if(csv) csv.addEventListener("change",e=>handleCSV(e.target.files[0]));
+  const drop=$("#drop"); if(drop){ drop.addEventListener("dragover",e=>{e.preventDefault();}); drop.addEventListener("drop",e=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) handleCSV(f); }); }
+}
+async function resolveNames(){ const ids=[...document.querySelectorAll("[data-uid]")].map(e=>e.dataset.uid).filter(Boolean); if(!ids.length) return; try{ const ps=await S.user.profiles([...new Set(ids)]); document.querySelectorAll("[data-uid]").forEach(e=>{ const p=ps[e.dataset.uid]; if(p&&p.name) e.textContent=p.name; }); }catch(_){} }
+document.addEventListener("click", async e=>{
+  const t=e.target.closest("[data-v],[data-go],[data-open],[data-agent],[data-tier],[data-unflag],#f-clear,[data-sort],#back,[data-band],[data-ptab],[data-stab],#p-save,#e-add,#n-add,[data-copy-share],[data-reset-share],[data-log-send],#dl-html,#dl-pdf,#preview-report,#ai-run,#ai-stop,[data-copy-text],[data-copy-link],#btn-settings,#add-mgr,[data-del-mgr],[data-unassign],[data-team-filter]");
+  if(!t) return;
+  if(t.dataset.v){ S.view=t.dataset.v; S.sel=null; location.hash=S.view; render(); return; }
+  if(t.dataset.go){ S.view=t.dataset.go; S.sel=null; render(); return; }
+  if(t.dataset.open){ openProp(t.dataset.open); return; }
+  if(t.dataset.agent!=null){ S.f.agent=t.dataset.agent; S.view="listings"; S.sel=null; render(); return; }
+  if(t.dataset.teamFilter){ S.f.team=t.dataset.teamFilter; S.view="listings"; render(); return; }
+  if(t.dataset.tier){ const i=S.f.tiers.indexOf(t.dataset.tier); i<0?S.f.tiers.push(t.dataset.tier):S.f.tiers.splice(i,1); render(); return; }
+  if(t.dataset.unflag){ S.f.flags=S.f.flags.filter(x=>x!==t.dataset.unflag); render(); return; }
+  if(t.id==="f-clear"){ S.f={...S.f,q:"",tiers:[],agent:"",city:"",band:"",team:"",flags:[]}; $("#q").value=""; render(); return; }
+  if(t.dataset.sort){ if(S.f.sort===t.dataset.sort) S.f.dir=S.f.dir==="desc"?"asc":"desc"; else { S.f.sort=t.dataset.sort; S.f.dir=["address","agent","city"].includes(t.dataset.sort)?"asc":"desc"; } render(); return; }
+  if(t.id==="back"){ S.sel=null; location.hash=S.view; render(); return; }
+  if(t.dataset.band){ S.band=t.dataset.band; render(); return; }
+  if(t.dataset.ptab){ S.ptab=t.dataset.ptab; render(); return; }
+  if(t.dataset.stab){ S.stab=t.dataset.stab; render(); return; }
+  if(t.id==="p-save"){ await savePlan(); return; }
+  if(t.id==="e-add"){ await addEngagement(); return; }
+  if(t.id==="n-add"){ await addNote(); return; }
+  if(t.dataset.copyShare){ const k=t.dataset.copyShare; const el=$("#sh-"+k); const txt=k==="email"?`Subject: ${$("#sh-subject").value}\n\n${el.value}`:el.value; await copyText(txt); await saveShareEdits(); return; }
+  if(t.dataset.resetShare){ const c=S.coaching[S.sel]||{}; const ov={...(c.shareouts||{})}; delete ov[t.dataset.resetShare]; if(t.dataset.resetShare==="email") delete ov.subject; await writeCoaching(S.sel,{shareouts:ov}); render(); return; }
+  if(t.dataset.logSend){ const c=S.coaching[S.sel]||{}; await saveShareEdits(); await writeCoaching(S.sel,{sent:[...(c.sent||[]),{channel:t.dataset.logSend,at:new Date().toISOString(),by:S.me&&S.me.id||null}]}); toast("Logged"); render(); return; }
+  if(t.id==="dl-html"){ await downloadReport("html"); return; }
+  if(t.id==="dl-pdf"){ await downloadReport("pdf"); return; }
+  if(t.id==="preview-report"){ const l=S.listings[S.sel]; const c=S.coaching[S.sel]||{}; const A=analyze(l,c); const html=reportHTML(l,A,priceBands(l,A),c); const box=$("#report-preview"); box.innerHTML=`<div class="print-report" style="border:1px solid var(--line);border-radius:8px;overflow:hidden"><iframe id="rep-frame" style="width:100%;height:640px;border:0;background:#fff" title="Report preview"></iframe></div>`; const fr=$("#rep-frame"); fr.srcdoc=html; return; }
+  if(t.id==="ai-run"){ runAI(S.sel); return; }
+  if(t.id==="ai-stop"){ if(S._aiCtl) S._aiCtl.abort(); return; }
+  if(t.dataset.copyText){ const c=S.coaching[S.sel]||{}; await copyText((c.ai||{})[t.dataset.copyText]||""); return; }
+  if(t.dataset.copyLink){ await copyText(location.href.split("#")[0]+"#deal-"+t.dataset.copyLink); return; }
+  if(t.id==="btn-settings"){ openSettings(); return; }
+  if(t.id==="add-mgr"){ const n=$("#new-mgr").value.trim(); if(!n) return; S.teams.managers=[...(S.teams.managers||[]),{name:n,agents:[]}]; await saveTeams(); render(); return; }
+  if(t.dataset.delMgr!=null){ S.teams.managers.splice(+t.dataset.delMgr,1); await saveTeams(); render(); return; }
+  if(t.dataset.unassign){ const [i,a]=t.dataset.unassign.split("|"); S.teams.managers[+i].agents=(S.teams.managers[+i].agents||[]).filter(x=>x!==a); await saveTeams(); render(); return; }
+});
+document.addEventListener("change", async e=>{
+  const t=e.target;
+  if(t.id==="f-agent"){ S.f.agent=t.value; render(); } else if(t.id==="f-city"){ S.f.city=t.value; render(); } else if(t.id==="f-band"){ S.f.band=t.value; render(); } else if(t.id==="f-team"){ S.f.team=t.value; render(); }
+  else if(t.id==="f-flag"){ if(t.value&&!S.f.flags.includes(t.value)) S.f.flags.push(t.value); render(); }
+  else if(t.dataset.assign!=null){ const i=+t.dataset.assign; if(t.value){ S.teams.managers[i].agents=[...(S.teams.managers[i].agents||[]),t.value]; await saveTeams(); render(); } }
+  else if(t.dataset.move){ t.closest(".move").classList.toggle("on",t.checked); }
+  else if(t.id==="comp-notes"){ await writeCoaching(S.sel,{compNotes:t.value}); }
+  else if(t.id.startsWith("a-")){ S.a[t.id.slice(2)]=+t.value; try{localStorage.setItem("slcc-assump",JSON.stringify(S.a));}catch(_){} render(); }
+});
+$("#q").addEventListener("input", e=>{ S.f.q=e.target.value; if(S.view!=="listings"||S.sel){ S.view="listings"; S.sel=null; } render(); });
+function openProp(id){ S.sel=id; S.ptab=S.ptab==="ai"?"ai":"plan"; location.hash="deal-"+id; render(); window.scrollTo({top:0}); if(S.db&&!S.photos[id]){ S.db.doc("photos/"+id).get().then(s=>{ if(s.exists){ S.photos[id]=(s.data().thumbs||[]); if(S.sel===id) render(); } }).catch(()=>{}); } }
+function openSettings(){ const main=$("#main"); const box=document.createElement("div"); box.className="card"; box.style.marginBottom="12px"; box.innerHTML=`<div class="sec-head"><h3>Model assumptions</h3><span class="sub">used in pricing paths and cost of waiting · saved on this device</span><span class="spacer"></span><button class="btn sm ghost" id="a-close">Close</button></div><div class="assump">${[["rate","30-yr rate %",0.01],["down","Down payment %",1],["carryPct","Carrying cost %/yr",0.1],["driftPct","Market drift %/mo",0.1],["discStale","Stale discount %",0.5],["discUltra","Ultra discount %",0.5],["discExtreme","Extreme discount %",0.5],["urgencyPct","Reprice urgency premium %",0.1],["closingPct","Closing costs %",0.5]].map(([k,l,st])=>`<label>${l}<input type="number" id="a-${k}" value="${S.a[k]}" step="${st}"></label>`).join("")}</div>`; main.prepend(box); box.querySelector("#a-close").addEventListener("click",()=>box.remove()); }
+
+/* ============================================================ writes */
+async function writeCoaching(id, patch){ if(!S.db){ S.coaching[id]={...(S.coaching[id]||{}),...patch}; toast("Saved on this device only"); return; } const cur=S.coaching[id]||{}; const next={...cur,...patch,dealId:id,updatedAt:new Date().toISOString()}; S.coaching[id]=next; try{ await S.db.doc("coaching/"+id).set(next); }catch(e){ toast(e.code==="invalid_argument"?"You do not have permission to save here":"Could not save, try again"); } }
+async function savePlan(){ const id=S.sel; const movesSel=[...document.querySelectorAll("[data-move]:checked")].map(i=>i.dataset.move); const plan={moves:movesSel,band:$("#p-band").value,targetPrice:+$("#p-target").value||null,owner:$("#p-owner").value,due:$("#p-due").value,status:$("#p-status").value,notes:$("#p-notes").value,mortgage:+$("#p-mortgage").value||null,updatedAt:new Date().toISOString(),by:S.me&&S.me.id||null}; if(plan.band) S.band=plan.band; S.listings[id]._mortgage=plan.mortgage||0; await writeCoaching(id,{plan}); toast("Plan saved"); render(); }
+async function addEngagement(){ const id=S.sel; const c=S.coaching[id]||{}; const v=k=>{ const el=$("#e-"+k); return el&&el.value!==""?+el.value:null; }; const entry={date:$("#e-date").value||todayISO(),views:v("views"),favorites:v("fav"),xouts:v("x"),tours:v("tours"),offers:v("offers"),by:S.me&&S.me.id||null,at:new Date().toISOString()}; if(entry.views==null&&entry.favorites==null){ toast("Enter at least views or favorites"); return; } const eng=(c.engagement||[]).filter(x=>x.date!==entry.date).concat(entry); await writeCoaching(id,{engagement:eng}); toast("Logged"); render(); }
+async function addNote(){ const id=S.sel; const txt=$("#n-text").value.trim(); if(!txt) return; const c=S.coaching[id]||{}; const me=S.me||{}; await writeCoaching(id,{notes:[...(c.notes||[]),{text:txt,at:new Date().toISOString(),by:me.id||null,name:""}]}); render(); }
+async function saveShareEdits(){ const id=S.sel; const c=S.coaching[id]||{}; const ov={...(c.shareouts||{})}; let changed=false; for(const k of ["slack","email","seller"]){ const el=$("#sh-"+k); if(el&&el.value!==S._share[k]){ ov[k]=el.value; changed=true; } } const sub=$("#sh-subject"); if(sub&&sub.value!==S._share.subject){ ov.subject=sub.value; changed=true; } if(changed) await writeCoaching(id,{shareouts:ov}); }
+async function saveTeams(){ if(!S.db){ toast("Saved on this device only"); return; } try{ await S.db.doc("teams/current").set({managers:S.teams.managers,updatedAt:new Date().toISOString()}); toast("Teams saved"); }catch(e){ toast("Could not save teams"); } }
+async function downloadReport(kind){ const l=S.listings[S.sel]; const c=S.coaching[S.sel]||{}; const A=analyze(l,c); const html=reportHTML(l,A,priceBands(l,A),c); const name=`Listing-Health-${l.address.replace(/[^A-Za-z0-9]+/g,"-")}-${todayISO()}`; if(!S.downloads){ await copyText(html); toast("Downloads unavailable here; report HTML copied to clipboard"); return; }
+  try{ if(kind==="html"){ await S.downloads.save({filename:name+".html",data:html}); toast("Report saved"); return; }
+    toast("Rendering PDF…"); const holder=document.createElement("div"); holder.style.cssText="position:fixed;left:-20000px;top:0;width:816px;background:#fff"; const fr=document.createElement("iframe"); fr.style.cssText="width:816px;height:1100px;border:0"; holder.appendChild(fr); document.body.appendChild(holder); fr.srcdoc=html; await new Promise(r=>fr.onload=r); const body=fr.contentDocument.body; const canvas=await html2canvas(body,{scale:1.5,backgroundColor:"#fff",width:816,windowWidth:816}); const {jsPDF}=window.jspdf; const pdf=new jsPDF({unit:"pt",format:"letter"}); const pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight(); const ratio=pw/canvas.width; const pageH=ph/ratio; let y=0; while(y<canvas.height){ const slice=document.createElement("canvas"); slice.width=canvas.width; slice.height=Math.min(pageH,canvas.height-y); slice.getContext("2d").drawImage(canvas,0,y,canvas.width,slice.height,0,0,canvas.width,slice.height); if(y>0) pdf.addPage(); pdf.addImage(slice.toDataURL("image/jpeg",0.9),"JPEG",0,0,pw,slice.height*ratio); y+=pageH; } holder.remove(); await S.downloads.save({filename:name+".pdf",data:pdf.output("blob")}); toast("PDF saved"); }
+  catch(e){ if(e&&e.code==="declined") return; toast("Could not save the file"+(e&&e.message?": "+e.message:"")); } }
+/* ============================================================ AI coaching */
+async function runAI(id){ const l=S.listings[id]; const c=S.coaching[id]||{}; const A=analyze(l,c); const bands=priceBands(l,A); const rf=l.redfin||{}; if(!S.sample) return;
+  S.aiBusy[id]="Reading the listing, competition and market…"; render();
+  const ctl=new AbortController(); S._aiCtl=ctl;
+  const mk=S.market||{}; const pb=S.playbook||{};
+  const data={listing:{address:l.address,city:l.city,agent:l.agent,dom:l.dom,tier:TIERS[l.tier].label,listDate:l.listDate,expiration:l.expirationDate,currentPrice:l.currentPrice,originalPrice:l.originalPrice,priceDrop:l.priceDrop,priceDropAmt:l.priceDropAmt,lastReduction:l.lastReductionDate,redfinEstimate:A.anchors.estimate,predictedClose:A.anchors.predicted,soldCompValue:A.anchors.compSold,blendedMarketValue:A.anchors.marketValue,gapToMarketPct:A.gapMV,hotHome:rf.isHot,openHouse:rf.hasOpenHouse,beds:rf.beds,baths:rf.baths,sqft:rf.sqft,pricePerSqft:rf.pricePerSqft,yearBuilt:rf.yearBuilt,photoCount:rf.photoCount,lowResPhotos:rf.lowResPhotos,leadPhotoBrightness:(rf.thumbs&&rf.thumbs[0]||{}).brightness,remarks:rf.remarks,priceHistory:rf.history,cumulativeDom:rf.cumulativeDom},
+    competition:{activeCount:(rf.similarActive||[]).length,newerThanOurs:rf.newerCompetitors,cheaperThanOurs:rf.cheaperCompetitors,activeMedianPrice:rf.activeMedianPrice,activeMedianPpsf:rf.activeMedianPpsf,soldMedianPrice:rf.soldMedianPrice,soldMedianPpsf:rf.soldMedianPpsf,soldMedianDom:rf.soldMedianDom,topActives:(rf.similarActive||[]).slice(0,8),recentSolds:(rf.similarSold||[]).slice(0,6)},
+    engagement:(c.engagement||[]).slice(-4), manualComps:c.compNotes||"", ruleDiagnosis:A.dx, pricingPaths:bands, assumptions:S.a, existingPlan:c.plan||null, teamNotes:(c.notes||[]).slice(-6).map(n=>n.text),
+    market:{rates:mk.rates,narrative:mk.narrative,talkingPoints:mk.talkingPoints&&mk.talkingPoints[l.band],stats:(mk.stats||[]).slice(0,25)},
+    playbook:{moves:moves().map(m=>`${m.id}: ${m.label} — ${m.desc}`),tierPlay:pb.tierPlays&&pb.tierPlays[l.tier],pricingRules:pb.pricing,relaunchRules:pb.relaunch,stats:(pb.stats||[]).slice(0,12)}};
+  const prompt=`You are a senior Redfin Powered by Rocket sales manager in Los Angeles coaching an agent on a stale listing. Voice: direct, supportive, accountable, specific, optimistic, no filler. Use the data below (it is real) and never invent numbers that are not in it. Where you compute something, show the math briefly.
+
+DATA (JSON):
+${JSON.stringify(data)}
+
+Reply with ONLY a JSON object with these string fields (arrays where noted):
+{
+ "headline": one sentence verdict on why this listing is stale and what will fix it,
+ "diagnosis": array of 3 to 5 strings, each a cause plus the evidence from the data,
+ "pricing": 120 to 200 words: which of the three price paths you recommend and why, referencing estimate, predicted close, sold comps, competition and days on market; mention search-bracket positioning if relevant,
+ "photoNotes": 60 to 120 words on photo count, lead photo, what to reshoot or reorder, and whether twilight/video/drone would help for this property type and price band,
+ "remarksRewrite": a full rewritten MLS remarks paragraph (900 to 1300 characters) that leads with the buyer benefit, names the incentive or financing hook, and ends with a call to action. Keep the real facts from the existing remarks.,
+ "rocketAngle": 50 to 100 words on how a Rocket rate buydown or payment-led message could be marketed for this exact price,
+ "moves": array of 3 to 6 move IDs from the playbook list, best first,
+ "slackPost": a Slack-ready message from the manager to the agent (use emojis sparingly, *bold* for headers, bullets, 150 to 250 words) that summarizes the read, the plan, the price path, the cost of waiting and a clear ask with a deadline,
+ "emailSubject": subject line,
+ "emailBody": a 250 to 400 word email from the manager to the agent in the same voice, ending with an offer to join the seller call,
+ "sellerGuide": a plain-English seller conversation guide the agent can use (300 to 450 words): opening, what buyers see, three paths, cost of waiting, non-price moves, financing lever, close with a decision; include three questions to ask the seller
+}`;
+  try{ const imgs=[]; const ph=S.photos[id]||rf.thumbs||[]; if(S.imagesOk&&ph.length){ for(const p of ph.slice(0,4)){ try{ const b=await (await fetch(p.src)).blob(); imgs.push(b); }catch(_){} } }
+    const out=await S.sample.json(prompt,{signal:ctl.signal,modelTier:"default",cache:false,images:imgs.length?imgs:undefined,onText:({text})=>{ S.aiBusy[id]=`Writing… ${Math.round(text.length/40)} lines`; const el=$("#ai-out .status"); if(el) el.textContent=S.aiBusy[id]; }});
+    if(out&&typeof out==="object"){ out.at=new Date().toISOString(); out.by=S.me&&S.me.id||null; const ov={...(c.shareouts||{})}; delete ov.slack; delete ov.email; delete ov.subject; delete ov.seller; await writeCoaching(id,{ai:out,shareouts:ov}); toast("Coaching ready"); }
+  }catch(e){ if(e&&e.code!=="cancelled") toast({not_granted:"Claude access was declined for this page",rate_limited:"Claude is busy, try again in a minute",invalid_json:"Claude's answer could not be parsed, try again"}[e&&e.code]||"Claude could not complete this request"); }
+  finally{ delete S.aiBusy[id]; S._aiCtl=null; render(); }
+}
+/* ============================================================ CSV upload */
+function parseCSV(text){ const rows=[]; let row=[],cur="",q=false; for(let i=0;i<text.length;i++){ const ch=text[i]; if(q){ if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; } else if(ch==='"') q=true; else if(ch===","){ row.push(cur); cur=""; } else if(ch==="\n"||ch==="\r"){ if(ch==="\r"&&text[i+1]==="\n") i++; row.push(cur); rows.push(row); row=[]; cur=""; } else cur+=ch; } if(cur!==""||row.length){ row.push(cur); rows.push(row); } const head=rows.shift().map(h=>h.replace(/^﻿/,"").trim()); return rows.filter(r=>r.length>1).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||"").trim()]))); }
+const moneyP=s=>{ if(!s) return null; s=String(s).replace(/[$,]/g,""); let m=1; if(/K$/i.test(s)){m=1000;s=s.slice(0,-1);} else if(/M$/i.test(s)){m=1e6;s=s.slice(0,-1);} const v=parseFloat(s); return isNaN(v)?null:Math.round(v*m); };
+const dateP=s=>{ if(!s) return null; const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(!m) return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:null; const y=m[3].length===2?"20"+m[3]:m[3]; return `${y}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}`; };
+async function handleCSV(file){ const out=$("#upload-out"); if(!file) return; const text=await file.text(); let rows; try{ rows=parseCSV(text); }catch(e){ out.innerHTML=`<p style="color:var(--t-extreme)">Could not parse the file.</p>`; return; }
+  if(!rows.length||!("Deal Id" in rows[0])){ out.innerHTML=`<p style="color:var(--t-extreme)">This does not look like the Redfin sheet (no "Deal Id" column).</p>`; return; }
+  const asOf=todayISO(); const seen=new Set(); const writes=[]; const changes={newStale:[],newUltra:[],newExtreme:[],priceDrops:[],gone:[],added:[]}; const prevTiers=tierCounts(listingsArr());
+  for(const r of rows){ const id=r["Deal Id"]; if(!id) continue; seen.add(id); const old=S.listings[id]; const dom=/^\d+$/.test(r["Days On Mkt"])?+r["Days On Mkt"]:null; const cp=moneyP(r["Current Price"]);
+    const base={dealId:id,status:r["Deal Status"],listDate:dateP(r["List Date"]),checkInDate:dateP(r["Check In Date"]),expirationDate:dateP(r["Listing Expiration Date"]),agent:r["Agent Name"],address:(r["Street Address"]||"").replace(/,\s*$/,"").trim(),city:r["City"],state:r["State Code"],priceDrop:(r["Price Drop?"]||"").toUpperCase()==="Y",priceDropAmt:moneyP(r["Price Drop Amt"]),lastReductionDate:dateP(r["Last Price Reduction Date"]),dom,dealUrl:r["Deal URL"],suggestedPrice:moneyP(r["Suggested Price Amount"]),originalPrice:moneyP(r["Original Price Amount"]),currentPrice:cp,redfinEstimate:moneyP(r["Current Redfin Estimate"]),predictedClose:moneyP(r["Predicted Close Price Amount"]),hotHome:r["Hot Home Score"]==="1",asOf};
+    base.tier=tierOf(dom); base.band=bandOf(cp); base.dataIssues=[]; if(!base.address||base.address==="-") base.dataIssues.push("No address in sheet"); if(!cp) base.dataIssues.push("No current price in sheet");
+    base.daysToExpiration=base.expirationDate?daysBetween(asOf,base.expirationDate):null; const est=base.redfinEstimate, pc=base.predictedClose; base.gapToEstimatePct=cp&&est?+((cp-est)/est*100).toFixed(1):null; base.gapToPredictedPct=cp&&pc?+((cp-pc)/pc*100).toFixed(1):null; base.reductionPct=base.originalPrice&&cp&&base.originalPrice>cp?+((base.originalPrice-cp)/base.originalPrice*100).toFixed(1):0;
+    const hist=(old&&old.history||[]).filter(h=>h.asOf!==asOf).concat([{asOf,dom,price:cp,estimate:est,tier:base.tier,hot:base.hotHome,priceDrop:base.priceDrop,status:base.status}]).slice(-26);
+    const doc={...(old||{}),...base,history:hist,redfin:old&&old.redfin&&old.redfin.ok?{...old.redfin,stale:true}:{ok:false,pending:true}};
+    if(old){ if(old.tier==="watch"&&base.tier==="stale") changes.newStale.push(id); if(["watch","stale"].includes(old.tier)&&base.tier==="ultra") changes.newUltra.push(id); if(old.tier!=="extreme"&&base.tier==="extreme") changes.newExtreme.push(id); if(old.currentPrice&&cp&&cp<old.currentPrice) changes.priceDrops.push(id); } else changes.added.push(id);
+    writes.push(doc); }
+  for(const id of Object.keys(S.listings)) if(!seen.has(id)) changes.gone.push(id);
+  out.innerHTML=`<p><b>${rows.length} rows parsed.</b> ${changes.added.length} new, ${changes.gone.length} no longer on the sheet, ${changes.newStale.length} crossed 30 days, ${changes.newUltra.length} crossed 60, ${changes.newExtreme.length} crossed 90, ${changes.priceDrops.length} price drops.</p><div class="pill-row"><button class="btn primary" id="apply-csv">Apply to the dashboard</button></div>`;
+  $("#apply-csv").addEventListener("click", async ()=>{ if(!S.db){ toast("Database not available in this view"); return; } $("#apply-csv").disabled=true; let n=0; try{ for(const d of writes){ await S.db.doc("listings/"+d.dealId).set(d); n++; if(n%10===0) $("#apply-csv").textContent=`Saving ${n}/${writes.length}…`; } for(const id of changes.gone){ const d=S.listings[id]; if(d){ await S.db.doc("listings/"+id).set({...d,status:"Removed from sheet",removedAt:asOf}); } } const prev=S.meta||{}; await S.db.doc("meta/current").set({asOf,count:writes.length,prevCount:prev.count||null,prevTiers,prevAsOf:prev.asOf||null,tiers:tierCounts(writes),changes,enrichment:"pending",updatedAt:new Date().toISOString()}); toast("Dashboard updated for "+dstr(asOf)); S.view="overview"; render(); }catch(e){ toast("Save failed: "+(e.message||e.code)); $("#apply-csv").disabled=false; } });
+}
+/* ============================================================ boot */
+function routeFromHash(){ const h=location.hash.replace("#",""); if(h.startsWith("deal-")){ S.sel=h.slice(5); } else if(h&&["overview","listings","agents","teams","market","playbook","upload"].includes(h)) S.view=h; }
+async function boot(){
+  try{ const a=JSON.parse(localStorage.getItem("slcc-assump")||"null"); if(a) Object.assign(S.a,a); }catch(_){}
+  routeFromHash(); window.addEventListener("hashchange",()=>{ routeFromHash(); render(); });
+  const hot=window.claude&&window.claude.hot; if(hot&&hot.snapshot) hot.snapshot(()=>({view:S.view,sel:S.sel,f:S.f,ptab:S.ptab}));
+  if(hot&&hot.data){ Object.assign(S,{view:hot.data.view||S.view,sel:hot.data.sel||S.sel,f:hot.data.f||S.f,ptab:hot.data.ptab||S.ptab}); }
+  render();
+  const [db,user,sample,downloads]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("sample"),claude.use("downloads")]);
+  S.db=db; S.user=user; S.sample=sample; S.downloads=downloads;
+  if(user){ try{ S.me=await user.me(); S.canWrite=await user.can("data.write"); }catch(_){} }
+  if(sample){ try{ const lim=await sample.limits(); S.imagesOk=!!(lim&&lim.images); }catch(_){} }
+  if(!db){ S.loaded=true; $("#asof").textContent="Database unavailable in this view"; render(); return; }
+  let first=true; const ready=()=>{ if(first){ first=false; S.loaded=true; } render(); };
+  db.collection("listings").onSnapshot(snap=>{ const next={}; snap.docs.forEach(d=>{ const x=d.data(); if(x&&x.dealId&&x.status!=="Removed from sheet") next[x.dealId]=x; }); const mort={}; for(const k in S.listings) if(S.listings[k]._mortgage) mort[k]=S.listings[k]._mortgage; S.listings=next; for(const k in mort) if(S.listings[k]) S.listings[k]._mortgage=mort[k]; ready(); }, e=>{ S.loaded=true; $("#asof").textContent="Could not load listings"; render(); });
+  db.collection("coaching").onSnapshot(snap=>{ const next={}; snap.docs.forEach(d=>{ const x=d.data(); if(x) next[d.id]=x; }); S.coaching=next; for(const k in next){ if(S.listings[k]&&next[k].plan&&next[k].plan.mortgage) S.listings[k]._mortgage=next[k].plan.mortgage; } if(S.loaded) render(); }, ()=>{});
+  db.doc("meta/current").onSnapshot(s=>{ S.meta=s.exists?s.data():null; $("#asof").textContent=S.meta?`Week of ${dstr(S.meta.asOf)} · ${S.meta.count||""} listings${S.meta.enrichment==="pending"?" · enrichment pending":""}`:"No snapshot yet"; if(S.loaded) render(); }, ()=>{});
+  db.doc("market/current").onSnapshot(s=>{ S.market=s.exists?s.data():null; if(S.market&&S.market.rates&&S.market.rates.rate30&&!localStorage.getItem("slcc-assump")) S.a.rate=S.market.rates.rate30; if(S.loaded) render(); }, ()=>{});
+  db.doc("playbook/current").onSnapshot(s=>{ S.playbook=s.exists?s.data():null; if(S.loaded) render(); }, ()=>{});
+  db.doc("teams/current").onSnapshot(s=>{ S.teams=s.exists?s.data():{managers:[]}; if(S.loaded) render(); }, ()=>{});
+  setTimeout(()=>{ if(!S.loaded){ S.loaded=true; render(); } }, 12000);
+}
+boot();
+</script>
