@@ -428,7 +428,7 @@ function svgLines(series, opts={}){
   for(const s of series){ const pts=s.points.filter(p=>p.y!=null); if(!pts.length) continue; const d=pts.map((p,i)=>`${i?"L":"M"}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join(" ");
     g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" ${s.dash?'stroke-dasharray="5 4"':""}></path>`;
     pts.forEach((p,i)=>{ const last=i===pts.length-1; g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${last?5:4}" fill="${s.color}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(s.name)} · ${esc(p.label||"")}"></circle>`; });
-    const lp=pts[pts.length-1]; g+=`<text x="${Math.min(X(lp.x)+6,W-pr-40)}" y="${Y(lp.y)-8}" style="fill:var(--fg);font-weight:600">${esc(s.name)}</text>`; }
+    const lp=pts[pts.length-1]; const right=X(lp.x)>W*0.72; g+=`<text x="${right?X(lp.x)-8:X(lp.x)+6}" y="${Y(lp.y)-9}" text-anchor="${right?"end":"start"}" style="fill:var(--fg);font-weight:600">${esc(s.name)}</text>`; }
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label||"chart")}">${g}</svg>`;
 }
 /* ============================================================ views */
@@ -437,7 +437,7 @@ function render(){
   if(!S.loaded){ main.innerHTML=`<div class="empty"><b>Loading the weekly snapshot</b>Listings, coaching notes and market context load from the dashboard's shared database.</div>`; return; }
   if(!listingsArr().length){ main.innerHTML=`<div class="empty"><b>No listings yet</b>Upload this week's sheet under Weekly upload, or ask Claude to run the enrichment pipeline.</div>`; return; }
   S._A=analyzeAll();
-  if(S.sel && S.listings[S.sel]) main.innerHTML=viewProperty(S.listings[S.sel]);
+  if(S.sel && S.listings[S.sel]){ main.innerHTML=viewProperty(S.listings[S.sel]); loadPhotos(S.sel); }
   else main.innerHTML=({overview:viewOverview,listings:viewListings,agents:viewAgents,teams:viewTeams,market:viewMarket,playbook:viewPlaybook,upload:viewUpload}[S.view]||viewOverview)();
   bindTips(); afterRender();
 }
@@ -446,7 +446,8 @@ function viewOverview(){
   const arr=listingsArr(); const A=S._A; const c=tierCounts(arr); const prev=S.meta&&S.meta.prevTiers||null; const staleArr=arr.filter(l=>["stale","ultra","extreme"].includes(l.tier));
   const vol=staleArr.reduce((s,l)=>s+(l.currentPrice||0),0); const avgDom=arr.length?arr.reduce((s,l)=>s+(l.dom||0),0)/arr.length:0; const drops=staleArr.filter(l=>l.priceDrop).length; const gaps=staleArr.map(l=>A[l.dealId].gapMV).filter(g=>g!=null); const avgGap=gaps.length?gaps.reduce((a,b)=>a+b,0)/gaps.length:null;
   const queue=arr.filter(l=>l.tier!=="watch").sort((a,b)=>A[b.dealId].priority-A[a.dealId].priority).slice(0,10);
-  const exp=arr.filter(l=>l.daysToExpiration!=null&&l.daysToExpiration<=45).sort((a,b)=>a.daysToExpiration-b.daysToExpiration);
+  const exp=arr.filter(l=>l.daysToExpiration!=null&&l.daysToExpiration>=0&&l.daysToExpiration<=45&&!(l.dataIssues&&l.dataIssues.length)).sort((a,b)=>a.daysToExpiration-b.daysToExpiration);
+  const bad=arr.filter(l=>l.dataIssues&&l.dataIssues.length);
   const byAgent={}; for(const l of staleArr){ (byAgent[l.agent]=byAgent[l.agent]||{n:0,vol:0,ex:0}); byAgent[l.agent].n++; byAgent[l.agent].vol+=l.currentPrice||0; if(l.tier==="extreme") byAgent[l.agent].ex++; }
   const agents=Object.entries(byAgent).sort((a,b)=>b[1].n-a[1].n||b[1].vol-a[1].vol).slice(0,8);
   const changes=S.meta&&S.meta.changes||null; const mk=S.market;
@@ -473,6 +474,7 @@ function viewOverview(){
       <div class="card"><h3>Tier mix</h3><div style="margin-top:8px">${svgTier(c,prev)}</div></div>
       <div class="card"><h3>Days on market</h3>${svgHist(arr)}</div>
       <div class="card"><div class="sec-head"><h3>Agents carrying the most stale inventory</h3></div><div class="tbl"><table><tr><th>Agent</th><th class="num">Stale+</th><th class="num">90+</th><th class="num">Volume</th><th>Team</th></tr>${agents.map(([a,v])=>`<tr class="row" data-agent="${esc(a)}"><td>${esc(a)}</td><td class="num">${v.n}</td><td class="num">${v.ex}</td><td class="num">${fmt$(v.vol,{k:true})}</td><td>${esc(managerOf(a)||"—")}</td></tr>`).join("")}</table></div></div>
+      ${bad.length?`<div class="card" style="border-color:var(--t-extreme)"><h3>Sheet rows to fix</h3><div class="pill-row" style="margin-top:8px">${bad.map(l=>`<button class="chip" data-open="${l.dealId}">Deal ${l.dealId} · ${esc(l.agent)} · ${esc(l.dataIssues[0])}</button>`).join("")}</div></div>`:""}
       ${exp.length?`<div class="card"><h3>Expiring within 45 days</h3><div class="queue" style="margin-top:8px">${exp.slice(0,6).map(l=>`<div class="qitem" data-open="${l.dealId}"><div class="rank">${l.daysToExpiration}d</div><div><div class="addr">${esc(l.address)}, ${esc(l.city)}</div><div class="why">${esc(l.agent)} · ${badge(l.tier)} ${l.dom} days</div></div><div class="r">${dstr(l.expirationDate)}</div></div>`).join("")}</div></div>`:""}
     </div>
   </div>`;
@@ -662,7 +664,8 @@ document.addEventListener("change", async e=>{
   else if(t.id.startsWith("a-")){ S.a[t.id.slice(2)]=+t.value; try{localStorage.setItem("slcc-assump",JSON.stringify(S.a));}catch(_){} render(); }
 });
 $("#q").addEventListener("input", e=>{ S.f.q=e.target.value; if(S.view!=="listings"||S.sel){ S.view="listings"; S.sel=null; } render(); });
-function openProp(id){ S.sel=id; S.ptab=S.ptab==="ai"?"ai":"plan"; location.hash="deal-"+id; render(); window.scrollTo({top:0}); if(S.db&&!S.photos[id]){ S.db.doc("photos/"+id).get().then(s=>{ if(s.exists){ S.photos[id]=(s.data().thumbs||[]); if(S.sel===id) render(); } }).catch(()=>{}); } }
+function loadPhotos(id){ if(!S.db||S.photos[id]||S._photoReq===id) return; S._photoReq=id; S.db.doc("photos/"+id).get().then(s=>{ S.photos[id]=s.exists?(s.data().thumbs||[]):[]; if(S.sel===id) render(); }).catch(()=>{ S.photos[id]=[]; }).finally(()=>{ if(S._photoReq===id) S._photoReq=null; }); }
+function openProp(id){ S.sel=id; S.ptab=S.ptab==="ai"?"ai":"plan"; location.hash="deal-"+id; render(); window.scrollTo({top:0}); }
 function openSettings(){ const main=$("#main"); const box=document.createElement("div"); box.className="card"; box.style.marginBottom="12px"; box.innerHTML=`<div class="sec-head"><h3>Model assumptions</h3><span class="sub">used in pricing paths and cost of waiting · saved on this device</span><span class="spacer"></span><button class="btn sm ghost" id="a-close">Close</button></div><div class="assump">${[["rate","30-yr rate %",0.01],["down","Down payment %",1],["carryPct","Carrying cost %/yr",0.1],["driftPct","Market drift %/mo",0.1],["discStale","Stale discount %",0.5],["discUltra","Ultra discount %",0.5],["discExtreme","Extreme discount %",0.5],["urgencyPct","Reprice urgency premium %",0.1],["closingPct","Closing costs %",0.5]].map(([k,l,st])=>`<label>${l}<input type="number" id="a-${k}" value="${S.a[k]}" step="${st}"></label>`).join("")}</div>`; main.prepend(box); box.querySelector("#a-close").addEventListener("click",()=>box.remove()); }
 
 /* ============================================================ writes */

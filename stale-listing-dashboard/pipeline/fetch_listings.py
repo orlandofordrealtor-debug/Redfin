@@ -131,6 +131,23 @@ def resolve(address, city, state):
         for suf in ("St", "Ave", "Rd", "Dr", "Ln", "Way", "Blvd", "Ct", "Pl", "Cir"):
             tries.append(f"{base} {suf} {city} {state}")
     tries.append(f"{base} {city}")
+    # the sheet's city is often the mailing city, not the one Redfin files the home under
+    tries.append(f"{a} {state}")
+    tries.append(f"{base} {state}")
+    if m and not has_suffix:
+        for suf in ("St", "Ave", "Rd", "Dr", "Ln", "Way", "Blvd", "Ct", "Pl", "Cir"):
+            tries.append(f"{base} {suf} {state}")
+    tries.append(base)
+    # directional prefix the MLS carries but Redfin's address file drops, and address ranges
+    nodir = re.sub(r"^(\d+)\s+[NSEW]\s+", r"\1 ", base)
+    if nodir != base:
+        tries += [f"{nodir} {city} {state}", f"{nodir} {state}", nodir]
+    rng = re.match(r"^(\d+)-\d+\s+(.+)$", base)
+    if rng:
+        one = f"{rng.group(1)} {rng.group(2)}"
+        tries += [f"{one} {city} {state}", f"{one} {state}", one]
+    seen = set()
+    tries = [t for t in tries if not (t in seen or seen.add(t))]
     for q in tries:
         try:
             url, pid = _lookup(q)

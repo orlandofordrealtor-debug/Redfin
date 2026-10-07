@@ -1,0 +1,78 @@
+{
+  "asOf": "2026-10-07",
+  "rates": {"rate30": 7.28, "rate15": 6.60, "rate30_1wk": 7.03, "rate30_1mo": 6.71, "rate30_3mo": 6.43, "rate30_6mo": 6.46, "rate30_12mo": 6.34, "rate30_2026low": 5.98, "asOf": "week of Oct 1, 2026", "source": "Freddie Mac PMMS", "url": "https://www.freddiemac.com/pmms", "jumbo": 7.27, "note": "Six straight weekly increases; highest PMMS reading since November 2023. Daily trackers were 7.5%+ on Oct 7."},
+  "narrative": "Here is what changed in the last six weeks. Mortgage rates went from 6.65% in late August to 7.28% on October 1, the highest since November 2023, after the Fed's first hike since 2023 (to 3.75 to 4.00% on Sep 16) and a 10-year Treasury above 5% for the first time since 2007. A buyer who could reach $1,000,000 in July can now reach about $910,000 on the same payment. The buyer did not change their mind about your seller's house; the math changed.\n\nThe demand data confirms it. Purchase applications are down 14% year over year. Redfin's pending sales are at a near three-year low. Reports On Housing counts 3,296 pending sales in LA County over the last 30 days, the weakest September since it began tracking in 2012, while active inventory climbed to 15,003. Expected Market Time jumped from 129 to 137 days in two weeks, versus 114 a year ago. In Orange County, 43% of active listings have already cut price. Nationally, sellers outnumber buyers by 58%, the widest gap on record.\n\nYet closed-sale data still looks fine: LA County's August median was $922K, up 1.4%, with 37.6% selling above list at a 99.5% sale-to-list ratio. That is the trap. Those closings were negotiated in June and July at 6.4 to 6.5%. Expect September and October closings to show the strain. Two markets now exist: homes priced to today's buyer, which still draw multiple offers, especially under $750K and in the Inland Empire, and homes priced to spring, which sit.\n\nFor a listing at 60-plus days, the honest conversation is this: the home has been shown to the buyers who were looking, at a payment they could not make. A 5% price reduction roughly offsets the purchasing power lost since July. Waiting for rates to fall is a bet against a Fed that just signaled more hikes, into a season where listings thin out but buyers thin out faster. Prop 19 portability, equity (distressed sales in LA County: 247 all year) and strong rents give most sellers options; the one option that is closing is the price from May.",
+  "talkingPoints": {
+    "under750": [
+      "Still the healthiest band: Victorville, Lancaster and Palmdale sell above list 46 to 53% of the time in 38 to 55 days (Aug 2026). Buyers here are the most rate sensitive: 0.5 point is $165 to $205 a month on a $600K to $750K purchase.",
+      "Price-drop shares in these cities run 32 to 37%, double LA County's 17%. A sub-$750K listing at 60+ days with no offers is almost always price or condition, not the market.",
+      "Yucca Valley is the exception: 77 DOM, 96.8% sale-to-list, 36.7% price drops. FAIR Plan insurance rises 29.1% on Oct 15. Get an insurance quote before relisting.",
+      "Condos: LA County condo Expected Market Time is 188 days versus 117 for detached. HOA dues plus insurance hit the payment-constrained buyer hardest."
+    ],
+    "750to1500": [
+      "This is the county median (LA $922K to $947K, Ventura $867K to $925K). Buyers here lost roughly $80K to $130K of purchasing power since July on the same payment and usually have no cash cushion.",
+      "Ventura County shows the softest data of the four counties: sales down 11.9% year over year, median down 1.3%, 21.4% of listings with price drops. Do not use OC's appreciation as a reference.",
+      "OC under $1M moves in 45 days, so a stale OC condo or entry home is a pricing issue. 43% of OC actives have cut; median list ($1.725M SFR) sits far above median closed ($1.41M).",
+      "Script: The buyers who toured in August were qualified at 6.7%. The same buyers are qualified today for about 5% less house. We can meet them or wait for the next group, which the data says is smaller."
+    ],
+    "1500to3000": [
+      "Jumbo rates are 7.27 to 7.66%, so the payment on a $2M home moved from about $10.4K to $10.9K in six weeks before taxes and a rising insurance bill. OC $2M+ takes 58 days versus 39 for $1M to $2M.",
+      "LA County's $2M+ segment has an Expected Market Time of 258 days, nearly twice the county average. Last year's band table showed $2M to $3M at 149 days and $3M to $4M at 222; expect worse now.",
+      "Cash buyers (27% of sales nationally) are the leverage. A cash-ready price beats a financed-buyer fantasy price.",
+      "Beverly Hills study: homes priced within 3% of value closed in 29 days at 99.1%; homes that needed a reduction averaged $342K below original list and 73 days. A stale listing here has usually already lost more than the reduction it resisted."
+    ],
+    "over3000": [
+      "Discounts are the norm: 14% and 42% under-ask closings reported in Beverly Hills; Malibu absorption 12%. The 2025 band table had $4M to $8M at 309 days and $8M+ at 593.",
+      "Measure ULA still takes 4% at about $5M and 5.5% at about $10M inside LA city, a $200K to $550K haircut that Beverly Hills or Santa Monica comps do not carry.",
+      "The 10-year at 5.3% matters twice: jumbo rates and the opportunity cost of parking cash. Treasuries paying 5% risk-free compete with the house; the listing needs to be finished, private and turnkey.",
+      "Insurance is a closing risk: FAIR Plan premiums in high-fire zones may double on Oct 15 renewals. Get a bindable quote into the disclosure package.",
+      "Seller over 55 moving down: Prop 19 lets them carry the old tax base to any California replacement home up to three times, which often matters more than the last 3% of price."
+    ]
+  },
+  "stats": [
+    {"metric": "30-yr fixed rate", "geo": "US (Freddie Mac)", "value": "7.28% (6.34% a year ago)", "period": "Oct 1 2026", "source": "https://www.freddiemac.com/pmms"},
+    {"metric": "Fed funds rate", "geo": "US", "value": "3.75 to 4.00%, first hike since 2023", "period": "Sep 16 2026", "source": "https://www.cnn.com/2026/09/16/economy/fed-rate-decision-sept-2026-your-money"},
+    {"metric": "10-yr Treasury", "geo": "US", "value": "5.24 to 5.31%", "period": "Sep 30 to Oct 6 2026", "source": "https://www.federalreserve.gov/releases/h15/"},
+    {"metric": "Purchase mortgage applications", "geo": "US (MBA)", "value": "-14% YoY", "period": "week ending Sep 25 2026", "source": "https://www.housingwire.com/articles/mba-mortgage-applications-down-6/"},
+    {"metric": "Sellers vs buyers", "geo": "US (Redfin)", "value": "57.9% more sellers than buyers, record", "period": "Aug 2026", "source": "https://www.redfin.com/news/press-releases/buyers-vs-sellers-august-2026/"},
+    {"metric": "Pending sales", "geo": "US (Redfin)", "value": "-5.4% YoY, lowest in nearly 3 years", "period": "4 wks to Sep 13 2026", "source": "https://www.redfin.com/news/press-releases/redfin-reports-pending-home-sales-dip-to-lowest-level-in-nearly-3-years/"},
+    {"metric": "Active listings with price drop", "geo": "US / LA metro / Anaheim / Riverside-SB", "value": "21.1% / 16.5% / 19.5% / 17.8%", "period": "4 wks to Sep 20 2026", "source": "https://www.redfin.com/news/price-drop-rate-ticks-up/"},
+    {"metric": "Months of supply", "geo": "US (NAR)", "value": "4.9 months, highest in over a decade", "period": "Aug 2026", "source": "https://www.nar.realtor/newsroom/nar-existing-home-sales-report-shows-2-0-decrease-in-august"},
+    {"metric": "Median sale price", "geo": "LA County (Redfin)", "value": "$921,915 (+1.4% YoY); $589/sqft (-1.5%)", "period": "Aug 2026", "source": "https://www.redfin.com/county/321/CA/Los-Angeles-County/housing-market"},
+    {"metric": "Median days on market", "geo": "LA County (Redfin)", "value": "49 (51 a year ago)", "period": "Aug 2026", "source": "https://www.redfin.com/county/321/CA/Los-Angeles-County/housing-market"},
+    {"metric": "Sale-to-list / sold above list / price drops", "geo": "LA County (Redfin)", "value": "99.5% / 37.6% / 17.0%", "period": "Aug 2026", "source": "https://www.redfin.com/county/321/CA/Los-Angeles-County/housing-market"},
+    {"metric": "Expected Market Time", "geo": "LA County (Reports On Housing)", "value": "137 days (114 a year ago); detached 117, condo 188, $2M+ 258", "period": "Sep 28 2026", "source": "https://hamidkoochak.com/blog/los-angeles-county-housing-report-8"},
+    {"metric": "Active inventory / pending (30 days)", "geo": "LA County (Reports On Housing)", "value": "15,003 active / 3,296 pending, weakest September since 2012", "period": "Sep 28 2026", "source": "https://hamidkoochak.com/blog/los-angeles-county-housing-report-8"},
+    {"metric": "Median price (SFR)", "geo": "LA / OC / Ventura / San Bernardino (C.A.R.)", "value": "$946,950 / $1,452,500 / $925,000 / $522,370", "period": "Aug 2026", "source": "https://www.car.org/aboutus/mediacenter/newsreleases/2026releases/august2026sales"},
+    {"metric": "Sales YoY", "geo": "LA / OC / Ventura / San Bernardino (C.A.R.)", "value": "+2.1% / -3.4% / -11.9% / -9.3%", "period": "Aug 2026", "source": "https://www.car.org/aboutus/mediacenter/newsreleases/2026releases/august2026sales"},
+    {"metric": "Median price / DOM / price drops", "geo": "Orange County (Redfin)", "value": "$1,220,914 / 43 days / 19.4%", "period": "Aug 2026", "source": "https://www.redfin.com/county/332/CA/Orange-County/housing-market"},
+    {"metric": "Active listings with a reduction", "geo": "Orange County (MLS)", "value": "43%; DOM under $1M 45, $1M to $2M 39, $2M+ 58", "period": "Oct 5 2026", "source": "https://www.ocrealestateinc.com/orange-county-housing-report/"},
+    {"metric": "Median price / DOM / price drops", "geo": "Ventura County (Redfin)", "value": "$867,098 / 49 days / 21.4%", "period": "Aug 2026", "source": "https://www.redfin.com/county/358/CA/Ventura-County/housing-market"},
+    {"metric": "Median price / DOM / price drops", "geo": "San Bernardino County (Redfin)", "value": "$548,165 / 54 days / 19.4%", "period": "Aug 2026", "source": "https://www.redfin.com/county/338/CA/San-Bernardino-County/housing-market"},
+    {"metric": "Median price / DOM / price drops / sold above list", "geo": "Victorville (Redfin)", "value": "$440K / 55 / 32.4% / 53.0%", "period": "Aug 2026", "source": "https://www.redfin.com/city/20509/CA/Victorville/housing-market"},
+    {"metric": "Median price / DOM / price drops / sold above list", "geo": "Lancaster (Redfin)", "value": "$480K / 38 / 35.3% / 45.7%", "period": "Aug 2026", "source": "https://www.redfin.com/city/10233/CA/Lancaster/housing-market"},
+    {"metric": "Median price / DOM / sale-to-list / price drops", "geo": "Yucca Valley (Redfin)", "value": "$395K / 77 / 96.8% / 36.7%", "period": "Aug 2026", "source": "https://www.redfin.com/city/21031/CA/Yucca-Valley/housing-market"},
+    {"metric": "Delistings", "geo": "LA metro (Redfin)", "value": "7.8% of listings delisted; 70.2% of delistings were stale 60+ days (Sep 2025)", "period": "Apr 2026 / Sep 2025", "source": "https://www.redfin.com/news/press-releases/redfin-reports-sellers-are-pulling-their-homes-off-the-market-at-near-record-rates/"},
+    {"metric": "Luxury (top 5%) median / DOM", "geo": "LA metro (Redfin)", "value": "$4,512,482 / 49 days; new luxury listings -7.2% YoY", "period": "3 mo to May 31 2026", "source": "https://www.redfin.com/news/luxury-housing-market-may-2026/"},
+    {"metric": "FAIR Plan insurance", "geo": "California", "value": "+29.1% average effective Oct 15 2026", "period": "Oct 2026", "source": "https://www.kqed.org/news/12094860/california-fair-plan-announces-29-1-rate-hike-for-homeowners-this-fall"},
+    {"metric": "Purchasing power", "geo": "Calc at 20% down", "value": "$684 per $100K borrowed per month at 7.28% vs $622 a year ago; each 0.5 pt moves buying power about 5%", "period": "Oct 2026", "source": "https://www.freddiemac.com/pmms/docs/PMMS_history.csv"}
+  ],
+  "affordability": [
+    {"price": 600000, "pi728": 3284, "pi678": 3123, "pi778": 3449},
+    {"price": 750000, "pi728": 4105, "pi678": 3904, "pi778": 4311},
+    {"price": 1000000, "pi728": 5474, "pi678": 5205, "pi778": 5748},
+    {"price": 1500000, "pi728": 8211, "pi678": 7807, "pi778": 8622},
+    {"price": 2000000, "pi728": 10947, "pi678": 10409, "pi778": 11496},
+    {"price": 3000000, "pi728": 16421, "pi678": 15614, "pi778": 17244}
+  ],
+  "news": [
+    "Fed raised the funds rate 25 bp to 3.75 to 4.00% on Sep 16 2026, first hike since 2023; 16 of 18 participants see at least one more hike in 2026; next meeting Oct 27-28.",
+    "10-year Treasury 5.24 to 5.31% (Sep 30 to Oct 6), 2007-era highs, driven by energy inflation.",
+    "C.A.R. chief economist: a more restrictive Fed through year-end may keep borrowing costs elevated and dampen autumn activity.",
+    "California FAIR Plan rates rise 29.1% on Oct 15 2026; State Farm +17% homeowners. Insurability is a contingency risk in foothill and WUI listings.",
+    "Prop 19 unchanged: 55+ sellers can carry their tax base up to three times. Measure ULA (4% over about $5M, 5.5% over about $10M in LA city) remains in effect.",
+    "Zillow titled its September report an early winter: newly pending sales -8.5% YoY nationally; 27.4% of listings with a cut."
+  ],
+  "driftPctPerMonth": -0.4,
+  "notFound": ["LA band-level DOM and price-drop shares at the exact dashboard price bands", "2026 national share of stale listings", "C.A.R. county unsold inventory index for Aug 2026"]
+}

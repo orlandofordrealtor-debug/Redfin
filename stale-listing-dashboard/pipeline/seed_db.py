@@ -13,7 +13,30 @@ Week-over-week history: each listing document carries history[] with one entry
 per snapshot it appeared in. The previous snapshot's history (or an existing
 db export) is merged in when --prev is given.
 """
-import argparse, json, os, shutil
+import argparse, base64, io, json, os, shutil
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
+
+def shrink(thumb, width, quality):
+    """Re-encode a cached data-URI thumbnail smaller so photo documents stay compact."""
+    if Image is None or not thumb.get("src", "").startswith("data:image/jpeg;base64,"):
+        return thumb
+    try:
+        im = Image.open(io.BytesIO(base64.b64decode(thumb["src"].split(",", 1)[1]))).convert("RGB")
+        w, h = im.size
+        if w > width:
+            im = im.resize((width, max(1, int(h * width / w))), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, "JPEG", quality=quality, optimize=True)
+        t = dict(thumb)
+        t["src"] = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+        return t
+    except Exception:
+        return thumb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -67,6 +90,7 @@ def main():
         doc = dict(r)
         rf = dict(doc.get("redfin") or {})
         thumbs = rf.pop("thumbs", []) or []
+        thumbs = [shrink(t, 480 if i == 0 else 200, 66 if i == 0 else 56) for i, t in enumerate(thumbs[:6])]
         rf["thumbCount"] = len(thumbs)
         doc["redfin"] = rf
         doc["history"] = hist
@@ -100,6 +124,21 @@ def main():
             shutil.copy(src, os.path.join(out, f"{name}.json"))
             manifest.append({"collection": name, "doc_id": "current", "file": f"{name}.json"})
     json.dump(manifest, open(os.path.join(out, "manifest.json"), "w"), indent=1)
+    # size-aware batches for the ArtifactData tool (1 MiB per request, 50 writes max)
+    batches, cur, cur_bytes = [], [], 0
+    for m in manifest:
+        if m["collection"] in ("playbook", "market"):
+            continue
+        b = os.path.getsize(os.path.join(out, m["file"]))
+        if cur and (cur_bytes + b > 850_000 or len(cur) >= 50):
+            batches.append(cur); cur, cur_bytes = [], 0
+        cur.append({"op": "set", "collection": m["collection"], "doc_id": m["doc_id"], "file_path": os.path.join(out, m["file"])}); cur_bytes += b
+    if cur:
+        batches.append(cur)
+    bdir = os.path.join(out, "batches"); os.makedirs(bdir, exist_ok=True)
+    for i, b in enumerate(batches):
+        json.dump(b, open(os.path.join(bdir, f"batch{i:02d}.json"), "w"), separators=(",", ":"))
+    print(f"{len(batches)} push batches in {bdir}")
     sizes = [os.path.getsize(os.path.join(out, m["file"])) for m in manifest]
     print(f"{len(manifest)} documents in {out}; largest {max(sizes)/1024:.0f} KB; enriched {meta['enriched']}/{len(recs)}; unresolved {meta['unresolved']}")
     print("changes:", {k: len(v) for k, v in changes.items()})
