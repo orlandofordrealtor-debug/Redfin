@@ -1,4 +1,4 @@
-<title>Stale to Sold</title>
+<title>Redfin's Sold Standard</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
 /* Layout: sticky brand bar + tab nav; Overview is a KPI row over two columns (queue + charts); Listings is a filter rail over a dense table; a property opens as a full-width work surface with a left fact column and right coaching column. */
@@ -166,7 +166,7 @@ tr.row{cursor:pointer} tr.row:hover td{background:var(--surface-2)}
 <div class="topbar">
   <div class="in">
     <a href="#overview" aria-label="Redfin Powered by Rocket"><img class="logo-light" src="brand/logo.svg" alt="Redfin Powered by Rocket"><img class="logo-dark" src="brand/logo-reversed.svg" alt="Redfin Powered by Rocket"></a>
-    <div class="title"><span id="app-name">Stale to <em>Sold</em></span><small id="asof">Loading weekly snapshot…</small></div>
+    <div class="title"><span id="app-name">Redfin's <em>Sold Standard</em></span><small id="asof">Loading weekly snapshot…</small></div>
     <div class="tools"><div class="search" role="search">🔎 <input id="q" type="text" placeholder="Search address, agent, city, deal ID" aria-label="Search listings"></div><button class="btn sm" id="btn-settings">⚙ Assumptions</button></div>
   </div>
   <nav class="nav" id="nav">
@@ -188,7 +188,7 @@ tr.row{cursor:pointer} tr.row:hover td{background:var(--surface-2)}
 <script>
 "use strict";
 /* ============================================================ state */
-const APP_NAME="Stale to Sold"; const APP_TAG="Stale Listing Command Center";
+const APP_NAME="Redfin's Sold Standard"; const APP_TAG="Stale Listing Command Center";
 const S = {
   listings:{}, coaching:{}, photos:{}, meta:null, market:null, playbook:null,
   view:"overview", sel:null, ptab:"studio", stab:"slack", band:"intermediate", radius:1.0, heroIdx:0, draft:{}, assetTab:"pdf",
@@ -485,7 +485,7 @@ function reportHTML(l, A, bands, c){
   if(bands) h+=`<h2>Pricing paths</h2><div class="bands">${["conservative","intermediate","aggressive"].map(k=>`<div class="band ${k===S.band?"on":""}"><span class="muted">${bands[k].label}</span><b>${fmt$(bands[k].price)}</b><span class="muted">${fmt$(bands[k].cutAmt)} · ${bands[k].cutPct.toFixed(1)}% · ${bands[k].ppsf?fmt$(bands[k].ppsf)+"/sf · ":""}~${fmt$(bands[k].pay)}/mo</span><div style="font-size:11.5px;margin-top:4px"><b>Who it fits:</b> ${esc(bands[k].who)}</div></div>`).join("")}</div>${["conservative","intermediate","aggressive"].map(k=>`<p style="font-size:12px;margin:8px 0"><b>${bands[k].label} (${fmt$(bands[k].price)}):</b> ${esc(bands[k].rationale)}</p>`).join("")}`;
   h+=`<h2>Action plan</h2><ol>${chosen.map(m=>`<li><b>${esc(m.label)}.</b> ${esc(m.desc)}</li>`).join("")}</ol><p><b>Owner:</b> ${esc(plan.owner||l.agent)} &nbsp; <b>Due:</b> ${plan.due?dstr(plan.due):"this week"}${plan.notes?`<br><b>Notes:</b> ${esc(plan.notes)}`:""}</p>`;
   if(cw) h+=`<h2>Cost of waiting</h2><table><tr><th>Days from today</th><th>Tier</th><th>Expected sale if held</th><th>Net to seller if held</th><th>Net if repriced now (${S.band})</th></tr>${cw.filter(x=>[0,30,60,90].includes(x.d)).map(x=>`<tr><td>${x.d}</td><td>${TIERS[x.tier].label}</td><td>${fmt$(x.holdSale)}</td><td>${fmt$(x.holdNet)}</td><td>${x.repNet?fmt$(x.repNet):"—"}</td></tr>`).join("")}</table><p class="muted">Assumptions: ${S.a.rate}% rate, ${S.a.down}% down, carrying ${S.a.carryPct}%/yr, market drift ${S.a.driftPct}%/mo, stale discounts ${S.a.discStale}/${S.a.discUltra}/${S.a.discExtreme}%, closing costs ${S.a.closingPct}%. Edit these in the dashboard.</p>`;
-  h+=`<div class="foot">Prepared with the Stale Listing Command Center. Market context: ${S.market?esc(S.market.asOf||""):""}. Figures are planning estimates, not appraisals.</div></body></html>`;
+  h+=`<div class="foot">Prepared with Redfin's Sold Standard. Market context: ${S.market?esc(S.market.asOf||""):""}. Figures are planning estimates, not appraisals.</div></body></html>`;
   return h;
 }
 /* ============================================================ data access */
@@ -796,7 +796,7 @@ function assetHTML(l,c,A,bands){ const d=studioState(l,c); const secs=resolvedSe
     if(x.key==="newcomp"){ h+=`<p>${esc(x.body)}</p>`; if(nc.length) h+=`<table><tr><th>New listing (last 30 days)</th><th>Price</th><th>$/sf</th><th>Bd/Ba</th><th>Sq ft</th><th>Dist</th><th>DOM</th></tr>${nc.slice(0,12).map(n=>`<tr><td>${n.url?`<a href="${esc(n.url)}">${esc(n.address)}</a>`:esc(n.address)}, ${esc(n.city||"")}</td><td>${fmt$(n.price)}${n.price&&l.currentPrice&&n.price<l.currentPrice?" ▼":""}</td><td>${fmt$(n.ppsf)}</td><td>${n.beds??"—"}/${n.baths??"—"}</td><td>${num(n.sqft)}</td><td>${n.distance!=null?n.distance+" mi":"—"}</td><td>${n.dom}</td></tr>`).join("")}</table>`; continue; }
     if(x.key==="cost"&&cw){ h+=`<p>${esc(x.body)}</p><table><tr><th>Days from today</th><th>Tier</th><th>Expected sale if held</th><th>Net if held</th><th>Net if repriced now</th></tr>${cw.filter(r=>[0,30,60,90].includes(r.d)).map(r=>`<tr><td>${r.d}</td><td>${TIERS[r.tier].label}</td><td>${fmt$(r.holdSale)}</td><td>${fmt$(r.holdNet)}</td><td>${r.repNet?fmt$(r.repNet):"—"}</td></tr>`).join("")}</table>`; continue; }
     h+=`<p>${esc(x.body)}</p>`; }
-  h+=`<div class="foot">Prepared with the Redfin Powered by Rocket Stale Listing Command Center. Market context as of ${S.market?esc(S.market.asOf||""):""}. Figures are planning estimates, not appraisals.</div></body></html>`; return h; }
+  h+=`<div class="foot">Prepared with Redfin's Sold Standard (Redfin Powered by Rocket). Market context as of ${S.market?esc(S.market.asOf||""):""}. Figures are planning estimates, not appraisals.</div></body></html>`; return h; }
 function assetPanel(l,c,A,bands){ const d=studioState(l,c); const k=S.assetTab; const name=`${(d.title||l.address).replace(/[^A-Za-z0-9]+/g,"-").slice(0,60)}-${todayISO()}`;
   if(k==="slack"){ const t=assetText(l,c,A,bands,"slack"); return `<textarea id="asset-slack" style="min-height:260px;font-size:13.5px">${esc(t)}</textarea><div class="pill-row" style="margin-top:8px"><button class="btn primary" data-asset-copy="asset-slack">Create and copy for Slack</button><button class="btn" data-log-send="slack">Log as sent</button></div>`; }
   if(k==="email"){ const t=assetText(l,c,A,bands,"email"); const subj=`${d.title||l.address}${d.tag?" · "+d.tag:""}`; return `<label class="help">Subject</label><input type="text" id="asset-subj" value="${esc(subj)}" style="width:100%;margin-bottom:6px"><textarea id="asset-email" style="min-height:260px;font-size:13.5px">${esc(t)}</textarea><div class="pill-row" style="margin-top:8px"><a class="btn primary" id="asset-gmail" href="https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subj)}&body=${encodeURIComponent(t)}" target="_blank" rel="noopener">Create in Gmail ↗</a><button class="btn" data-asset-copy="asset-email">Copy email</button><button class="btn" data-log-send="email">Log as sent</button></div>`; }

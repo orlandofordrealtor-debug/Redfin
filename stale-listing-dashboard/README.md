@@ -1,6 +1,6 @@
-# Stale Listing Command Center
+# Redfin's Sold Standard
 
-Redfin Powered by Rocket dashboard for the weekly stale listings hour. It turns the
+Redfin Powered by Rocket dashboard (the Stale Listing Command Center) for the weekly stale listings hour. It turns the
 weekly "active listings" sheet into a tiered, coachable view of every listing,
 pulls each property's public Redfin.com page (photos, remarks, price history,
 competition), layers on live market context, and produces shareable coaching
