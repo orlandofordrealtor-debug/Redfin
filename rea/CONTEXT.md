@@ -36,14 +36,15 @@ Gmail, Google Calendar, Google Drive, Slack, Docusign, Gamma, Higgsfield (image,
 
 - `research/real-estate-ai-teardown/`: 15 open-source real estate AI repos reverse engineered. Ranked patterns, compliance landmines, 12-skill roadmap, listing-data field dictionary.
 
-## Decisions and standing rules
+## Decisions and standing rules (confirmed by Orlando 2026-10-12)
 
-- REA means Reverse Engineer Anything (confirmed 2026-10-12). The thread is a sandbox for reverse engineering parts of the business and running improved versions in parallel.
+- **REA means Reverse Engineer Anything.** The thread is a sandbox for reverse engineering parts of the business and running improved versions in parallel.
+- **"Run it parallel" means a personal team operating system.** Orlando is rebuilding the parts of the business he touches as his own system for his 30 agents, independent of what corporate ships. Every drop should therefore land somewhere in `rea/OS.md` (the function map) and move a function from "corporate only" toward "sandbox version live." Metrics and shadow comparisons are still produced, but the goal is a working system, not just an experiment.
+- **Link types: all four.** Internal Redfin tools (screenshots and exports only), competitor and vendor products, content and ideas (video, podcasts, articles, posts, frameworks, prompts), software and repos.
+- **Default destinations: published artifacts, repo files, and Google Drive / Docs / Sheets.** Interactive products go out as artifacts. Teardowns, scripts, prompts, and templates are committed here. Documents and spreadsheets meant for editing inside Redfin's Google Workspace go to Drive. Gamma decks only on request.
+- **Data: real names everywhere.** Real agent and customer names are used in every output, including published artifacts and files sent to external generators. Orlando chose speed over anonymization. Artifacts are private by default; flag once per drop when a deliverable carries customer PII outside Redfin-controlled systems so the sharing decision is deliberate.
 - Compliance floor in `rea/PLAYBOOK.md` §5 applies to all agent- and client-facing output.
 
-## Open items (awaiting Orlando)
+## Open items
 
-- Which link types will be most common.
-- Default output destination (repo, artifacts, Drive, Gamma).
-- What "run it parallel" means operationally: shadow process with metrics, prototype replacements, or a personal team operating system.
-- Data boundaries: whether real agent and customer names may appear in repo files and published artifacts.
+- None blocking. Add here as they come up.

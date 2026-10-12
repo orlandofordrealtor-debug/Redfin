@@ -1,6 +1,6 @@
 # REA Playbook: Reverse Engineer Anything
 
-**Purpose.** Turn any link, file, screenshot, or description into (a) a clear understanding of how the thing works and (b) customizable products Orlando can run in parallel with the current workflow to compare outcomes. The sandbox exists to find better ways to do business for Orlando, his agents, and his clients.
+**Purpose.** Turn any link, file, screenshot, or description into (a) a clear understanding of how the thing works and (b) customizable products Orlando can run in parallel with the current workflow. The end state is a **personal team operating system**: the parts of the business Orlando touches, rebuilt as his own system for his 30 agents, running alongside what corporate ships. `rea/OS.md` is the map of that system; every drop should move one function on it forward.
 
 ---
 
@@ -58,8 +58,8 @@ Tone: senior consultant and sales leader. Direct, practical, agent-centric, cons
 |---|---|
 | The teardown itself | `REA.md` in the drop folder, committed |
 | Interactive dashboard, tool, calculator, command center | Published artifact, link in REA.md, HTML source in the drop folder |
-| Documents meant for sharing or editing | Claude Doc (when the connector is present) or Google Doc on request, link in REA.md |
-| Decks | Gamma or slides artifact on request, link in REA.md |
+| Documents and spreadsheets meant for editing or sharing inside Redfin's Google Workspace | Google Doc / Sheet in Orlando's Drive, link in REA.md |
+| Decks | Gamma or slides artifact, on request only, link in REA.md |
 | Scripts, email copy, Slack posts, prompts | In full inside REA.md and as separate files in the drop folder |
 | Skills | `skills/<name>/` from the template, referenced from REA.md |
 | Spreadsheets and models | `.xlsx` in the drop folder, or Google Sheet on request |
@@ -75,12 +75,16 @@ Applies to anything agent-facing or client-facing that comes out of a drop.
 - **RESPA / Rocket.** Rocket is an option, never a condition. Include the affiliated-business disclosure cue. Agents never quote rates, terms, or approval odds. Loan-officer handoff only with the client's consent.
 - **Pricing opinions.** "This is not an appraisal," with the evidence it rests on.
 - **Accuracy.** Facts only. Numbers echoed verbatim from the source. `Not provided` and `Verify before sending` where applicable. No fabricated stats, quotes, or market data.
-- **Data.** Anonymize agent and customer PII in published artifacts and anything sent to external generators unless Orlando says otherwise. Internal systems come in only as pastes and exports.
+- **Data.** Real agent and customer names are used everywhere, including published artifacts (Orlando's decision, 2026-10-12). Artifacts are private by default. Flag once per drop when a deliverable carries customer PII outside Redfin-controlled systems so the sharing decision is deliberate. Internal systems come in only as pastes and exports.
 - **Company policy.** Flag anything that would need compliance, legal, or leadership sign-off before use. Do not assume approval.
 
 ---
 
-## 6. Memory
+## 6. The operating system map
+
+`rea/OS.md` lists the business functions Orlando touches (lead intake through post-close, plus coaching, recruiting, marketing, and reporting). For each: how corporate does it today, what the sandbox version is, its status, and the drops that built it. When a drop completes, update the relevant row. When Orlando asks "where are we," read OS.md first.
+
+## 7. Memory
 
 - `rea/CONTEXT.md` holds durable context: role, team, tools, known workflows, preferences, decisions. Read at session start; update when something durable is learned.
 - `rea/INDEX.md` is the running log of every drop with date, object, tier, one-line outcome, and link.

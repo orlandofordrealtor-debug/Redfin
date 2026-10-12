@@ -1,7 +1,7 @@
 # Redfin
 Orlando's business skills and workflows. A **Reverse Engineer Anything (REA)** sandbox: drop a link, file, or screenshot and get back a teardown plus customizable products to run in parallel with today's workflow.
 
-Start here: [rea/PLAYBOOK.md](rea/PLAYBOOK.md) · Context: [rea/CONTEXT.md](rea/CONTEXT.md) · Log: [rea/INDEX.md](rea/INDEX.md)
+Start here: [rea/PLAYBOOK.md](rea/PLAYBOOK.md) · System map: [rea/OS.md](rea/OS.md) · Context: [rea/CONTEXT.md](rea/CONTEXT.md) · Log: [rea/INDEX.md](rea/INDEX.md)
 
 ## Contents
 
