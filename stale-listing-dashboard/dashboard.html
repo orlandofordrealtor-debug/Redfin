@@ -176,7 +176,8 @@ tr.row{cursor:pointer} tr.row:hover td{background:var(--surface-2)}
 .pop h5{margin:0 0 6px;font-family:var(--font-display);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)} .pop table{width:100%} .pop td{padding:3px 6px;font-size:12.5px;border-bottom:1px solid var(--line);vertical-align:top} .pop tr:last-child td{border-bottom:0}
 .kpi.has-pop .l .help{font-size:11px;opacity:.8}
 .badge.has-pop{cursor:help}
-.outliers{border:1px solid var(--t-extreme);background:var(--t-extreme-soft);border-radius:10px;padding:10px 12px;font-size:13.5px} .outliers b{color:var(--t-extreme)}
+.outliers{border:1px solid var(--t-extreme);border-left-width:5px;background:var(--surface);border-radius:10px;padding:10px 12px;font-size:13.5px} .outliers>.sec-head>b{color:var(--t-extreme);font-family:var(--font-display)} .outlier-tbl td{padding:6px 8px} .outlier-tbl .addr small{font-size:11.5px}
+.row-label{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:14px 0 8px} .row-label h4{color:var(--fg);font-size:12.5px} .row-label .help{font-size:12px}
 .chip.red{border-color:var(--t-extreme);color:var(--t-extreme);background:var(--surface)} .chip.red:hover{background:var(--t-extreme-soft)}
 .insights{margin-top:12px;display:grid;gap:8px} .insights h4{margin-bottom:2px}
 .insight{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)} .insight p{margin:0;font-size:14px;line-height:1.45} .insight .badge{margin-top:2px;white-space:normal;max-width:150px;text-align:left} @media (max-width:640px){.insight{grid-template-columns:1fr}}
@@ -699,24 +700,28 @@ function ohPop(kind, r, arr){
   return "";
 }
 function ohTile(kind, v, label, cls, trendKey, r, arr, opts={}){ return `<div class="kpi has-pop ${cls||""}" data-pop="${kind}" tabindex="0"><div class="v">${v}</div><div class="l">${label} <span class="help">ⓘ</span></div>${trendKey?kpiTrend(trendKey,{weeks:S.ohWeeks,...opts}):`<div class="d help">${opts.sub||""}</div>`}<div class="pop">${ohPop(kind,r,arr)}</div></div>`; }
-function ohOutliers(arr){ const red=arr.filter(O=>O.alerts.some(a=>["oh-spend","oh-duplicate","oh-zero"].includes(a.key))).sort((a,b)=>(b.duplicateRows||0)-(a.duplicateRows||0)||(b.active?1:0)-(a.active?1:0)||(b.spendPct||0)-(a.spendPct||0));
-  if(!red.length) return ""; return `<div class="outliers"><b>⚠ ${red.length} outlier${red.length>1?"s":""} to look at first</b><div class="pill-row" style="margin-top:6px">${red.slice(0,8).map(O=>`<button class="chip red" ${O.active?`data-open="${O.id}"`:`data-ohdeal="${O.id}"`} title="${esc(O.alerts.map(a=>a.label).join(" · "))}">${esc(O.address)} · ${esc(O.alerts[0].label)}${O.active?"":" · not active"}</button>`).join("")}${red.length>8?`<button class="chip" data-ohalert="oh-spend">+${red.length-8} more →</button>`:""}</div></div>`; }
+function ohOutliers(arr, opts={}){ const red=arr.filter(O=>O.alerts.some(a=>["oh-spend","oh-duplicate","oh-zero"].includes(a.key))).sort((a,b)=>(b.duplicateRows||0)-(a.duplicateRows||0)||(b.active?1:0)-(a.active?1:0)||(b.spendPct||0)-(a.spendPct||0));
+  if(!red.length) return ""; const n=opts.limit||6; const show=red.slice(0,n); const flag=O=>O.alerts.find(a=>["oh-duplicate","oh-zero","oh-spend"].includes(a.key));
+  return `<div class="outliers"><div class="sec-head" style="margin-bottom:6px"><b>⚠ Outliers · ${red.length} deal${red.length>1?"s":""} at or above ${S.a.ohSpendPct}% of commission${red.some(O=>O.duplicateRows>1)?", or listed more than once":""}</b><span class="sub">${red.filter(O=>O.active).length} active · click a row</span><span class="spacer"></span>${red.length>n?`<button class="btn sm" data-ohalert="oh-spend">All ${red.length} →</button>`:""}</div>
+    <div class="tbl"><table class="outlier-tbl"><thead><tr><th>Property</th><th>Status</th><th class="num">Opens</th><th class="num">Spend</th><th class="num">% of commission</th><th>Flags</th></tr></thead><tbody>${show.map(O=>`<tr class="row" ${O.active?`data-open="${O.id}"`:`data-ohdeal="${O.id}"`}><td><div class="addr">${esc(O.address)}<small>${esc(O.agentName)}</small></div></td><td class="nowrap">${O.active?`${badge(O.tier)} ${O.dom??"—"}d`:`<span class="badge b-muted">Not active</span>`}</td><td class="num">${O.opens}</td><td class="num">${fmt$(O.cost)}</td><td class="num" style="color:var(--t-extreme);font-weight:700">${O.spendPct!=null?O.spendPct.toFixed(0)+"%":"—"}</td><td><div class="pill-row">${O.alerts.map(a=>`<span class="badge ${a.sev==="high"?"b-extreme":"b-stale"}" title="${esc(a.label)}">${{"oh-spend":"High spend","oh-duplicate":"Duplicate rows","oh-zero":"Zero opens","oh-associate":"Associates only","oh-above-norm":"+"+O.vsNorm+" past norm"}[a.key]||a.key}</span>`).join("")}</div></td></tr>`).join("")}</tbody></table></div></div>`; }
 function ohProfitTable(r){ const H=ohHeldUp(); const rows=OH_TIER_ROWS.filter(([k])=>r.byTier[k]).map(([k,label])=>{ const b=r.byTier[k]; return `<tr><td>${label}</td><td class="num">${b.deals}</td><td class="num">${k==="inactive"?"—":Math.round(b.dom/b.deals)}</td><td class="num">${fmt$(b.commission,{k:true})}</td><td class="num">${fmt$(b.cost)}</td><td class="num" style="${b.commission&&b.cost/b.commission*100>=S.a.ohSpendPct?"color:var(--t-extreme);font-weight:600":""}">${b.commission?(b.cost/b.commission*100).toFixed(1)+"%":"—"}</td><td class="num">${(b.opens/b.deals).toFixed(1)}</td></tr>`; }).join("");
   return `<div class="tbl"><table><thead><tr><th>Status</th><th class="num">Deals</th><th class="num">Avg DOM</th><th class="num">Commission</th><th class="num">OH spend</th><th class="num">Spend %</th><th class="num">Opens/deal</th></tr></thead><tbody>${rows}</tbody></table></div>
   <div class="stat-strip" style="margin-top:8px"><span>Commission tied up in 60+ day listings <b>${fmt$(H.total,{k:true})}</b> across <b>${H.n}</b> listings</span><span>known from the sheet <b>${fmt$(H.known,{k:true})}</b> (${H.nKnown})</span><span>rest estimated at <b>${(H.rate*100).toFixed(1)}%</b> of list</span><span>already spent on opens there <b>${fmt$(H.spent)}</b></span></div>
   <p class="help" style="margin:6px 0 0">Every week a 60+ listing holds, that commission stays unearned while the seller carries the home and the open house meter keeps running. The cost-of-waiting model on each listing page turns this into seller net.</p>`; }
+function ohTilesRow(){
+  if(!ohLoaded()) return ""; const arr=ohScope(); const r=ohRollup(arr); const W=ohWeek()||{};
+  return `<div class="row-label"><h4>Open houses · trailing six months</h4><span class="help">sheet of ${dstr(W.sheetDate||W.asOf)} · ${r.deals} deals past the ${S.a.ohNorm}-open norm · ${r.active} still active · hover a tile for who, what and cost</span><span class="spacer"></span><button class="btn sm" data-v="openhouses">Full breakdown →</button></div>
+  <div class="grid kpis kpi-four">
+    ${ohTile("opens",r.opens,"Open houses held","","opens",r,arr,{badUp:true})}
+    ${ohTile("paid",r.paidOpens,"Paid (associate) opens","","paidOpens",r,arr,{badUp:true})}
+    ${ohTile("spend",fmt$(r.cost,{k:true}),"Estimated spend","","cost",r,arr,{badUp:true,fmt:v=>fmt$(v,{k:true}),pct:false})}
+    ${ohTile("high",r.highSpend,"Spend ≥ "+S.a.ohSpendPct+"% of commission","extreme","highSpend10",r,arr,{badUp:true})}
+  </div>`; }
 function ohOverview(){
   if(!ohLoaded()) return ""; const arr=ohScope(); const r=ohRollup(arr); const W=ohWeek()||{}; const ins=ohInsights(r,arr);
-  return `<div class="card sec" id="oh-exec"><div class="sec-head"><h3>Open house investment · trailing six months</h3><span class="sub">sheet of ${dstr(W.sheetDate||W.asOf)} · ${r.deals} deals past the ${S.a.ohNorm}-open norm · ${r.active} still active · hover a tile for who, what and cost</span><span class="spacer"></span><button class="btn sm primary" data-v="openhouses">Open house breakdown →</button></div>
+  return `<div class="card sec" id="oh-exec"><div class="sec-head"><h3>Open house investment · trailing six months</h3><span class="sub">${fmt$(r.cost,{k:true})} across ${r.deals} deals · ${fmt$(r.spendPerActiveListing)} per active listing · ${r.spendPct!=null?r.spendPct.toFixed(1)+"% of the "+fmt$(r.commission,{k:true})+" commission in play":""}</span><span class="spacer"></span><button class="btn sm primary" data-v="openhouses">Open house breakdown →</button></div>
     ${ohOutliers(arr)}
-    <div class="grid kpis" style="margin-top:10px">
-      ${ohTile("opens",r.opens,"Open houses held","","opens",r,arr,{badUp:true})}
-      ${ohTile("paid",r.paidOpens,"Paid (associate) opens","","paidOpens",r,arr,{badUp:true})}
-      ${ohTile("spend",fmt$(r.cost,{k:true}),"Estimated spend","","cost",r,arr,{badUp:true,fmt:v=>fmt$(v,{k:true}),pct:false})}
-      ${ohTile("per",fmt$(r.spendPerActiveListing),"Spend per active listing","","spendPerActiveListing",r,arr,{badUp:true,fmt:v=>fmt$(v),pct:false})}
-      ${ohTile("high",r.highSpend,"Spend ≥ "+S.a.ohSpendPct+"% of commission","extreme","highSpend10",r,arr,{badUp:true})}
-    </div>
-    <div class="grid two" style="margin-top:12px"><div><h4>Spend by listing tier</h4>${ohSpendByTier(r)}</div><div><h4>Time on market vs profitability</h4>${ohProfitTable(r)}</div></div>
+    <div class="grid two" style="margin-top:12px"><div class="trend-block"><div class="trend-head"><h4>Spend by listing tier</h4><span class="help">where the six-month spend sits today</span></div>${ohSpendByTier(r)}</div><div class="trend-block"><div class="trend-head"><h4>Time on market vs profitability</h4><span class="help">commission in play against what the opens cost</span></div>${ohProfitTable(r)}</div></div>
     ${ins.length?`<div class="insights"><h4>What to do with this</h4>${ins.map(i=>`<div class="insight"><span class="badge b-accent">${esc(i.tag)}</span><p>${esc(i.text)}</p>${i.go?`<button class="btn sm" data-ohgo="${esc(i.go)}">Show me →</button>`:""}</div>`).join("")}</div>`:""}
   </div>`;
 }
@@ -742,7 +747,7 @@ function viewOpenHouses(){
     <span class="search" style="min-width:200px;max-width:280px">🔎 <input id="of-q" type="text" placeholder="Address, agent or deal ID" value="${esc(f.q||"")}" aria-label="Search open houses"></span>
     <button class="btn sm ${any?"primary":"ghost"}" id="of-clear">${any?"Clear filters":"All "+all.length+" deals shown"}</button>
   </div>
-  ${ohOutliers(arr)}
+  ${ohOutliers(arr,{limit:8})}
   <div class="grid kpis" style="margin-top:10px">
     ${ohTile("opens",r.opens,"Open houses held","","opens",r,arr,{badUp:true})}
     ${ohTile("paid",r.paidOpens,"Paid (associate) opens","","paidOpens",r,arr,{badUp:true})}
@@ -802,6 +807,7 @@ function viewOverview(){
   const stale60=arr.filter(l=>(l.dom||0)>=60).length; const stale60Pct=arr.length?stale60/arr.length*100:0; const ws=trailingWeeks();
   return `
   <div class="sec-head"><h2>Executive summary</h2><span class="sub">Week of ${dstr(S.meta&&S.meta.asOf||todayISO())} · ${arr.length} active listings · ${staleArr.length} stale or worse</span></div>
+  <div class="row-label" style="margin-top:0"><h4>Listings · week of ${dstr(S.meta&&S.meta.asOf||todayISO())}</h4><span class="help">click a tile to open that bucket · bars are the trailing weeks</span></div>
   <div class="grid kpis kpi-head">
     <div class="kpi kpi-link" data-kpi="all" title="Open all listings"><div class="v">${arr.length}</div><div class="l">Active listings →</div>${kpiTrend("active")}</div>
     <div class="kpi ultra kpi-link" data-kpi="stale60" title="Open everything 60+ days"><div class="v">${stale60}</div><div class="l">Stale listings · 60+ →</div>${kpiTrend("stale60",{badUp:true})}</div>
@@ -818,6 +824,7 @@ function viewOverview(){
     <div class="kpi"><div class="v">${avgGap!=null?pct(avgGap):"—"}</div><div class="l">Avg gap to market value</div>${kpiTrend("avgDom",{badUp:true,fmt:v=>v.toFixed(0)+" avg DOM",pct:false})}</div>
     ${mk&&mk.rates?`<div class="kpi"><div class="v">${mk.rates.rate30}%</div><div class="l">30-yr fixed</div><div class="d">${mk.rates.rate30_1mo?`${(mk.rates.rate30-mk.rates.rate30_1mo)>=0?"+":""}${(mk.rates.rate30-mk.rates.rate30_1mo).toFixed(2)} vs 1 mo`:""} · ${esc(mk.rates.asOf||"")}</div></div>`:""}
   </div>
+  ${ohTilesRow()}
   <div class="card sec"><div class="sec-head"><h3>Inventory trend · trailing ${Math.min(ws.length,4)} week${ws.length===1?"":"s"}</h3><span class="sub">${ws.length>=2?`${dstr(ws[0].asOf)} to ${dstr(ws[ws.length-1].asOf)} · the board fills to four weeks as snapshots accumulate`:"the comparison fills in as weekly snapshots accumulate (up to four)"}</span></div>${ws.length?trendBoard(ws):`<div class="empty">No weekly snapshots yet.</div>`}</div>
   ${ohOverview()}
   <div class="grid two sec">
