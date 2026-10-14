@@ -110,6 +110,20 @@ def main():
     for rid in prev:
         if rid not in seen:
             changes["gone"].append(rid)
+    # weekly KPI snapshot (one small doc per week; the page builds trailing trends from these)
+    stale60 = [r for r in recs if (r.get("dom") or 0) >= 60]
+    stale30 = [r for r in recs if (r.get("dom") or 0) >= 30]
+    doms = [r["dom"] for r in recs if r.get("dom") is not None]
+    week = {"asOf": asof, "active": len(recs), "tiers": tier_counts(recs),
+            "stale60": len(stale60), "stale60Pct": round(len(stale60) / max(len(recs), 1) * 100, 1),
+            "stale30": len(stale30), "stale30Pct": round(len(stale30) / max(len(recs), 1) * 100, 1),
+            "volume": sum(r.get("currentPrice") or 0 for r in recs), "staleVolume": sum(r.get("currentPrice") or 0 for r in stale30),
+            "avgDom": round(sum(doms) / max(len(doms), 1), 1), "medianDom": sorted(doms)[len(doms) // 2] if doms else None,
+            "priceDrops": sum(1 for r in recs if r.get("priceDrop")), "hot": sum(1 for r in recs if r.get("hotHome")),
+            "added": len(changes["added"]), "gone": len(changes["gone"]), "newStale": len(changes["newStale"]), "newUltra": len(changes["newUltra"]), "newExtreme": len(changes["newExtreme"]), "weekPriceDrops": len(changes["priceDrops"]),
+            "agents": len({r.get("agent") for r in recs}), "expiring45": sum(1 for r in recs if r.get("daysToExpiration") is not None and 0 <= r["daysToExpiration"] <= 45)}
+    json.dump(week, open(os.path.join(out, "week.json"), "w"), indent=1)
+    manifest.append({"collection": "weeks", "doc_id": asof, "file": "week.json"})
     meta = {"asOf": asof, "count": len(recs), "tiers": tier_counts(recs),
             "prevAsOf": (prev_meta or {}).get("asOf") if prev_meta else (json.load(open(a.prev))["asOf"] if a.prev else None),
             "prevCount": len(prev) or None, "prevTiers": tier_counts(list(prev.values())) if prev else None,
@@ -125,10 +139,24 @@ def main():
             manifest.append({"collection": name, "doc_id": "current", "file": f"{name}.json"})
     json.dump(manifest, open(os.path.join(out, "manifest.json"), "w"), indent=1)
     # size-aware batches for the ArtifactData tool (1 MiB per request, 50 writes max)
+    prev_photos = {}
+    if a.prev_db and os.path.isdir(os.path.join(a.prev_db, "photos")):
+        for f in os.listdir(os.path.join(a.prev_db, "photos")):
+            try:
+                d = json.load(open(os.path.join(a.prev_db, "photos", f)))
+                prev_photos[f[:-5]] = len(d.get("thumbs", []))
+            except Exception:
+                pass
     batches, cur, cur_bytes = [], [], 0
+    skipped = 0
     for m in manifest:
         if m["collection"] in ("playbook", "market"):
             continue
+        if m["collection"] == "photos" and prev_photos.get(m["doc_id"]) is not None:
+            cur_n = len(json.load(open(os.path.join(out, m["file"]))).get("thumbs", []))
+            if cur_n == prev_photos[m["doc_id"]]:
+                skipped += 1
+                continue
         b = os.path.getsize(os.path.join(out, m["file"]))
         if cur and (cur_bytes + b > 980_000 or len(cur) >= 50):
             batches.append(cur); cur, cur_bytes = [], 0
@@ -138,7 +166,14 @@ def main():
     bdir = os.path.join(out, "batches"); os.makedirs(bdir, exist_ok=True)
     for i, b in enumerate(batches):
         json.dump(b, open(os.path.join(bdir, f"batch{i:02d}.json"), "w"), separators=(",", ":"))
-    print(f"{len(batches)} push batches in {bdir}")
+    print(f"{len(batches)} push batches in {bdir} (skipped {skipped} unchanged photo docs)")
+    # version pins: documents that existed last week are at version 2 after the 10/07 re-seed; new ones have none
+    prev_ids = set(prev.keys())
+    vers = {}
+    vp = os.path.join(a.prev_db, "versions.json") if a.prev_db else None
+    if vp and os.path.exists(vp):
+        vers = json.load(open(vp))
+    json.dump({"prevIds": sorted(prev_ids), "prevPhotoIds": sorted(prev_photos.keys()), "versions": vers}, open(os.path.join(out, "push-context.json"), "w"), indent=1)
     sizes = [os.path.getsize(os.path.join(out, m["file"])) for m in manifest]
     print(f"{len(manifest)} documents in {out}; largest {max(sizes)/1024:.0f} KB; enriched {meta['enriched']}/{len(recs)}; unresolved {meta['unresolved']}")
     print("changes:", {k: len(v) for k, v in changes.items()})

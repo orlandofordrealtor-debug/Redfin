@@ -1,0 +1,29 @@
+{
+ "asOf": "2026-10-07",
+ "active": 172,
+ "tiers": {
+  "watch": 54,
+  "stale": 46,
+  "ultra": 30,
+  "extreme": 42,
+  "unknown": 0
+ },
+ "stale60": 72,
+ "stale60Pct": 41.9,
+ "stale30": 118,
+ "stale30Pct": 68.6,
+ "volume": 173939000,
+ "staleVolume": 115149000,
+ "avgDom": 69.6,
+ "medianDom": 50,
+ "priceDrops": 64,
+ "hot": 32,
+ "added": null,
+ "gone": null,
+ "newStale": null,
+ "newUltra": null,
+ "newExtreme": null,
+ "weekPriceDrops": null,
+ "agents": 70,
+ "expiring45": 27
+}

@@ -190,7 +190,7 @@ tr.row{cursor:pointer} tr.row:hover td{background:var(--surface-2)}
 /* ============================================================ state */
 const APP_NAME="Redfin's Sold Standard"; const APP_TAG="Stale Listing Command Center";
 const S = {
-  listings:{}, coaching:{}, photos:{}, meta:null, market:null, playbook:null,
+  listings:{}, coaching:{}, photos:{}, meta:null, market:null, playbook:null, weeks:[],
   view:"overview", sel:null, ptab:"studio", stab:"slack", band:"intermediate", radius:1.0, heroIdx:0, draft:{}, assetTab:"pdf",
   f:{q:"", tiers:[], agent:"", city:"", band:"", flags:[], sort:"priority", dir:"desc"},
   db:null, user:null, me:null, sample:null, downloads:null, canWrite:null, imagesOk:false,
@@ -534,6 +534,25 @@ function svgLines(series, opts={}){
     const lp=pts[pts.length-1]; const right=X(lp.x)>W*0.72; g+=`<text x="${right?X(lp.x)-8:X(lp.x)+6}" y="${Y(lp.y)-9}" text-anchor="${right?"end":"start"}" style="fill:var(--fg);font-weight:600">${esc(s.name)}</text>`; }
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label||"chart")}">${g}</svg>`;
 }
+/* ============================================================ week-over-week trends */
+function trailingWeeks(){ const w=S.weeks.slice(-4); return w; }
+function wkVal(w,key){ return key.split(".").reduce((o,k)=>o==null?null:o[k], w); }
+function kpiTrend(key, opts={}){ // mini bars for the trailing weeks + delta vs last week; opts.badUp: a rise is bad
+  const ws=trailingWeeks(); if(ws.length<2) return `<div class="d help">${ws.length?"Trend builds from next week":"&nbsp;"}</div>`;
+  const vals=ws.map(w=>wkVal(w,key)??0); const mx=Math.max(...vals,1); const cur=vals[vals.length-1], prev=vals[vals.length-2]; const d=cur-prev; const pctD=prev?(d/prev*100):null;
+  const good=opts.badUp? d<0 : opts.goodUp ? d>0 : null; const col=d===0?"var(--muted)":good===null?"var(--fg)":good?"var(--good)":"var(--t-extreme)";
+  const bars=vals.map((v,i)=>{ const h=Math.max(2,Math.round(v/mx*20)); const last=i===vals.length-1; return `<rect x="${i*18}" y="${22-h}" width="12" height="${h}" rx="2" fill="${last?"var(--accent)":"var(--viz-gray)"}" data-tip="${dstr(ws[i].asOf)}: ${opts.fmt?opts.fmt(v):v}"></rect>`; }).join("");
+  return `<div class="d" style="display:flex;align-items:center;gap:8px"><svg width="${vals.length*18-6}" height="22" viewBox="0 0 ${vals.length*18-6} 22" aria-label="trailing ${vals.length} weeks">${bars}</svg><span style="color:${col};font-weight:600">${d>0?"▲ +":d<0?"▼ ":"● "}${opts.fmt?opts.fmt(Math.abs(d)):Math.abs(d)}${pctD!=null&&opts.pct!==false?` (${pctD>0?"+":""}${pctD.toFixed(0)}%)`:""}</span><span class="help">wk</span></div>`;
+}
+function svgWeeks(ws){ // grouped bars: tiers by week, direct-labeled, one axis
+  const keys=["watch","stale","ultra","extreme"]; const W=600,H=210,pl=34,pr=10,pt=18,pb=34; const n=ws.length; const groupW=(W-pl-pr)/n; const bw=Math.min(26,(groupW-14)/keys.length); const mx=Math.max(...ws.flatMap(w=>keys.map(k=>w.tiers[k]||0)),1);
+  const Y=v=>pt+(1-v/mx)*(H-pt-pb);
+  let g=`<g class="grid">${[0,.5,1].map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${Y(mx*t)}" y2="${Y(mx*t)}"></line>`).join("")}</g><text x="${pl-4}" y="${pt+4}" text-anchor="end">${mx}</text><text x="${pl-4}" y="${H-pb+4}" text-anchor="end">0</text>`;
+  ws.forEach((w,i)=>{ const x0=pl+i*groupW+(groupW-bw*keys.length-2*(keys.length-1))/2; keys.forEach((k,j)=>{ const v=w.tiers[k]||0; const x=x0+j*(bw+2); g+=`<rect x="${x}" y="${Y(v)}" width="${bw}" height="${Y(0)-Y(v)}" rx="3" fill="var(--t-${k})" opacity="${i===n-1?1:0.55}" data-tip="${dstr(w.asOf)} · ${TIERS[k].label}: ${v}"></rect>${v?`<text x="${x+bw/2}" y="${Y(v)-4}" text-anchor="middle" style="fill:var(--fg);font-weight:600;font-size:10.5px">${v}</text>`:""}`; }); g+=`<text x="${pl+i*groupW+groupW/2}" y="${H-pb+15}" text-anchor="middle" style="${i===n-1?"fill:var(--fg);font-weight:600":""}">${dstr(w.asOf)}</text><text x="${pl+i*groupW+groupW/2}" y="${H-pb+28}" text-anchor="middle">${w.stale60Pct!=null?w.stale60Pct+"% stale 60+":""}</text>`; });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tier counts by week">${g}</svg><div class="legend">${keys.map(k=>`<span><i style="background:var(--t-${k})"></i>${TIERS[k].label}</span>`).join("")}<span class="help">· faded bars are prior weeks</span></div>`;
+}
+function weeksTable(ws){ const rows=[["Active listings","active",{}],["Stale 60+ (Redfin definition)","stale60",{badUp:true}],["Stale 60+ %","stale60Pct",{badUp:true,fmt:v=>v+"%"}],["Aging 30+ (dashboard tiers)","stale30",{badUp:true}],["Watch · 1 to 29","tiers.watch",{}],["Stale · 30 to 59","tiers.stale",{badUp:true}],["Ultra · 60 to 89","tiers.ultra",{badUp:true}],["Extreme · 90+","tiers.extreme",{badUp:true}],["Listings with a price drop","priceDrops",{}],["Hot Homes","hot",{goodUp:true}],["Average DOM","avgDom",{badUp:true}],["Stale volume","staleVolume",{badUp:true,fmt:v=>fmt$(v,{k:true})}],["Expiring within 45 days","expiring45",{badUp:true}],["New this week","added",{}],["Left the list","gone",{goodUp:true}]];
+  return `<div class="tbl"><table><thead><tr><th>Metric</th>${ws.map((w,i)=>`<th class="num" style="${i===ws.length-1?"color:var(--accent-ink)":""}">${dstr(w.asOf)}</th>`).join("")}<th class="num">Δ wk</th></tr></thead><tbody>${rows.map(([label,key,o])=>{ const vals=ws.map(w=>wkVal(w,key)); const cur=vals[vals.length-1], prev=vals.length>1?vals[vals.length-2]:null; const d=(cur!=null&&prev!=null)?cur-prev:null; const good=d==null||d===0?null:o.badUp?d<0:o.goodUp?d>0:null; const col=good===null?"var(--muted)":good?"var(--good)":"var(--t-extreme)"; const f=o.fmt||(v=>v==null?"—":(typeof v==="number"&&!Number.isInteger(v)?v.toFixed(1):v)); return `<tr><td>${label}</td>${vals.map((v,i)=>`<td class="num" style="${i===vals.length-1?"font-weight:600":""}">${v==null?"—":f(v)}</td>`).join("")}<td class="num" style="color:${col};font-weight:600">${d==null?"—":(d>0?"+":"")+(o.fmt?f(d).replace("$-","-$"):Number.isInteger(d)?d:d.toFixed(1))}</td></tr>`; }).join("")}</tbody></table></div>`; }
 /* ============================================================ views */
 function clearFilters(){ S.f={...S.f,q:"",tiers:[],agent:"",city:"",band:"",flags:[]}; const q=$("#q"); if(q) q.value=""; }
 function render(){
@@ -556,18 +575,22 @@ function viewOverview(){
   const agents=Object.entries(byAgent).sort((a,b)=>b[1].n-a[1].n||b[1].vol-a[1].vol).slice(0,8);
   const changes=S.meta&&S.meta.changes||null; const mk=S.market;
   const cw=staleArr.reduce((s,l)=>{ const w=costOfWaiting(l,A[l.dealId],null); return s+(w?(w[0].holdNet-w.find(x=>x.d===90).holdNet):0); },0);
+  const stale60=arr.filter(l=>(l.dom||0)>=60).length; const stale60Pct=arr.length?stale60/arr.length*100:0; const ws=trailingWeeks();
   return `
   <div class="sec-head"><h2>Executive summary</h2><span class="sub">Week of ${dstr(S.meta&&S.meta.asOf||todayISO())} · ${arr.length} active listings · ${staleArr.length} stale or worse</span></div>
   <div class="grid kpis">
-    <div class="kpi kpi-link" data-kpi="all" title="Open all listings"><div class="v">${arr.length}</div><div class="l">Active listings →</div><div class="d">${S.meta&&S.meta.prevCount!=null?`${arr.length-S.meta.prevCount>=0?"+":""}${arr.length-S.meta.prevCount} vs last week`:"&nbsp;"}</div></div>
-    <div class="kpi stale kpi-link" data-kpi="stale" title="Open the Stale bucket"><div class="v">${c.stale}</div><div class="l">Stale · 30 to 59 →</div><div class="d">${prev?`${c.stale-(prev.stale||0)>=0?"+":""}${c.stale-(prev.stale||0)} wk`:"&nbsp;"}</div></div>
-    <div class="kpi ultra kpi-link" data-kpi="ultra" title="Open the Ultra Stale bucket"><div class="v">${c.ultra}</div><div class="l">Ultra · 60 to 89 →</div><div class="d">${prev?`${c.ultra-(prev.ultra||0)>=0?"+":""}${c.ultra-(prev.ultra||0)} wk`:"&nbsp;"}</div></div>
-    <div class="kpi extreme kpi-link" data-kpi="extreme" title="Open the Extremely Stale bucket"><div class="v">${c.extreme}</div><div class="l">Extreme · 90+ →</div><div class="d">${prev?`${c.extreme-(prev.extreme||0)>=0?"+":""}${c.extreme-(prev.extreme||0)} wk`:"&nbsp;"}</div></div>
-    <div class="kpi"><div class="v">${fmt$(vol,{k:true})}</div><div class="l">Stale volume</div><div class="d">${drops} of ${staleArr.length} have cut price</div></div>
+    <div class="kpi kpi-link" data-kpi="all" title="Open all listings"><div class="v">${arr.length}</div><div class="l">Active listings →</div>${kpiTrend("active")}</div>
+    <div class="kpi ultra kpi-link" data-kpi="stale60" title="Open everything 60+ days"><div class="v">${stale60}</div><div class="l">Stale listings · 60+ →</div>${kpiTrend("stale60",{badUp:true})}</div>
+    <div class="kpi extreme"><div class="v">${stale60Pct.toFixed(1)}%</div><div class="l">Stale listing %</div>${kpiTrend("stale60Pct",{badUp:true,fmt:v=>v.toFixed(1)+" pts",pct:false})}</div>
+    <div class="kpi stale kpi-link" data-kpi="stale" title="Open the Stale bucket"><div class="v">${c.stale}</div><div class="l">Stale · 30 to 59 →</div>${kpiTrend("tiers.stale",{badUp:true})}</div>
+    <div class="kpi ultra kpi-link" data-kpi="ultra" title="Open the Ultra Stale bucket"><div class="v">${c.ultra}</div><div class="l">Ultra · 60 to 89 →</div>${kpiTrend("tiers.ultra",{badUp:true})}</div>
+    <div class="kpi extreme kpi-link" data-kpi="extreme" title="Open the Extremely Stale bucket"><div class="v">${c.extreme}</div><div class="l">Extreme · 90+ →</div>${kpiTrend("tiers.extreme",{badUp:true})}</div>
+    <div class="kpi"><div class="v">${fmt$(vol,{k:true})}</div><div class="l">Stale volume · 30+</div>${kpiTrend("staleVolume",{badUp:true,fmt:v=>fmt$(v,{k:true}),pct:false})}</div>
     <div class="kpi"><div class="v">${fmt$(cw,{k:true})}</div><div class="l">90-day cost of waiting</div><div class="d">projected seller net at risk</div></div>
-    <div class="kpi"><div class="v">${avgGap!=null?pct(avgGap):"—"}</div><div class="l">Avg gap to market value</div><div class="d">stale listings · avg DOM ${Math.round(avgDom)}</div></div>
+    <div class="kpi"><div class="v">${avgGap!=null?pct(avgGap):"—"}</div><div class="l">Avg gap to market value</div>${kpiTrend("avgDom",{badUp:true,fmt:v=>v.toFixed(0)+" avg DOM",pct:false})}</div>
     ${mk&&mk.rates?`<div class="kpi"><div class="v">${mk.rates.rate30}%</div><div class="l">30-yr fixed</div><div class="d">${mk.rates.rate30_1mo?`${(mk.rates.rate30-mk.rates.rate30_1mo)>=0?"+":""}${(mk.rates.rate30-mk.rates.rate30_1mo).toFixed(2)} vs 1 mo`:""} · ${esc(mk.rates.asOf||"")}</div></div>`:""}
   </div>
+  <div class="card sec"><div class="sec-head"><h3>Inventory trend · trailing ${Math.min(ws.length,4)} week${ws.length===1?"":"s"}</h3><span class="sub">${ws.length>=2?`${dstr(ws[0].asOf)} to ${dstr(ws[ws.length-1].asOf)} · bright bars are this week`:"the comparison fills in as weekly snapshots accumulate (up to four)"}</span></div><div class="grid two">${ws.length?`<div>${svgWeeks(ws)}</div><div>${weeksTable(ws)}</div>`:`<div class="empty">No weekly snapshots yet.</div>`}</div></div>
   <div class="grid two sec">
     <div class="col">
       <div class="card"><div class="sec-head"><h3>Needs attention this week</h3><span class="sub">ranked by health, price and tier</span></div><div class="queue">${queue.map((l,i)=>qitem(l,i+1)).join("")||`<div class="empty">Nothing stale. Nice.</div>`}</div><div style="margin-top:10px"><button class="btn sm" data-kpi="all">Open all listings →</button> <button class="btn sm" data-kpi="extreme">Work the 90+ bucket →</button></div></div>
@@ -836,7 +859,7 @@ document.addEventListener("click", async e=>{
   if(!t) return;
   if(t.dataset.v){ S.view=t.dataset.v; S.sel=null; clearFilters(); location.hash=S.view; render(); window.scrollTo({top:0}); return; }
   if(t.dataset.go){ S.view=t.dataset.go; S.sel=null; clearFilters(); render(); return; }
-  if(t.dataset.kpi){ clearFilters(); if(t.dataset.kpi!=="all") S.f.tiers=[t.dataset.kpi]; S.view="listings"; S.sel=null; location.hash="listings"; render(); window.scrollTo({top:0}); return; }
+  if(t.dataset.kpi){ clearFilters(); if(t.dataset.kpi==="stale60") S.f.tiers=["ultra","extreme"]; else if(t.dataset.kpi!=="all") S.f.tiers=[t.dataset.kpi]; S.view="listings"; S.sel=null; location.hash="listings"; render(); window.scrollTo({top:0}); return; }
   if(t.dataset.open){ openProp(t.dataset.open); return; }
   if(t.dataset.agent!=null){ clearFilters(); S.f.agent=t.dataset.agent; S.view="listings"; S.sel=null; location.hash="listings"; render(); window.scrollTo({top:0}); return; }
   if(t.dataset.tier){ const i=S.f.tiers.indexOf(t.dataset.tier); i<0?S.f.tiers.push(t.dataset.tier):S.f.tiers.splice(i,1); render(); return; }
@@ -976,6 +999,7 @@ async function boot(){
   db.doc("meta/current").onSnapshot(s=>{ S.meta=s.exists?s.data():null; $("#asof").textContent=S.meta?`${APP_TAG} · Week of ${dstr(S.meta.asOf)} · ${S.meta.count||""} listings${S.meta.enrichment==="pending"?" · enrichment pending":""}`:APP_TAG+" · No snapshot yet"; if(S.loaded) render(); }, ()=>{});
   db.doc("market/current").onSnapshot(s=>{ S.market=s.exists?s.data():null; if(S.market&&S.market.rates&&S.market.rates.rate30&&!localStorage.getItem("slcc-assump")) S.a.rate=S.market.rates.rate30; if(S.loaded) render(); }, ()=>{});
   db.doc("playbook/current").onSnapshot(s=>{ S.playbook=s.exists?s.data():null; if(S.loaded) render(); }, ()=>{});
+  db.collection("weeks").onSnapshot(snap=>{ S.weeks=snap.docs.map(d=>d.data()).filter(w=>w&&w.asOf).sort((a,b)=>a.asOf<b.asOf?-1:1); if(S.loaded) render(); }, ()=>{});
   setTimeout(()=>{ if(!S.loaded){ S.loaded=true; render(); } }, 12000);
 }
 boot();

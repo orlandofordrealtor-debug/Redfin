@@ -262,16 +262,21 @@ def fetch_thumbs(atf, limit=PHOTO_TARGET):
     return thumbs
 
 
-def enrich(row, asof, want_photos=True, cache_days=6):
+def enrich(row, asof, want_photos=True, cache_days=6, refresh_core=False):
     deal_id = row["Deal Id"].strip()
     os.makedirs(RAW_DIR, exist_ok=True)
     cache_path = os.path.join(RAW_DIR, f"{deal_id}.json")
     raw = None
+    keep = {}
     if os.path.exists(cache_path):
         try:
             raw = json.load(open(cache_path))
             fetched = dt.date.fromisoformat(raw.get("fetchedAt", "2000-01-01"))
             if (dt.date.fromisoformat(asof) - fetched).days > cache_days:
+                raw = None
+            elif refresh_core and raw.get("fetchedAt") != asof and raw.get("url"):
+                # weekly: re-pull the listing page, facts and history; keep the radius search and photos
+                keep = {k: raw[k] for k in ("gisActive", "gisSold", "gisFetchedAt", "thumbs", "simListings", "simSolds") if k in raw}
                 raw = None
         except Exception:
             raw = None
@@ -295,14 +300,14 @@ def enrich(row, asof, want_photos=True, cache_days=6):
                     time.sleep(0.25)
                     raw["btf"] = stingray("/stingray/api/home/details/belowTheFold" + q)
                     time.sleep(0.25)
-                    if lid:
+                    if lid and "simListings" not in keep:
                         try:
                             raw["simListings"] = stingray("/stingray/api/home/details/similars/listings" + q)
                             time.sleep(0.25)
                             raw["simSolds"] = stingray("/stingray/api/home/details/similars/solds" + q)
                         except Exception as e:
                             raw["simError"] = str(e)
-                    if want_photos:
+                    if want_photos and "thumbs" not in keep:
                         photos = (raw["atf"].get("mediaBrowserInfo") or {}).get("photos") or []
                         urls = []
                         for ph in photos[:8]:
@@ -323,6 +328,8 @@ def enrich(row, asof, want_photos=True, cache_days=6):
                         raw["thumbs"] = thumbs
             except Exception as e:
                 raw["error"] = f"{type(e).__name__}: {e}"
+        for k, v in keep.items():
+            raw.setdefault(k, v)
         json.dump(raw, open(cache_path, "w"))
     # stage 2: radius search + full photo set (incremental, so cached rows get it too)
     changed = False
@@ -571,6 +578,7 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--no-photos", action="store_true")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--refresh-core", action="store_true", help="re-pull listing page/facts/history for cached rows, keep comps and photos")
     a = ap.parse_args()
     rows = list(csv.DictReader(open(a.csv, newline="", encoding="utf-8-sig")))
     if a.limit:
@@ -580,7 +588,7 @@ def main():
     records = []
     t0 = time.time()
     for i, row in enumerate(rows, 1):
-        raw = enrich(row, a.asof, want_photos=not a.no_photos)
+        raw = enrich(row, a.asof, want_photos=not a.no_photos, refresh_core=a.refresh_core)
         rec = shape(row, raw, a.asof)
         records.append(rec)
         ok = "ok" if rec["redfin"].get("ok") else ("skip" if raw.get("error") else "??")

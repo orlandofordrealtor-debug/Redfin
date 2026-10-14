@@ -39,7 +39,8 @@ stale-listing-dashboard/
 
 1. Export the sheet as CSV into `data/weekly/<date>.csv` (or upload it in the
    dashboard's Weekly upload tab, which updates tiers and history immediately).
-2. Enrich: `python3 pipeline/fetch_listings.py --csv data/weekly/<date>.csv --asof <date>`
+2. Enrich: `python3 pipeline/fetch_listings.py --csv data/weekly/<date>.csv --asof <date> --refresh-core`
+   (re-pulls price, photos count, remarks and history for every listing; comps and photo sets refresh after 6 days)
 3. Build docs: `python3 pipeline/seed_db.py --snapshot data/snapshots/<date>.json --prev-db data/db/<previous date>`
 4. Push `data/db/<date>/manifest.json` to the artifact database (Claude does this
    with the ArtifactData batch tool, 50 documents per call).
@@ -55,6 +56,7 @@ Sending Claude the new sheet link runs steps 1 to 5.
 | `photos/<dealId>` | pipeline | up to 8 thumbnails as data URIs |
 | `coaching/<dealId>` | the page | engagement entries, action plan, notes, AI coaching, share-out edits, sent log |
 | `meta/current` | pipeline, CSV upload | as-of date, tier counts, week-over-week changes |
+| `weeks/<date>` | pipeline | one KPI snapshot per week (active, stale 60+, stale %, tiers, volume, DOM, drops); the Overview builds trailing-four-week trends from these |
 | `market/current` | Claude | rates, stats, narrative, talking points |
 | `playbook/current` | Claude | moves, diagnostics, tier plays, pricing rules, scripts, stats |
 
