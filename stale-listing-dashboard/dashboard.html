@@ -32,21 +32,31 @@ button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--info)}
 .logo-dark{display:none} @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo-light{display:none} :root:not([data-theme="light"]) .logo-dark{display:inline} }
 :root[data-theme="dark"] .logo-light{display:none} :root[data-theme="dark"] .logo-dark{display:inline}
-.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
-.topbar .in{max-width:1480px;margin:0 auto;padding:12px 16px 8px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px}
-.topbar img{height:38px;width:auto;display:block}
-.title{text-align:center;font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:.01em;line-height:1.05;color:var(--accent)}
-.title small{display:block;font-family:var(--font-body);font-weight:600;font-size:12.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 8px 24px -18px rgba(0,0,0,.45)}
+.brandline{height:4px;background:linear-gradient(90deg,var(--accent) 0%,#ff7a59 55%,var(--accent) 100%)}
+.topbar .in{max-width:1480px;margin:0 auto;padding:14px 20px 10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.brand{display:inline-flex;align-items:center;justify-self:start;padding:4px 0} .topbar img{height:40px;width:auto;display:block}
+.title{text-align:center;font-family:var(--font-display);font-weight:700;font-size:27px;letter-spacing:-.005em;line-height:1.05;color:var(--accent);white-space:nowrap}
 .title em{font-style:normal;color:var(--fg)}
-.tools{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
-@media (max-width:900px){.topbar .in{grid-template-columns:1fr;justify-items:center}.tools{justify-content:center;width:100%}.title{font-size:22px}}
+.title small{display:block;font-family:var(--font-body);font-weight:600;font-size:12px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase;margin-top:5px;white-space:normal}
+.tools{display:flex;justify-self:end;align-items:center;gap:8px;flex-wrap:nowrap}
+.tool .lbl{margin-left:5px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:7px 14px;min-width:240px;max-width:360px;flex:1;transition:border-color .15s,box-shadow .15s}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)} .search input{border:0;background:transparent;outline:none;flex:1;min-width:0;font-size:14px}
+.nav{padding:0 16px 12px} .nav-in{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;max-width:1480px;margin:0 auto;padding:6px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line)}
+.nav button{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:11px;padding:9px 16px;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--muted);background:transparent;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,transform .15s,box-shadow .15s,border-color .15s}
+.nav button i{font-style:normal;font-size:15px;line-height:1;opacity:.85}
+.nav button:hover{background:var(--surface);color:var(--fg);border-color:var(--line-2);transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(0,0,0,.6)}
+.nav button.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 8px 20px -10px rgba(222,51,65,.75)} .nav button.on i{opacity:1}
+.nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nav button::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.45) 50%,transparent 65%);transform:translateX(-130%);pointer-events:none}
+.nav.glint button::after{animation:glint 1.3s ease-in-out 3} .nav.glint button:nth-child(2)::after{animation-delay:.12s} .nav.glint button:nth-child(3)::after{animation-delay:.24s} .nav.glint button:nth-child(4)::after{animation-delay:.36s} .nav.glint button:nth-child(5)::after{animation-delay:.48s} .nav.glint button:nth-child(6)::after{animation-delay:.6s} .nav.glint button:nth-child(7)::after{animation-delay:.72s}
+.nav button:hover::after{animation:glint .8s ease-out 1}
+@keyframes glint{to{transform:translateX(130%)}}
+@media (max-width:1100px){.search{min-width:180px}.tool .lbl{display:none}.title{font-size:24px}}
+@media (max-width:900px){.topbar .in{grid-template-columns:1fr;justify-items:center;gap:10px;padding:12px 16px 8px}.brand{justify-self:center}.tools{justify-self:stretch;width:100%}.search{max-width:none}.title{white-space:normal}.nav-in{gap:4px}.nav button{padding:8px 12px;font-size:13px}}
+@media (prefers-reduced-motion:reduce){.nav button::after{animation:none!important}}
 .spacer{flex:1}
-.search{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;min-width:220px;flex:1;max-width:420px}
-.search input{border:0;background:transparent;outline:none;flex:1;min-width:0}
-.nav{display:flex;gap:2px;max-width:1480px;margin:0 auto;padding:0 16px;overflow-x:auto;justify-content:center}
-.nav button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;white-space:nowrap}
-.nav button:hover{color:var(--fg)} .nav button.on{color:var(--accent);border-bottom-color:var(--accent)}
-.nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 main{max-width:1480px;margin:0 auto;padding-block:18px 60px;padding-inline:16px}
 h1,h2,h3,h4{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.2}
 h2{font-size:20px;font-weight:700} h3{font-size:16px;font-weight:600} h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -193,22 +203,23 @@ tr.row.inactive td{color:var(--muted)} tr.row.inactive .addr{color:var(--fg)}
 @media (max-width:640px){ .kpi .v{font-size:22px} .prop-head h2{font-size:20px} main{padding-inline:16px} }
 </style>
 
-<div class="topbar">
+<header class="topbar">
+  <div class="brandline" aria-hidden="true"></div>
   <div class="in">
-    <a href="#overview" aria-label="Redfin Powered by Rocket"><img class="logo-light" src="brand/logo.svg" alt="Redfin Powered by Rocket"><img class="logo-dark" src="brand/logo-reversed.svg" alt="Redfin Powered by Rocket"></a>
+    <a class="brand" href="#overview" aria-label="Redfin Powered by Rocket"><img class="logo-light" src="brand/logo.svg" alt="Redfin Powered by Rocket"><img class="logo-dark" src="brand/logo-reversed.svg" alt="Redfin Powered by Rocket"></a>
     <div class="title"><span id="app-name">Redfin's <em>Sold Standard</em></span><small id="asof">Loading weekly snapshot…</small></div>
-    <div class="tools"><div class="search" role="search">🔎 <input id="q" type="text" placeholder="Search address, agent, city, deal ID" aria-label="Search listings"></div><button class="btn sm" id="btn-settings">⚙ Assumptions</button></div>
+    <div class="tools"><div class="search" role="search"><span aria-hidden="true">🔎</span><input id="q" type="text" placeholder="Search address, agent, city or deal ID" aria-label="Search listings"></div><button class="btn sm tool" id="btn-settings" title="Model assumptions">⚙<span class="lbl">Assumptions</span></button><button class="btn sm tool" id="btn-theme" title="Switch between dark and light" aria-label="Switch theme">☀<span class="lbl">Light</span></button></div>
   </div>
-  <nav class="nav" id="nav">
-    <button data-v="overview" class="on">Overview</button>
-    <button data-v="listings">Listings</button>
-    <button data-v="openhouses">Open Houses</button>
-    <button data-v="agents">Agents</button>
-    <button data-v="market">Market</button>
-    <button data-v="playbook">Playbook</button>
-    <button data-v="upload">Weekly upload</button>
-  </nav>
-</div>
+  <nav class="nav glint" id="nav" aria-label="Sections"><div class="nav-in">
+    <button data-v="overview" class="on"><i>◎</i>Overview</button>
+    <button data-v="listings"><i>☰</i>Listings</button>
+    <button data-v="openhouses"><i>⌂</i>Open Houses</button>
+    <button data-v="agents"><i>◉</i>Agents</button>
+    <button data-v="market"><i>↗</i>Market</button>
+    <button data-v="playbook"><i>▤</i>Playbook</button>
+    <button data-v="upload"><i>⇧</i>Weekly upload</button>
+  </div></nav>
+</header>
 <main id="main"><div class="empty"><b>Loading the weekly snapshot</b>Listings, coaching notes and market context load from the dashboard's shared database.</div></main>
 <div class="toast" id="toast"></div>
 <div class="tip" id="tip"></div>
@@ -1095,7 +1106,7 @@ function afterRender(){
 }
 async function resolveNames(){ const ids=[...document.querySelectorAll("[data-uid]")].map(e=>e.dataset.uid).filter(Boolean); if(!ids.length) return; try{ const ps=await S.user.profiles([...new Set(ids)]); document.querySelectorAll("[data-uid]").forEach(e=>{ const p=ps[e.dataset.uid]; if(p&&p.name) e.textContent=p.name; }); }catch(_){} }
 document.addEventListener("click", async e=>{
-  const t=e.target.closest("[data-v],[data-go],[data-open],[data-agent],[data-tier],[data-unflag],#f-clear,[data-sort],#back,[data-band],[data-radius],[data-hero],[data-kpi],[data-issue],#asset-gmail,[data-ptab],[data-stab],#p-save,#e-add,#n-add,[data-copy-share],[data-reset-share],[data-log-send],#dl-html,#dl-pdf,#preview-report,#ai-run,#ai-stop,[data-copy-text],[data-copy-link],#btn-settings,[data-ext],[data-pop],[data-ohdeal],[data-ohalert],[data-ohgo],[data-ofstatus],[data-oftier],[data-ofagent],[data-ofsort],#of-clear");
+  const t=e.target.closest("[data-v],[data-go],[data-open],[data-agent],[data-tier],[data-unflag],#f-clear,[data-sort],#back,[data-band],[data-radius],[data-hero],[data-kpi],[data-issue],#asset-gmail,[data-ptab],[data-stab],#p-save,#e-add,#n-add,[data-copy-share],[data-reset-share],[data-log-send],#dl-html,#dl-pdf,#preview-report,#ai-run,#ai-stop,[data-copy-text],[data-copy-link],#btn-settings,#btn-theme,[data-ext],[data-pop],[data-ohdeal],[data-ohalert],[data-ohgo],[data-ofstatus],[data-oftier],[data-ofagent],[data-ofsort],#of-clear");
   if(!t) return;
   if(t.dataset.ext!=null) return;
   if(t.dataset.pop!=null){ if(e.target.closest(".pop")) return; const was=t.classList.contains("open"); document.querySelectorAll(".has-pop.open").forEach(x=>x.classList.remove("open")); if(!was) t.classList.add("open"); return; }
@@ -1147,6 +1158,7 @@ document.addEventListener("click", async e=>{
   if(t.dataset.copyText){ const c=S.coaching[S.sel]||{}; await copyText((c.ai||{})[t.dataset.copyText]||""); return; }
   if(t.dataset.copyLink){ await copyText(location.href.split("#")[0]+"#deal-"+t.dataset.copyLink); return; }
   if(t.id==="btn-settings"){ openSettings(); return; }
+  if(t.id==="btn-theme"){ const nt=document.documentElement.dataset.theme==="dark"?"light":"dark"; applyTheme(nt); try{ localStorage.setItem("slcc-theme",nt); }catch(_){} return; }
 });
 document.addEventListener("change", async e=>{
   const t=e.target;
@@ -1233,7 +1245,10 @@ async function handleCSV(file){ const out=$("#upload-out"); if(!file) return; co
 }
 /* ============================================================ boot */
 function routeFromHash(){ const h=location.hash.replace("#",""); if(h.startsWith("deal-")){ S.sel=h.slice(5); } else if(h&&["overview","listings","openhouses","agents","market","playbook","upload"].includes(h)) S.view=h; }
+function applyTheme(t){ document.documentElement.dataset.theme=t; const b=$("#btn-theme"); if(b) b.innerHTML=t==="dark"?'☀<span class="lbl">Light</span>':'☾<span class="lbl">Dark</span>'; }
 async function boot(){
+  let theme="dark"; try{ theme=localStorage.getItem("slcc-theme")||"dark"; }catch(_){} applyTheme(theme);
+  setTimeout(()=>{ const n=$("#nav"); if(n) n.classList.remove("glint"); }, 6000);
   try{ const a=JSON.parse(localStorage.getItem("slcc-assump")||"null"); if(a) Object.assign(S.a,a); }catch(_){}
   routeFromHash(); window.addEventListener("hashchange",()=>{ routeFromHash(); render(); });
   const hot=window.claude&&window.claude.hot; if(hot&&hot.snapshot) hot.snapshot(()=>({view:S.view,sel:S.sel,f:S.f,ptab:S.ptab}));
