@@ -1254,7 +1254,7 @@ async function handleCSV(file){ const out=$("#upload-out"); if(!file) return; co
 function routeFromHash(){ const h=location.hash.replace("#",""); if(h.startsWith("deal-")){ S.sel=h.slice(5); } else if(h&&["overview","listings","openhouses","agents","market","playbook","upload"].includes(h)) S.view=h; }
 function applyTheme(t){ document.documentElement.dataset.theme=t; const b=$("#btn-theme"); if(b) b.innerHTML=t==="dark"?'☀<span class="lbl">Light</span>':'☾<span class="lbl">Dark</span>'; }
 async function boot(){
-  let theme="dark"; try{ theme=localStorage.getItem("slcc-theme")||"dark"; }catch(_){} applyTheme(theme);
+  let theme="light"; try{ theme=localStorage.getItem("slcc-theme")||"light"; }catch(_){} applyTheme(theme);
   setTimeout(()=>{ const n=$("#nav"); if(n) n.classList.remove("glint"); }, 6000);
   try{ const a=JSON.parse(localStorage.getItem("slcc-assump")||"null"); if(a) Object.assign(S.a,a); }catch(_){}
   routeFromHash(); window.addEventListener("hashchange",()=>{ routeFromHash(); render(); });
