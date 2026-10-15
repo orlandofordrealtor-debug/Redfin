@@ -838,7 +838,7 @@ function eaDerive(d){ if(!d) return null; const m=eaMeta(d.propertyId); const st
   const agent=m.agent||d.listingAgent||d.listingAgentSheet||(l&&l.agent)||""; const copies=m.copies||{}; const tally=m.tally||{}; const nCopies=Object.values(copies).reduce((a,b)=>a+(b||0),0);
   const used=d.daysUsed!=null?d.daysUsed:null; const left=d.daysLeft!=null?d.daysLeft:null; const days=d.daysInEarlyAccess||0;
   const clock=d.stage==="exclusive"?(days<=14?"green":days<=30?"amber":"red"):(d.clock||"green");
-  const addr=`${d.address||""}${d.unit?" #"+d.unit:""}`; const badge=d.stage==="other"?(d.brokerageBadge||d.badge||"COMING SOON"):st.badge;
+  const addr=`${d.address||""}${d.unit&&!String(d.address||"").includes(String(d.unit).replace(/^#/,""))?" "+(String(d.unit).startsWith("#")||/^unit/i.test(String(d.unit))?String(d.unit):"#"+d.unit):""}`; const badge=d.stage==="other"?(d.brokerageBadge||d.badge||"COMING SOON"):st.badge;
   return {...d, id:String(d.propertyId), st, agent, agentEdited:!!m.agent, copies, nCopies, tally, feedback:m.feedback||[], log:m.log||[], used, left, days, clock, addr, badge, isRedfin:d.stage==="exclusive"||d.stage==="redfin",
     title:`${addr}, ${d.city||""}`, mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr+", "+(d.city||"")+", CA "+(d.zip||""))}`, dealUrl:d.dealId?`https://www.redfin.com/tools/deals/sell/${d.dealId}`:null,
     activity:(tally.matches||0)+(tally.outreach||0)+(tally.showings||0)+(tally.offers||0)+nCopies}; }
