@@ -1,0 +1,30 @@
+{
+ "asOf": "2026-10-13",
+ "checkedAt": "2026-10-15",
+ "sheetDate": "2026-10-15",
+ "total": 23,
+ "byStage": {
+  "exclusive": {
+   "count": 17,
+   "volume": 20590000.0,
+   "laCount": 15
+  },
+  "live": {
+   "count": 6,
+   "volume": 6696000.0,
+   "laCount": 6
+  }
+ },
+ "exclusives": 17,
+ "redfinComingSoon": 0,
+ "otherComingSoon": 0,
+ "graduated": 6,
+ "preMarketVolume": 20590000.0,
+ "newThisWeek": [],
+ "gone": [],
+ "byArea": {
+  "Los Angeles County": 21,
+  "Central Coast": 2
+ },
+ "eaDays": 21
+}
