@@ -81,10 +81,14 @@ def city_region(name, cache):
     rid = None
     for sec in payload.get("sections", []):
         for row in sec.get("rows", []):
-            if str(row.get("type")) == "2" and (row.get("url") or "").startswith("/city/") and "/CA/" in (row.get("url") or ""):
-                m = re.match(r"(\d+)_(\d+)", str(row.get("id") or ""))
-                if m:
-                    rid = (6, int(m.group(2))); break  # search API: region_type 6 = city
+            url = row.get("url") or ""
+            m = re.match(r"(\d+)_(\d+)", str(row.get("id") or ""))
+            if not m:
+                continue
+            if str(row.get("type")) == "2" and url.startswith("/city/") and "/CA/" in url and not url.startswith("/city/2112/"):
+                rid = (6, int(m.group(2))); break  # search API: region_type 6 = city (2112 is Brentwood in Contra Costa, not LA's)
+            if str(row.get("type")) == "6" and url.startswith("/neighborhood/") and "/CA/Los-Angeles/" in url:
+                rid = (1, int(m.group(2))); break  # region_type 1 = neighborhood inside Los Angeles
         if rid:
             break
     cache[key] = rid
@@ -136,16 +140,20 @@ def crawl_coming_soon(extra_cities=(), max_pages=6):
                 redfin = any(s.get("sashTypeId") == 48 for s in sashes) or (h.get("isRedfin") and h.get("listingType") == 6)
                 other = next((s.get("sashTypeName") for s in sashes if s.get("sashTypeId") == 47), None)
                 pid = str(h.get("propertyId"))
-                if pid in found:
+                if pid in found or area_of(h.get("zip")) == "Other":
                     continue
                 la = h.get("listingAgent")
+                unit = h.get("unitNumber"); unit = unit.get("value") if isinstance(unit, dict) else unit
+                tor = (h.get("timeOnRedfin") or {}).get("value") if isinstance(h.get("timeOnRedfin"), dict) else h.get("timeOnRedfin")
+                if dom is None and tor:
+                    dom = int(round(tor / 86400000))
                 found[pid] = {
                     "propertyId": pid, "listingId": h.get("listingId"), "url": BASE + (h.get("url") or ""),
-                    "address": (h.get("streetLine") or {}).get("value"), "unit": h.get("unitNumber"), "city": hcity, "zip": h.get("zip"), "state": h.get("state"),
+                    "address": (h.get("streetLine") or {}).get("value"), "unit": unit, "city": hcity, "zip": h.get("zip"), "state": h.get("state"),
                     "price": (h.get("price") or {}).get("value"), "beds": h.get("beds"), "baths": h.get("baths"), "sqft": (h.get("sqFt") or {}).get("value"),
                     "pricePerSqft": (h.get("pricePerSqFt") or {}).get("value"), "lotSize": (h.get("lotSize") or {}).get("value"), "yearBuilt": (h.get("yearBuilt") or {}).get("value"),
                     "propertyType": h.get("propertyType"), "uiPropertyType": h.get("uiPropertyType"), "lat": ll.get("latitude"), "lng": ll.get("longitude"),
-                    "dom": dom, "timeOnRedfin": (h.get("timeOnRedfin") or {}).get("value"), "numPictures": h.get("numPictures"),
+                    "dom": dom, "timeOnRedfin": tor, "numPictures": h.get("numPictures"),
                     "remarks": h.get("listingRemarks") or "", "remarksAccessLevel": h.get("remarksAccessLevel"),
                     "listingAgent": (la.get("name") if isinstance(la, dict) else la) or "",
                     "isRedfin": bool(h.get("isRedfin")), "isEarlyAccess": bool(h.get("isEarlyAccess")), "earlyAccessType": h.get("earlyAccessType"),
