@@ -42,7 +42,7 @@ def area_of(zip_code, city=""):
         return "Ventura County"
     if z in ("926", "927", "928"):
         return "Orange County"
-    if z.startswith("9"):
+    if z and "900" <= z <= "918":
         return "Los Angeles County"
     return "Other"
 
@@ -314,6 +314,8 @@ def main():
 
     # 3. crawled coming soon (not in the sheet)
     for pid, c in crawled.items():
+        if area_of(c.get("zip")) == "Other":
+            continue
         doc = dict(c); doc["source"] = "redfin.com"; doc["area"] = area_of(c.get("zip"), c.get("city"))
         live_match = listings.get(norm_addr(c.get("address")))
         if live_match:
