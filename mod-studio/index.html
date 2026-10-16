@@ -555,6 +555,10 @@ const S = {
 };
 const canAdd = () => S.mode === 'live' && S.canWrite !== false;
 const canUpload = () => canAdd() && !!S.assets;
+// Headshots are open to everyone who can save: Editors upload to the asset store, everyone else keeps a compact copy on the photo record.
+const canAddPhoto = () => canAdd();
+const hsSrc = (h) => (!h ? '' : h.assetId ? assetURL(h.assetId) : h.imageData || '');
+const hsKey = (h) => (!h ? '' : h.assetId || `inline:${h.id}:${h.updatedAt || h.createdAt || ''}`);
 const canEditCore = () => S.mode === 'live' && S.me.isOwner;
 const canDelete = (item) => S.me.isOwner || (!!item && !!S.me.id && item.createdBy === S.me.id);
 const adminName = () => brandSettings().adminName || 'the Studio owner';
@@ -1075,9 +1079,9 @@ async function resolveImages(m, key, exp) {
   const s = STYLES[key] || STYLES.signature; const d = S.draft;
   const hs = S.headshots.find((h) => h.id === d.headshotId);
   const crop = d.crop || (hs && hs.crop) || null;
-  const src = hs && hs.assetId ? assetURL(hs.assetId) : null;
+  const src = hsSrc(hs) || null; const sk = hsKey(hs);
   const ck = JSON.stringify(crop || {});
-  const sq = (w) => src ? memo(`hs:${src}:${ck}:sq:${w}`, () => cropDataURL(src, crop, 'square', w)) : (m.manager.name ? memo(`ini:${m.manager.name}:${w}`, async () => initialsDataURL(m.manager.name, w)) : Promise.resolve(null));
+  const sq = (w) => src ? memo(`hs:${sk}:${ck}:sq:${w}`, () => cropDataURL(src, crop, 'square', w)) : (m.manager.name ? memo(`ini:${m.manager.name}:${w}`, async () => initialsDataURL(m.manager.name, w)) : Promise.resolve(null));
   const out = { spot: {}, thumb: {} };
   const jobs = [
     safe(sq(s.avatar === 'circle-small' ? 160 : 280)).then((v) => { out.headshot = v; }),
@@ -1086,7 +1090,7 @@ async function resolveImages(m, key, exp) {
     safe(brandImg('logo', s.footLogo, exp)).then((v) => { out.footLogo = v; }),
     m.toggles.live ? safe(brandImg('dot', s.dot, exp)).then((v) => { out.dot = v; }) : null,
   ];
-  if (s.avatar === 'portrait' || s.avatar === 'stamp') jobs.push(safe(src ? memo(`hs:${src}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
+  if (s.avatar === 'portrait' || s.avatar === 'stamp') jobs.push(safe(src ? memo(`hs:${sk}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
   m.spotlights.forEach((sp, i) => {
     if (!sp.assetId && !(exp && isHttps(sp.publicUrl))) return;
     if (i === 0) {
@@ -1258,14 +1262,29 @@ async function uploadImage(file, maxDim, keepFormat) {
   const blob = (keepFormat && native) || file.type === 'image/gif' ? file : await resizeBlob(file, maxDim, 0.9);
   return S.assets.upload(blob, { type: blob.type || file.type });
 }
+const blobDataURL = (b) => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(b); });
+// A database record holds at most 256 KB, so an inline photo is shrunk until it fits with room to spare.
+async function inlinePhoto(file) {
+  for (const [dim, q] of [[900, 0.82], [760, 0.78], [640, 0.74], [520, 0.7]]) {
+    const blob = await resizeBlob(file, dim, q);
+    if (blob.size <= 150 * 1024) return blobDataURL(blob);
+  }
+  throw new Error('Image failed to shrink');
+}
+async function storePhoto(file) {
+  if (S.assets) { const r = await uploadImage(file, 1200); return { assetId: r.id, imageData: '' }; }
+  return { assetId: '', imageData: await inlinePhoto(file) };
+}
 
 const IMG_EXT = /\.(jpe?g|png|gif|webp|heic|heif|bmp|tiff?)$/i;
 const isImageFile = (f) => !!f && (/^image\//.test(f.type || '') || (!f.type && IMG_EXT.test(f.name || '')));
 const fileInput = (kind, attrs = '', multiple = false) => `<input type="file" accept="image/*" ${multiple ? 'multiple' : ''} data-upload="${kind}" ${attrs} aria-label="Choose an image from your phone or computer">`;
 const upBtn = (label, kind, cls = 'btn', attrs = '', multiple = false) => `<label class="${cls} upbtn">${label}${fileInput(kind, attrs, multiple)}</label>`;
-function uploadBlockedNote() {
+function uploadBlockedNote(kind) {
   if (S.mode !== 'live' || S.assets) return '';
-  return `<div class="up-note">Uploading isn’t available in this view. It needs Editor access to the Studio. If you have it and uploads still don’t open on your phone, open the Studio link in Safari or Chrome.</div>`;
+  if (kind === 'headshot' && canAddPhoto()) return '';
+  if (kind === 'headshot') return `<div class="up-note">You can pick any photo for your email. Adding photos or changing a default for the whole team needs edit access: ask ${esc(adminName())} to invite you to the Studio by email as an Editor.</div>`;
+  return `<div class="up-note">Uploading infographics needs Editor access to the Studio. Ask ${esc(adminName())} to invite you by email as an Editor. If you have it and uploads still don’t open on your phone, open the Studio link in Safari or Chrome.</div>`;
 }
 function progress(text) {
   const el = document.createElement('div'); el.className = 'toast progress'; el.setAttribute('role', 'status'); el.textContent = text; $('#toasts').appendChild(el);
@@ -1280,7 +1299,7 @@ async function handleUpload(kind, files, o = {}) {
   files = files.filter(isImageFile);
   if (!files.length) { toast('Pick a photo or image file: JPEG, PNG, WebP, GIF or HEIC.', 'err'); return; }
   if (kind === 'drawer') { onFile(files[0]); return; }
-  if (!canUpload()) { toast(errMsg({ code: 'not_granted' }), 'err'); return; }
+  if (kind === 'headshot' ? !canAddPhoto() : !canUpload()) { toast(errMsg({ code: 'not_granted' }), 'err'); return; }
   if (kind === 'logo') { uploadLogo(o.key, files[0]); return; }
   if (kind === 'spotlights') { bulkUpload(files); return; }
   if (kind === 'headshot') quickHeadshots(o.mgr, files);
@@ -1293,8 +1312,8 @@ async function quickHeadshots(managerId, files) {
   for (const [i, f] of files.entries()) {
     prog.set(many ? `Uploading ${i + 1} of ${files.length}…` : 'Uploading photo…');
     try {
-      const r = await uploadImage(f, 1200); const id = `hs-${slug(managerId)}-${rid()}`;
-      await S.db.collection('headshots').doc(id).set({ managerId, label: `Photo ${base + ok + 1}`, assetId: r.id, createdBy: S.me.id || '', createdAt: nowISO() });
+      const stored = await storePhoto(f); const id = `hs-${slug(managerId)}-${rid()}`;
+      await S.db.collection('headshots').doc(id).set({ managerId, label: `Photo ${base + ok + 1}`, ...stored, createdBy: S.me.id || '', createdAt: nowISO() });
       if (!firstId) firstId = id; ok += 1;
     } catch (e) { console.error(e); lastErr = e; }
   }
@@ -1317,7 +1336,7 @@ function renderWho() {
 function renderBanner() {
   const el = $('#banner');
   if (S.mode === 'offline') el.innerHTML = '<div class="banner"><b>Shared libraries aren’t connected.</b><span>Open the Studio from its claude.ai link to load your region’s standard info, headshots and spotlights. You can still draft and preview here.</span></div>';
-  else if (S.mode === 'live' && S.canWrite === false) el.innerHTML = `<div class="banner"><b>View only.</b><span>You can build, preview and copy emails. To add headshots or spotlights, ask ${esc(adminName())} for Editor access.</span></div>`;
+  else if (S.mode === 'live' && S.canWrite === false) el.innerHTML = `<div class="banner"><b>View only.</b><span>You can build, preview and copy emails, and pick any photo for your own email. To add photos, change a default photo for the team or upload infographics, ask ${esc(adminName())} to invite you to the Studio by email as an Editor.</span></div>`;
   else el.innerHTML = '';
 }
 function updateCoreBadge() {
@@ -1338,7 +1357,12 @@ const HOURS = []; for (let h = 5; h <= 23; h += 0.5) HOURS.push(h);
 const hourOptions = (sel, emptyLabel) => `<option value="">${esc(emptyLabel)}</option>` + HOURS.map((h) => `<option value="${h}" ${sel !== '' && sel !== undefined && sel !== null && Number(sel) === h ? 'selected' : ''}>${fmtHour(h)}</option>`).join('');
 const stepHead = (n, title, hint) => `<div class="step-head"><span class="step-num">${String(n).padStart(2, '0')}</span><h3>${esc(title)}</h3>${hint ? `<span class="hint">${esc(hint)}</span>` : ''}</div>`;
 function mgrHeadshot(mg) { return S.headshots.find((h) => h.id === mg.defaultHeadshotId) || S.headshots.find((h) => h.managerId === mg.id); }
-function mgrAvatarHTML(mg) { const hs = mgrHeadshot(mg); return hs && hs.assetId ? `<img src="${esc(assetURL(hs.assetId))}" alt="" style="object-position:50% 20%">` : `<span class="ini">${esc(initials(mg.name))}</span>`; }
+function mgrAvatarHTML(mg) { const hs = mgrHeadshot(mg); return hsSrc(hs) ? `<img src="${esc(hsSrc(hs))}" alt="" style="object-position:50% 20%">` : `<span class="ini">${esc(initials(mg.name))}</span>`; }
+// A viewer who can't save can still keep a favorite photo per manager on their own device.
+const DEVICE_PHOTO_KEY = 'modstudio.devicePhotos.v1';
+function devicePhotos() { try { return JSON.parse(localStorage.getItem(DEVICE_PHOTO_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function setDevicePhoto(managerId, hsId) { try { const m = devicePhotos(); if (hsId) m[managerId] = hsId; else delete m[managerId]; localStorage.setItem(DEVICE_PHOTO_KEY, JSON.stringify(m)); return true; } catch (e) { return false; } }
+function preferredHeadshot(mg) { const id = devicePhotos()[mg.id]; return (id && S.headshots.find((h) => h.id === id && h.managerId === mg.id)) || mgrHeadshot(mg); }
 
 function renderSteps() {
   $('#steps').innerHTML = `
@@ -1402,7 +1426,13 @@ function renderHsPicker() {
   if (S.mode === 'offline') { el.innerHTML = '<p class="muted" style="font-size:13px">Headshots load from the shared library. Until then the email shows your initials.</p>'; return; }
   if (!d.managerId) { el.innerHTML = '<p class="muted" style="font-size:13px">Pick or save a manager first to see their headshots. Until then the email shows initials.</p>'; return; }
   const list = S.headshots.filter((h) => h.managerId === d.managerId).sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
-  el.innerHTML = `<div class="hs-grid">${list.map((h) => `<button class="hs ${d.headshotId === h.id ? 'is-active' : ''}" data-action="pick-headshot" data-id="${esc(h.id)}" title="${esc(h.label || 'Headshot')}" aria-label="${esc(h.label || 'Headshot')}"><img src="${esc(assetURL(h.assetId))}" alt="" loading="lazy"><span class="tick">✓</span></button>`).join('')}${canUpload() ? `<label class="add-tile upbtn">+ Add photo${fileInput('headshot', `data-manager="${esc(d.managerId)}"`, true)}</label>` : ''}</div>${list.length ? '' : '<p class="muted" style="font-size:13px;margin-top:8px">No headshots for this manager yet. Tap + Add photo to pick one from your phone or computer.</p>'}${uploadBlockedNote()}`;
+  const mg = S.managers.find((m) => m.id === d.managerId); const first = firstName(mg ? mg.name : d.manager.name) || 'this manager';
+  const picked = list.find((h) => h.id === d.headshotId); const isDef = !!(picked && mg && mg.defaultHeadshotId === picked.id);
+  const onDevice = !!(picked && devicePhotos()[d.managerId] === picked.id);
+  const defRow = !picked || !mg ? '' : canAdd()
+    ? `<div class="btn-row" style="margin-top:10px;align-items:center">${isDef ? `<span class="chip red">★ ${esc(first)}’s default photo</span>` : `<button class="btn btn-xs" data-action="default-headshot" data-id="${esc(picked.id)}">★ Make this ${esc(first)}’s default</button><span class="muted" style="font-size:12px">Everyone sees the change.</span>`}</div>`
+    : `<div class="btn-row" style="margin-top:10px;align-items:center">${onDevice ? `<span class="chip">★ Your pick on this device</span><button class="btn btn-xs btn-ghost" data-action="forget-device-photo">Use the team default</button>` : `<button class="btn btn-xs" data-action="remember-device-photo" data-id="${esc(picked.id)}">★ Use this photo every time on this device</button>`}</div>`;
+  el.innerHTML = `<div class="hs-grid">${list.map((h) => `<button class="hs ${d.headshotId === h.id ? 'is-active' : ''}" data-action="pick-headshot" data-id="${esc(h.id)}" title="${esc(h.label || 'Headshot')}" aria-label="${esc(h.label || 'Headshot')}"><img src="${esc(hsSrc(h))}" alt="" loading="lazy"><span class="tick">✓</span></button>`).join('')}${canAddPhoto() ? `<label class="add-tile upbtn">+ Add photo${fileInput('headshot', `data-manager="${esc(d.managerId)}"`, true)}</label>` : ''}</div>${list.length ? defRow : `<p class="muted" style="font-size:13px;margin-top:8px">No headshots for this manager yet.${canAddPhoto() ? ' Tap + Add photo to pick one from your phone or computer.' : ''}</p>`}${uploadBlockedNote('headshot')}`;
 }
 function renderCropBox() {
   const el = $('#cropBox'); if (!el) return; const d = S.draft;
@@ -1418,7 +1448,7 @@ async function drawCrop(setSliders) {
   const cv = $('#cropCanvas'); if (!cv) return; const d = S.draft;
   const hs = S.headshots.find((h) => h.id === d.headshotId); if (!hs) return;
   try {
-    const im = await loadImage(assetURL(hs.assetId));
+    const im = await loadImage(hsSrc(hs));
     const crop = d.crop || hs.crop || defaultCrop(im.naturalWidth, im.naturalHeight);
     if (setSliders) { const z = $('#b_zoom'), f = $('#b_fy'); if (z) z.value = crop.zoom; if (f) f.value = crop.fy; }
     const [sx, sy, sw, sh] = cropRect(im, crop, 'square'); const g = cv.getContext('2d');
@@ -1594,7 +1624,7 @@ function setBind(path, val) {
 function selectManager(id) {
   const mg = S.managers.find((x) => x.id === id); if (!mg) return; const d = S.draft;
   d.managerId = id; d.manager = { ...blankManager(), ...pick(mg, Object.keys(blankManager())) };
-  const hs = mgrHeadshot(mg); d.headshotId = hs ? hs.id : ''; d.crop = null;
+  const hs = preferredHeadshot(mg); d.headshotId = hs ? hs.id : ''; d.crop = null;
   saveDraft(); renderMgrPicker(); renderMgrFields(); renderHsPicker(); renderCropBox(); refreshSubjectUI(); renderSendPanel(); updateProgress(); schedulePreview();
 }
 function newManagerInline() {
@@ -1638,7 +1668,7 @@ function renderLibrary() {
   const counts = { spotlights: S.spotlights.length, headshots: S.headshots.length, managers: S.managers.length, history: S.emails.length };
   const actions = {
     spotlights: `${canUpload() ? upBtn('Upload from phone or computer', 'spotlights', 'btn btn-primary', '', true) : ''}${canAdd() ? '<button class="btn" data-action="new-spotlight">+ New spotlight</button>' : ''}`,
-    headshots: canUpload() ? '<button class="btn btn-primary" data-action="upload-headshot">+ Add headshot</button>' : '',
+    headshots: canAddPhoto() ? '<button class="btn btn-primary" data-action="upload-headshot">+ Add headshot</button>' : '',
     managers: canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '',
     history: '',
   };
@@ -1701,7 +1731,7 @@ async function purgeSpotlight(id, btn) {
 }
 function hsCard(h, mg) {
   const isDef = mg && mg.defaultHeadshotId === h.id;
-  return `<div class="hs-card ${isDef ? 'is-default' : ''}"><div class="ph" style="background-image:url('${esc(assetURL(h.assetId))}')">${isDef ? '<span class="chip red">Default</span>' : ''}</div><div class="lab" title="${esc(h.label || '')}">${esc(h.label || 'Headshot')}</div><div class="acts">${canAdd() && mg && !isDef ? `<button class="btn btn-xs" data-action="default-headshot" data-id="${esc(h.id)}">Make default</button>` : ''}${canAdd() ? `<button class="btn btn-xs btn-ghost" data-action="edit-headshot" data-id="${esc(h.id)}">Edit</button>` : ''}</div></div>`;
+  return `<div class="hs-card ${isDef ? 'is-default' : ''}"><div class="ph" style="background-image:url('${esc(hsSrc(h))}')">${isDef ? '<span class="chip red">Default</span>' : ''}</div><div class="lab" title="${esc(h.label || '')}">${esc(h.label || 'Headshot')}</div><div class="acts">${canAdd() && mg && !isDef ? `<button class="btn btn-xs" data-action="default-headshot" data-id="${esc(h.id)}">Make default</button>` : ''}${canAdd() ? `<button class="btn btn-xs btn-ghost" data-action="edit-headshot" data-id="${esc(h.id)}">Edit</button>` : ''}</div></div>`;
 }
 function libHeadshots() {
   const mgrs = S.managers.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
@@ -1709,7 +1739,7 @@ function libHeadshots() {
   if (!mgrs.length && !orphan.length) return emptyHTML('No managers yet', 'Add a manager first, then upload their headshots.', canAdd() ? '<button class="btn btn-primary" data-action="new-manager">+ Add manager</button>' : '');
   const blocks = mgrs.map((mg) => {
     const list = S.headshots.filter((h) => h.managerId === mg.id);
-    return `<section class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}${mg.title || mg.market ? ' · ' : ''}${list.length} photo${list.length === 1 ? '' : 's'}</div></div><div class="btn-row" style="margin-left:auto">${canUpload() ? upBtn('+ Add photos', 'headshot', 'btn btn-sm btn-primary', `data-manager="${esc(mg.id)}"`, true) : ''}</div></div>${list.length ? `<div class="hs-row">${list.map((h) => hsCard(h, mg)).join('')}</div>` : '<p class="muted" style="font-size:13px">No photos yet.</p>'}</section>`;
+    return `<section class="mgr-block"><div class="mgr-block-head">${mgrAvatarHTML(mg)}<div><h4>${esc(mg.name)}</h4><div class="meta">${esc([mg.title, mg.market].filter(Boolean).join(' · '))}${mg.title || mg.market ? ' · ' : ''}${list.length} photo${list.length === 1 ? '' : 's'}</div></div><div class="btn-row" style="margin-left:auto">${canAddPhoto() ? upBtn('+ Add photos', 'headshot', 'btn btn-sm btn-primary', `data-manager="${esc(mg.id)}"`, true) : ''}</div></div>${list.length ? `<div class="hs-row">${list.map((h) => hsCard(h, mg)).join('')}</div>` : '<p class="muted" style="font-size:13px">No photos yet.</p>'}</section>`;
   });
   if (orphan.length) blocks.push(`<section class="mgr-block"><div class="mgr-block-head"><div><h4>Unassigned</h4><div class="meta">Photos whose manager was removed</div></div></div><div class="hs-row">${orphan.map((h) => hsCard(h, null)).join('')}</div></section>`);
   return `<div style="display:grid;gap:14px">${blocks.join('')}</div>`;
@@ -1778,7 +1808,7 @@ function currentWeekendISO() { const t = new Date(); const d = new Date(t.getFul
 const addDays = (iso, n) => { const d = parseDay(iso); d.setDate(d.getDate() + n); return isoDay(d); };
 const weeksAway = (iso) => Math.round((parseDay(iso) - parseDay(currentWeekendISO())) / (7 * 86400000));
 const canEditSched = () => canAdd();
-function avatarFor(mg, cls = 'av') { const hs = mg && mgrHeadshot(mg); return hs && hs.assetId ? `<img class="${cls}" src="${esc(assetURL(hs.assetId))}" alt="">` : `<span class="${cls} ini">${esc(initials(mg ? mg.name : '?'))}</span>`; }
+function avatarFor(mg, cls = 'av') { const hs = mg && mgrHeadshot(mg); return hsSrc(hs) ? `<img class="${cls}" src="${esc(hsSrc(hs))}" alt="">` : `<span class="${cls} ini">${esc(initials(mg ? mg.name : '?'))}</span>`; }
 function mySchedId() { if (S.schedMine !== undefined) return S.schedMine; try { const v = localStorage.getItem('modstudio.mine'); if (v !== null) return v; } catch (e) { /* ignore */ } const m = S.managers.find((x) => x.userId && x.userId === S.me.id); return m ? m.id : ''; }
 function dateBlock(iso) { const w = weekend(iso); const sm = MON[w.sat.getMonth()], um = MON[w.sun.getMonth()]; return `<div class="wk-date"><small>${sm === um ? sm : `${sm}–${um}`}</small><b>${w.sat.getDate()}–${w.sun.getDate()}</b></div>`; }
 function renderSchedule() {
@@ -1974,8 +2004,9 @@ function renderBrand() {
     </div>
     <aside style="display:grid;gap:14px;align-content:start">
       <section class="panel access"><h3>Share with your sales managers</h3>
-        <ol style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px"><li>Open <b>Share</b> on this Studio.</li><li>Invite each sales manager by email as an <b>Editor</b>, so they can add headshots and infographics.</li><li>Keep link sharing off. A public link turns outside editors into viewers.</li></ol>
-        <dl><dt>Owner</dt><dd>Everything, including standard info and brand settings.</dd><dt>Editor</dt><dd>Build emails, add managers, headshots and spotlights, and suggest standard info updates.</dd><dt>Viewer</dt><dd>Build, preview and copy emails.</dd></dl></section>
+        <p style="font-size:14px;margin:0 0 8px;color:var(--ink-2)">Claude decides who can save changes, not the Studio. Anyone who opens a public link from outside your Claude account can only view, and can’t upload or change photos. To let every manager add photos and set their own default:</p>
+        <ol style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px"><li>Open <b>Share</b> on this Studio.</li><li>Turn off <b>Anyone with the link</b>.</li><li>Invite each sales manager by email as an <b>Editor</b>.</li></ol>
+        <dl><dt>Owner</dt><dd>Everything, including standard info and brand settings.</dd><dt>Editor</dt><dd>Build emails, add and replace any manager’s photos, set anyone’s default photo, upload infographics, edit the schedule, and suggest standard info updates.</dd><dt>Contributor</dt><dd>Same as Editor for photos, defaults and the schedule. Photos are stored at email size. Can’t upload infographics.</dd><dt>Viewer or link visitor</dt><dd>Build, preview and copy emails. Can pick any photo, and keep a favorite on their own device.</dd></dl></section>
       <section class="panel"><h3>How images reach inboxes</h3><p style="font-size:14px;color:var(--ink-2)">Copy email for Gmail embeds photos, logos and the animated badge right in the message. Gmail normally keeps pasted images. If one goes missing in your test send, paste a public https link for that image here or on the spotlight, and the email points to it instead.</p></section>
     </aside></div>`;
 }
@@ -2056,11 +2087,11 @@ function headshotDrawer(hsId, managerId) {
   const mid = h ? h.managerId : managerId || S.draft.managerId || mgrs[0].id;
   const owner = S.managers.find((m) => m.id === mid);
   openDrawer(`${dHead(h ? 'Edit headshot' : 'Add a headshot')}<div class="drawer-body">
-    ${dropHTML(h ? assetURL(h.assetId) : '', h ? 'Replace the photo (optional)' : 'Choose a photo')}
+    ${dropHTML(h ? hsSrc(h) : '', h ? 'Replace the photo (optional)' : 'Choose a photo')}
     <label class="field"><span>Manager</span><select class="select" id="h_mgr">${mgrs.map((m) => `<option value="${esc(m.id)}" ${m.id === mid ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
     <label class="field"><span>Label</span><input class="input" id="h_label" value="${esc(h ? h.label || '' : '')}" placeholder="Navy suit · terrace"></label>
     <label class="switch-row"><span><b>Make this the default photo</b><small>Picked automatically when this manager builds an email</small></span><input type="checkbox" class="switch" id="h_def" ${h && owner && owner.defaultHeadshotId === h.id ? 'checked' : !h && owner && !owner.defaultHeadshotId ? 'checked' : ''}></label>
-  </div><div class="drawer-foot">${h && canDelete(h) ? `<button class="btn btn-danger" data-action="delete-headshot" data-id="${esc(h.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-headshot" data-id="${esc(h ? h.id : '')}">${h ? 'Save' : 'Upload headshot'}</button></div>`);
+  </div><div class="drawer-foot">${h && canAddPhoto() ? `<button class="btn btn-danger" data-action="delete-headshot" data-id="${esc(h.id)}" style="margin-right:auto">Delete</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-headshot" data-id="${esc(h ? h.id : '')}">${h ? 'Save' : 'Upload headshot'}</button></div>`);
 }
 async function saveHeadshot(id, btn) {
   const h = S.headshots.find((x) => x.id === id);
@@ -2069,14 +2100,13 @@ async function saveHeadshot(id, btn) {
   const label = $('#h_label').value.trim(); const makeDef = $('#h_def').checked;
   await busy(btn, 'Saving…', async () => {
     try {
-      let assetId = h ? h.assetId : '';
-      if (S.pendingFile) { const r = await uploadImage(S.pendingFile, 1200); assetId = r.id; }
+      const stored = S.pendingFile ? await storePhoto(S.pendingFile) : null;
       const docId = h ? h.id : `hs-${slug(managerId)}-${rid()}`;
       const ref = S.db.collection('headshots').doc(docId);
-      if (h) await ref.update({ managerId, label, assetId, updatedAt: nowISO(), ...(assetId !== h.assetId ? { crop: null } : {}) });
-      else await ref.set({ managerId, label, assetId, createdBy: S.me.id || '', createdAt: nowISO() });
+      if (h) await ref.update({ managerId, label, ...(stored || {}), updatedAt: nowISO(), ...(stored ? { crop: null } : {}) });
+      else await ref.set({ managerId, label, ...stored, createdBy: S.me.id || '', createdAt: nowISO() });
       if (makeDef) await S.db.collection('managers').doc(managerId).update({ defaultHeadshotId: docId });
-      if (h && h.assetId && assetId !== h.assetId && S.assets) S.assets.delete(h.assetId).catch(() => {});
+      if (h && h.assetId && stored && stored.assetId !== h.assetId && S.assets) S.assets.delete(h.assetId).catch(() => {});
       if (!h && S.draft.managerId === managerId && (!S.draft.headshotId || makeDef)) { S.draft.headshotId = docId; S.draft.crop = null; saveDraft(); }
       toast(h ? 'Headshot updated.' : 'Headshot added to the library.'); closeDrawer();
     } catch (e) { console.error(e); toast(errMsg(e), 'err'); }
@@ -2217,7 +2247,9 @@ const handlers = {
   'edit-headshot': (a) => headshotDrawer(a.dataset.id),
   'save-headshot': (a) => saveHeadshot(a.dataset.id, a),
   'delete-headshot': (a) => deleteHeadshot(a.dataset.id, a),
-  'default-headshot': (a) => { const h = S.headshots.find((x) => x.id === a.dataset.id); if (h) write(() => S.db.collection('managers').doc(h.managerId).update({ defaultHeadshotId: h.id }), 'Default photo updated.'); },
+  'default-headshot': (a) => { const h = S.headshots.find((x) => x.id === a.dataset.id); if (h) busy(a, 'Saving…', () => write(() => S.db.collection('managers').doc(h.managerId).update({ defaultHeadshotId: h.id }), 'Default photo updated for everyone.').then((ok) => { if (ok && devicePhotos()[h.managerId]) setDevicePhoto(h.managerId, ''); })); },
+  'remember-device-photo': (a) => { const d = S.draft; if (setDevicePhoto(d.managerId, a.dataset.id)) toast('This photo is now your pick on this device.'); else toast('This browser won’t save preferences. Pick the photo each time, or ask for edit access.', 'err'); renderHsPicker(); },
+  'forget-device-photo': () => { const d = S.draft; setDevicePhoto(d.managerId, ''); const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && mgrHeadshot(mg); d.headshotId = hs ? hs.id : ''; d.crop = null; saveDraft(); renderHsPicker(); renderCropBox(); schedulePreview(); toast('Back to the team default photo.'); },
   'save-crop': (a) => { const d = S.draft; if (!d.crop || !d.headshotId) { toast('Adjust the sliders first.'); return; } const crop = { ...d.crop }; busy(a, 'Saving…', () => write(() => S.db.collection('headshots').doc(d.headshotId).update({ crop }), 'Crop saved for this photo.').then((ok) => { if (ok) { d.crop = null; saveDraft(); } })); },
   'reset-crop': () => { S.draft.crop = null; saveDraft(); drawCrop(true); schedulePreview(); },
   'toggle-spotlight': (a) => toggleSpotlight(a.dataset.id),
@@ -2347,7 +2379,7 @@ function flush() {
       const mine = (se && mgrById(se.managerId)) || S.managers.find((m) => m.userId && m.userId === S.me.id) || (S.me.isOwner && S.managers.find((m) => m.ownerProfile)) || (S.managers.length === 1 ? S.managers[0] : null);
       if (mine) selectManager(mine.id);
     }
-    if (d.managerId && !d.headshotId && S.loaded.has('headshots')) { const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && mgrHeadshot(mg); if (hs) { d.headshotId = hs.id; saveDraft(); } }
+    if (d.managerId && !d.headshotId && S.loaded.has('headshots')) { const mg = S.managers.find((m) => m.id === d.managerId); const hs = mg && preferredHeadshot(mg); if (hs) { d.headshotId = hs.id; saveDraft(); } }
   }
   if (!d.spInit && S.loaded.has('spotlights') && liveSpotlights().length) {
     const newest = liveSpotlights().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))[0];

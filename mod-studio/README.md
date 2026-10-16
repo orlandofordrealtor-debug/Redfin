@@ -42,6 +42,12 @@ The fix is `text.html`, a one-file page:
 
 The page reads only digits from the link and only ever opens `sms:` or `tel:` for that number. It loads nothing from other sites and has no tracking. Until a page address is set, the Send step shows a reminder.
 
+## Headshots and who can change them
+
+- **Editors and Contributors** can add, rename, replace and delete any manager's photos, and set anyone's default photo, from Build email (Step 3) or Library → Headshots. Editors' uploads go to the asset store at full size. Contributors can't use the asset store, so their photos are resized to email size (about 900 px, under 150 KB) and saved on the photo record itself.
+- **Viewers and outside link visitors** can't save shared changes; Claude's sharing rules block it, and no page setting can lift that. They can still pick any photo for their own email, and "Use this photo every time on this device" remembers that pick in their browser.
+- To give every manager full rights: Share → turn off "Anyone with the link" → invite each manager by email as an Editor.
+
 ## Uploads
 
 Every upload button is a real file input laid over the button, so a tap opens the photo library or file picker directly on phones and computers (no scripted clicks, which some mobile browsers and in-app views block). Headshots and infographics save as soon as they're picked; large photos are resized before upload, and HEIC photos are converted where the device can read them.
@@ -55,7 +61,7 @@ Every upload button is a real file input laid over the button, so a tap opens th
 | `distribution` | owner (or editors, per setting) | BCC recipients: name, email, team list or person, included flag, order |
 | `schedule` | contributors | One doc per Saturday (`YYYY-MM-DD`): manager on duty, original manager after a swap, note |
 | `managers` | contributors | Manager profiles and default headshot |
-| `headshots` | contributors | Manager id, asset id, label, crop |
+| `headshots` | contributors | Manager id, label, crop, and either an asset id or an inline JPEG (`imageData`) |
 | `spotlights` | contributors | Infographic asset, title, takeaways, prompts, call to action, trash state |
 | `emails` | contributors | Saved drafts for send history |
 | `suggestions` | contributors | Suggested standard info updates |
