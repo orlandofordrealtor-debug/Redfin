@@ -284,7 +284,7 @@ p{margin:0}
 .fixed-row{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px;padding:2px 2px}
 .fixed-row::before{content:"";width:18px;height:2px;border-radius:2px;background:var(--line-2)}
 .sort{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.sort-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:9px 10px 9px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);transition:box-shadow .2s,border-color .2s,opacity .2s}
+.sort-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:10px;padding:9px 10px 9px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);transition:box-shadow .2s,border-color .2s,opacity .2s}
 .sort-item.is-off{opacity:.55}
 .sort-item.is-dragging{border-color:var(--red);box-shadow:var(--shadow-lg);background:var(--surface);position:relative;z-index:2}
 .sort-item b{display:block;font-size:14px;font-weight:700}
@@ -293,6 +293,16 @@ p{margin:0}
 .handle:hover{background:var(--surface-3);color:var(--ink)}
 .is-dragging .handle{cursor:grabbing}
 .sort-moves{display:flex;gap:2px}
+.sec-edit{padding:4px 12px}
+.chip.sm{font-size:10.5px;padding:1px 7px;vertical-align:2px;margin-left:4px}
+.se-list{display:block}
+.se-item{display:block;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.se-item+.se-item{margin-top:10px}
+.se-item>summary{cursor:pointer;padding:12px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14.5px;list-style:none}
+.se-item>summary::-webkit-details-marker{display:none}
+.se-item>summary::before{content:'▸';color:var(--muted);transition:transform .15s}
+.se-item[open]>summary::before{transform:rotate(90deg)}
+.se-body{display:grid;gap:12px;padding:2px 14px 14px}
 .sort-moves .btn{padding:4px 8px}
 @media (max-width:420px){.sort-moves{display:none}}
 .style-group{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:4px 0 -2px}
@@ -528,7 +538,7 @@ const DEFAULT_REACH = 'Text me first for anything urgent. For deal or customer q
 function blankManager() { return { name: '', title: 'Sales Manager', market: '', phone: '', email: '', reach: DEFAULT_REACH, availStart: '', availEnd: '', signoff: 'Have a great weekend!' }; }
 function blankDraft() {
   return { managerId: '', manager: blankManager(), saturday: isoDay(nextSaturday()), subject: '', subjectAuto: true, welcome: DEFAULT_WELCOME, wins: '', headshotId: '', crop: null, spotlightIds: [], spInit: false, toggles: { ...DEFAULT_TOGGLES }, order: DEFAULT_ORDER.slice(), style: 'signature', styleInit: false,
-    announceTitle: '', announceBody: '', announceCta: '', announceUrl: '', to: '', bccOff: [], bccExtra: '' };
+    announceTitle: '', announceBody: '', announceCta: '', announceUrl: '', to: '', bccOff: [], bccExtra: '', heads: {}, coreEdits: {}, spotEdits: {} };
 }
 function loadDraft() {
   try {
@@ -537,7 +547,9 @@ function loadDraft() {
       const d = JSON.parse(raw); const b = blankDraft();
       const out = { ...b, ...d, manager: { ...b.manager, ...(d.manager || {}) }, toggles: { ...b.toggles, ...(d.toggles || {}) } };
       out.order = normOrder(out.order); if (!Array.isArray(out.bccOff)) out.bccOff = [];
-      if (parseDay(out.saturday) < nextSaturday()) out.saturday = isoDay(nextSaturday());
+      ['heads', 'coreEdits', 'spotEdits'].forEach((k) => { if (!out[k] || typeof out[k] !== 'object') out[k] = {}; });
+      // Section edits are for one weekend's email, so a draft from a past weekend starts from the standard wording again.
+      if (parseDay(out.saturday) < nextSaturday()) { out.saturday = isoDay(nextSaturday()); out.heads = {}; out.coreEdits = {}; out.spotEdits = {}; }
       return out;
     }
   } catch (e) { /* storage unavailable */ }
@@ -783,8 +795,11 @@ function eHero(m, s, img) {
   return `<table ${TBL} width="100%" bgcolor="${s.heroBg}" style="background:${s.heroBg};${s.heroGrad ? `background-image:${s.heroGrad};` : ''}border-radius:${s.radius}px;border-collapse:separate"><tr><td style="padding:28px 26px 22px">${inner}</td></tr></table>`;
 }
 
+// Per-email edits: a section heading can be reworded, and a team can be left out of one block without touching standard info.
+const shown = (c, key) => !(c._hide || []).includes(key);
+const HD = (m, key, eyebrow, title) => { const h = (m.heads || {})[key] || {}; return [h.eyebrow !== undefined ? h.eyebrow : eyebrow, h.title !== undefined ? h.title : title]; };
 function eQuick(m, s) {
-  const secs = m.core.filter((c) => c.visible !== false && c.quick && (c.lines || []).length && c.kind !== 'links');
+  const secs = m.core.filter((c) => c.visible !== false && shown(c, 'quick') && c.quick && (c.lines || []).length && c.kind !== 'links');
   if (!secs.length) return '';
   const tiles = secs.map((c) => {
     const lines = (c.lines || []).slice(0, 2).map((l, i) => `<div style="margin-top:${i ? 6 : 8}px">${l.label ? `<div style="${ff(SANS, 11.5, 600, 1.3, `color:${s.muted}`)}">${esc(l.label)}</div>` : ''}<div style="${ff(SANS, i ? 13.5 : 14.5, 400, 1.35, `color:${s.ink};word-break:break-word`)}">${elink(l.href || l.value, l.value, s.ink, i ? 600 : 700)}</div></div>`).join('');
@@ -794,13 +809,13 @@ function eQuick(m, s) {
       ${c.hoursText ? `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:8px`)}">${esc(c.hoursText)}</div>` : ''}
     </td></tr></table>`;
   });
-  return ecard(s, ehead(s, 'Need help now?', 'Tap to reach the right team') + ecols(tiles, 295));
+  return ecard(s, ehead(s, ...HD(m, 'quick', 'Need help now?', 'Tap to reach the right team')) + ecols(tiles, 295));
 }
 
 function eSpotlight(m, s, img) {
   const [f, ...rest] = m.spotlights;
   if (!f) return '';
-  let h = ehead(s, `This weekend’s focus${f.category ? ' · ' + f.category : ''}`, f.title, { size: 26 });
+  let h = ehead(s, HD(m, 'spotlight', `This weekend’s focus${f.category ? ' · ' + f.category : ''}`, '')[0], f.title, { size: 26 });
   const src = img.spot[f.id];
   if (src) {
     const pic = `<img src="${esc(src)}" width="592" alt="${esc(f.title)}" style="display:block;width:100%;max-width:592px;height:auto;border:0;border-radius:${Math.max(0, s.radius - 8)}px">`;
@@ -842,7 +857,7 @@ function eCoverage(m, s) {
   const entries = [];
   const mg = m.manager;
   if (mg.availStart !== '' && mg.availEnd !== '' && Number(mg.availEnd) > Number(mg.availStart)) entries.push({ days: ['sat', 'sun'], start: Number(mg.availStart), end: Number(mg.availEnd), label: `${firstName(mg.name) || 'Your MOD'} (MOD)`, mod: true });
-  m.core.filter((c) => c.visible !== false).forEach((c) => (c.coverage || []).forEach((cv) => { if (Number(cv.end) > Number(cv.start)) entries.push({ ...cv, start: Number(cv.start), end: Number(cv.end), label: cv.label || c.kicker || c.title }); }));
+  m.core.filter((c) => c.visible !== false && shown(c, 'coverage')).forEach((c) => (c.coverage || []).forEach((cv) => { if (Number(cv.end) > Number(cv.start)) entries.push({ ...cv, start: Number(cv.start), end: Number(cv.end), label: cv.label || c.kicker || c.title }); }));
   if (!entries.length) return '';
   const total = AX1 - AX0;
   const bar = (r) => {
@@ -858,15 +873,17 @@ function eCoverage(m, s) {
     if (!rows.length) return '';
     return `<div style="${ff(SANS, 15, 800, 1.3, `color:${s.ink};margin:0 0 10px`)}">${label}</div>${rows.map(bar).join('')}${axis}`;
   };
-  return ecard(s, ehead(s, 'Weekend coverage', 'Who’s on, and when') + ecols([day('sat', `Saturday · ${MON[m.weekend.sat.getMonth()]} ${m.weekend.sat.getDate()}`), day('sun', `Sunday · ${MON[m.weekend.sun.getMonth()]} ${m.weekend.sun.getDate()}`)], 295, { gap: 6 }) +
-    `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:10px`)}">${esc(m.brand.tz)}</div>`);
+  const tz = ((m.heads || {}).coverage || {}).tz !== undefined ? m.heads.coverage.tz : m.brand.tz;
+  return ecard(s, ehead(s, ...HD(m, 'coverage', 'Weekend coverage', 'Who’s on, and when')) + ecols([day('sat', `Saturday · ${MON[m.weekend.sat.getMonth()]} ${m.weekend.sat.getDate()}`), day('sun', `Sunday · ${MON[m.weekend.sun.getMonth()]} ${m.weekend.sun.getDate()}`)], 295, { gap: 6 }) +
+    (tz ? `<div style="${ff(SANS, 12, 400, 1.4, `color:${s.muted};margin-top:10px`)}">${esc(tz)}</div>` : ''));
 }
 
 function eRouting(m, s) {
   const rows = [];
   const mg = m.manager; const first = firstName(mg.name); const tel = e164(mg.phone);
-  if (mg.name) rows.push({ need: 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? textHref('sms:' + tel, first) : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
-  m.core.filter((c) => c.visible !== false && c.need && c.kind !== 'links' && !(c.group === 'tech' && m.toggles.tech)).forEach((c) => {
+  const modNeed = ((m.heads || {}).routing || {}).modNeed;
+  if (mg.name) rows.push({ need: modNeed !== undefined ? modNeed : 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? textHref('sms:' + tel, first) : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
+  m.core.filter((c) => c.visible !== false && shown(c, 'routing') && c.need && c.kind !== 'links' && !(c.group === 'tech' && m.toggles.tech)).forEach((c) => {
     const l = (c.lines || [])[0] || {}; const detailed = (c.steps || []).length || c.group === 'tech';
     rows.push({ need: c.need, title: c.title, href: l.href || l.value, value: l.value, hours: c.hoursText, summary: detailed ? '' : c.summary, note: detailed ? '' : c.note });
   });
@@ -878,11 +895,11 @@ function eRouting(m, s) {
       ${r.summary ? `<div style="${ff(SANS, 13.5, 400, 1.5, `color:${s.muted};margin-top:4px`)}">${esc(r.summary)}</div>` : ''}
       ${r.note ? `<div style="${ff(SANS, 13, 600, 1.45, `color:${s.warnInk};background:${s.warnBg};border-radius:8px;padding:7px 10px;margin-top:8px`)}">Heads up: ${esc(r.note)}</div>` : ''}
     </td></tr>`).join('');
-  return ecard(s, ehead(s, 'Quick guide', 'Who to contact for what') + `<table ${TBL} width="100%">${body}</table>`);
+  return ecard(s, ehead(s, ...HD(m, 'routing', 'Quick guide', 'Who to contact for what')) + `<table ${TBL} width="100%">${body}</table>`);
 }
 
 function ePlaybooks(m, s) {
-  return m.core.filter((c) => c.visible !== false && (c.steps || []).length && c.group !== 'tech' && c.kind !== 'links').map((c) => {
+  return m.core.filter((c) => c.visible !== false && shown(c, 'playbooks') && (c.steps || []).length && c.group !== 'tech' && c.kind !== 'links').map((c) => {
     const st = c.steps;
     let h = ehead(s, c.kicker ? `${c.kicker} playbook` : 'Playbook', c.title);
     if (c.summary) h += `<div style="${ff(SANS, 15, 400, 1.55, `color:${s.muted};margin:-6px 0 18px`)}">${esc(c.summary)}</div>`;
@@ -903,7 +920,7 @@ function ePlaybooks(m, s) {
 }
 
 function eTech(m, s) {
-  const secs = m.core.filter((c) => c.visible !== false && c.group === 'tech');
+  const secs = m.core.filter((c) => c.visible !== false && shown(c, 'tech') && c.group === 'tech');
   if (!secs.length) return '';
   const lanes = secs.map((c) => {
     const btns = (c.lines || []).map((l, i) => ebtn(safeHref(l.href || l.value), l.label || l.value, i ? s.card : s.accent, i ? s.accent : s.onAccent, { small: true, border: s.accent })).join('');
@@ -917,11 +934,11 @@ function eTech(m, s) {
       ${c.note ? `<div style="${ff(SANS, 12.5, 600, 1.45, `color:${s.warnInk};background:${s.warnBg};border-radius:8px;padding:7px 10px;margin:6px 0 4px`)}">${esc(c.note)}</div>` : ''}
     </td></tr></table>`;
   });
-  return ecard(s, ehead(s, 'Tech help', 'Pick the right lane') + ecols(lanes, 295));
+  return ecard(s, ehead(s, ...HD(m, 'tech', 'Tech help', 'Pick the right lane')) + ecols(lanes, 295));
 }
 
 function eResources(m, s) {
-  return m.core.filter((c) => c.visible !== false && c.kind === 'links' && (c.lines || []).length).map((c) => ecard(s,
+  return m.core.filter((c) => c.visible !== false && shown(c, 'resources') && c.kind === 'links' && (c.lines || []).length).map((c) => ecard(s,
     ehead(s, c.kicker || 'Self-serve', c.title) + (c.summary ? `<div style="${ff(SANS, 14.5, 400, 1.55, `color:${s.muted};margin:-6px 0 14px`)}">${esc(c.summary)}</div>` : '') +
     ecols(c.lines.map((l) => `<div style="border-top:2px solid ${s.accent};padding:10px 2px 6px;${ff(SANS, 15, 800, 1.35, `color:${s.ink}`)}">${elink(l.href || l.value, l.label || l.value, s.ink, 800)} <span style="color:${s.accent};font-weight:800">→</span>${l.label && l.value ? `<div style="${ff(SANS, 13, 400, 1.45, `color:${s.muted};margin-top:3px`)}">${esc(l.value)}</div>` : ''}</div>`), 295, { gap: 6 })));
 }
@@ -929,7 +946,7 @@ function eResources(m, s) {
 function eWins(m, s) {
   const lines = String(m.wins || '').split('\n').map((x) => x.trim()).filter(Boolean);
   if (!lines.length) return '';
-  return ecard(s, ehead(s, 'Wins & shout-outs', 'Celebrating the team') + lines.map((l, i) => `<div style="padding:9px 0;${i ? `border-top:1px solid ${s.line};` : ''}${ff(SANS, 15, 400, 1.5, `color:${s.ink}`)}"><span style="color:${s.accent};font-weight:900">★</span>&nbsp; ${esc(l)}</div>`).join(''));
+  return ecard(s, ehead(s, ...HD(m, 'wins', 'Wins & shout-outs', 'Celebrating the team')) + lines.map((l, i) => `<div style="padding:9px 0;${i ? `border-top:1px solid ${s.line};` : ''}${ff(SANS, 15, 400, 1.5, `color:${s.ink}`)}"><span style="color:${s.accent};font-weight:900">★</span>&nbsp; ${esc(l)}</div>`).join(''));
 }
 
 function eSignoff(m, s, img) {
@@ -957,7 +974,7 @@ function eAnnounce(m, s) {
   if (!a.title && !a.body) return '';
   const link = safeHref(a.url);
   const cta = a.cta ? (link ? ebtn(link, a.cta, s.accent, s.onAccent) : `<div style="${ff(SANS, 15, 700, 1.5, `color:${s.accent}`)}">${esc(a.cta)}</div>`) : '';
-  return ecard(s, ehead(s, 'Weekend announcement', a.title || '') + (a.body ? `<div style="${ff(SANS, 15.5, 400, 1.6, `color:${s.ink};margin:0 0 ${cta ? 16 : 0}px`)}">${nl2br(a.body)}</div>` : '') + cta, { topRule: true });
+  return ecard(s, ehead(s, HD(m, 'announce', 'Weekend announcement', '')[0], a.title || '') + (a.body ? `<div style="${ff(SANS, 15.5, 400, 1.6, `color:${s.ink};margin:0 0 ${cta ? 16 : 0}px`)}">${nl2br(a.body)}</div>` : '') + cta, { topRule: true });
 }
 const BLOCKS = { announce: eAnnounce, quick: eQuick, spotlight: eSpotlight, coverage: eCoverage, routing: eRouting, playbooks: ePlaybooks, tech: eTech, resources: eResources, wins: eWins };
 function renderEmail(m, key, img, o = {}) {
@@ -1008,7 +1025,7 @@ function plainText(m) {
     if (f.ctaLabel) L.push(`${f.ctaLabel}${f.ctaUrl ? ': ' + f.ctaUrl : ''}`);
     L.push('');
   }
-  m.core.filter((c) => c.visible !== false).forEach((c) => {
+  m.core.filter((c) => c.visible !== false && (() => { const b = blocksFor(c, m.toggles); return !b.length || b.some((k) => shown(c, k)); })()).forEach((c) => {
     L.push(String(c.title || '').toUpperCase()); if (c.need) L.push(c.need);
     (c.lines || []).forEach((l) => { const h = safeHref(l.href || l.value); L.push(`- ${l.label ? l.label + ': ' : ''}${l.value || ''}${/^https?:/.test(h) && h !== l.value ? ` (${h})` : ''}`); });
     (c.steps || []).forEach((x, i) => L.push(`${i + 1}. ${x.title}${x.body ? ' — ' + x.body : ''}`));
@@ -1122,8 +1139,9 @@ function buildModel() {
     manager: mg, weekend: weekend(d.saturday), subject: subjectFor(d),
     preheader: mg.phone ? `Text ${first || 'your MOD'} at ${mg.phone} for anything urgent. Tour hotline, TC/LC hours, Rocket and IT help inside.` : 'Tour hotline, TC/LC hours, Rocket and IT help for the weekend, all in one place.',
     welcome: d.welcome, wins: d.wins,
-    core: S.core.slice().sort(byOrder),
-    spotlights: (d.spotlightIds || []).map((id) => liveSpotlights().find((x) => x.id === id)).filter(Boolean),
+    core: S.core.slice().sort(byOrder).map((c) => editedCore(c, (d.coreEdits || {})[c.id])),
+    spotlights: (d.spotlightIds || []).map((id) => liveSpotlights().find((x) => x.id === id)).filter(Boolean).map((x) => ({ ...x, ...((d.spotEdits || {})[x.id] || {}) })),
+    heads: d.heads || {},
     toggles: d.toggles, order: normOrder(d.order), brand: brandSettings(),
     announce: { title: d.announceTitle, body: d.announceBody, cta: d.announceCta, url: d.announceUrl },
   };
@@ -1370,7 +1388,7 @@ function renderSteps() {
     <article class="step">${stepHead(2, 'Weekend & message', '')}<div class="step-body" id="wkFields"></div></article>
     <article class="step">${stepHead(3, 'Headshot', 'From the shared library')}<div class="step-body"><div id="hsPicker"></div><div id="cropBox"></div></div></article>
     <article class="step">${stepHead(4, 'This weekend’s focus', 'Infographic or spotlight')}<div class="step-body" id="spPicker"></div></article>
-    <article class="step">${stepHead(5, 'Sections', 'Turn blocks on or off')}<div class="step-body" id="toggles"></div></article>
+    <article class="step">${stepHead(5, 'Sections', 'Turn on, reorder or edit')}<div class="step-body" id="toggles"></div></article>
     <article class="step">${stepHead(6, 'Style', 'Five looks, same content')}<div class="step-body" id="stylePick"></div></article>
     <article class="step">${stepHead(7, 'Send', 'Copy into Gmail')}<div class="step-body" id="sendPanel"></div></article>`;
   renderMgrPicker(); renderMgrFields(); renderWeekendFields(); renderHsPicker(); renderCropBox(); renderSpPicker(); renderToggles(); renderStylePick(); renderSendPanel(); updateProgress();
@@ -1467,9 +1485,9 @@ function renderSpPicker() {
 function renderToggles() {
   const d = S.draft; d.order = normOrder(d.order);
   $('#toggles').innerHTML = `<label class="switch-row"><span><b>Animated “On duty” badge</b><small>A pulsing dot that animates in Gmail</small></span><input type="checkbox" class="switch" id="t_live" data-toggle="live" ${d.toggles.live ? 'checked' : ''}></label>
-    <p class="muted" style="font-size:13px">Drag the <b>⠿</b> handle (or use the arrows) to put sections in the order you want. The email follows this order exactly.</p>
+    <p class="muted" style="font-size:13px">Drag the <b>⠿</b> handle (or use the arrows) to put sections in the order you want. The email follows this order exactly. Tap <b>Edit</b> on any section to change its wording, hours or links for this email only.</p>
     <div class="fixed-row">Always first: logo and your hero card</div>
-    <ol class="sort" id="sortList">${d.order.map((k, i) => `<li class="sort-item ${d.toggles[k] ? '' : 'is-off'}" data-key="${k}"><button class="handle" data-handle aria-label="Drag to reorder ${esc(SECTION_INFO[k][0])}" title="Drag to reorder">⠿</button><span style="min-width:0"><b>${esc(SECTION_INFO[k][0])}</b><small>${esc(SECTION_INFO[k][1])}</small></span><span class="sort-moves"><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} up">↑</button><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="1" ${i === d.order.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} down">↓</button></span><input type="checkbox" class="switch" id="t_${k}" data-toggle="${k}" ${d.toggles[k] ? 'checked' : ''} aria-label="Show ${esc(SECTION_INFO[k][0])}"></li>`).join('')}</ol>
+    <ol class="sort" id="sortList">${d.order.map((k, i) => `<li class="sort-item ${d.toggles[k] ? '' : 'is-off'}" data-key="${k}"><button class="handle" data-handle aria-label="Drag to reorder ${esc(SECTION_INFO[k][0])}" title="Drag to reorder">⠿</button><span style="min-width:0"><b>${esc(SECTION_INFO[k][0])}${secEdited(k) ? ' <span class="chip red sm">Edited</span>' : ''}</b><small>${esc(SECTION_INFO[k][1])}</small></span><span class="sort-moves"><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} up">↑</button><button class="btn btn-ghost btn-xs" data-action="move-sec" data-key="${k}" data-dir="1" ${i === d.order.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(SECTION_INFO[k][0])} down">↓</button></span><button class="btn btn-xs sec-edit" data-action="edit-sec" data-key="${k}" aria-label="Edit ${esc(SECTION_INFO[k][0])}">Edit</button><input type="checkbox" class="switch" id="t_${k}" data-toggle="${k}" ${d.toggles[k] ? 'checked' : ''} aria-label="Show ${esc(SECTION_INFO[k][0])}"></li>`).join('')}</ol>
     <div class="fixed-row">Always last: your sign-off and the footer</div>
     <div class="btn-row"><button class="btn btn-xs btn-ghost" data-action="reset-order">Reset to the standard order</button></div>`;
 }
@@ -2165,6 +2183,170 @@ function covRow(cv = {}) {
   const days = (cv.days || ['sat', 'sun']).join(',');
   return `<div class="rep-item" data-rep="cov"><button class="btn btn-ghost btn-xs x" data-action="rep-remove" aria-label="Remove hours">✕</button><div class="rep-grid"><label class="field"><span>Days</span><select class="select" data-k="days"><option value="sat,sun" ${days === 'sat,sun' ? 'selected' : ''}>Sat and Sun</option><option value="sat" ${days === 'sat' ? 'selected' : ''}>Saturday</option><option value="sun" ${days === 'sun' ? 'selected' : ''}>Sunday</option></select></label><label class="field"><span>Bar label</span><input class="input" data-k="label" value="${esc(cv.label || '')}"></label></div><div class="rep-grid"><label class="field"><span>From</span><select class="select" data-k="start">${hourOptions(cv.start ?? 8, '—')}</select></label><label class="field"><span>To</span><select class="select" data-k="end">${hourOptions(cv.end ?? 12, '—')}</select></label></div></div>`;
 }
+/* ---------------- per-email section edits ---------------- */
+// Each block in step 5 can be reworded for this email only. Edits live on the draft and store only what differs
+// from standard info, so anything left alone keeps following standard info.
+const EDIT_FIELDS = ['title', 'kicker', 'need', 'summary', 'hoursText', 'note', 'lines', 'steps', 'coverage'];
+const SEC_EDIT = {
+  announce: { head: ['Weekend announcement'] },
+  quick: { head: ['Need help now?', 'Tap to reach the right team'], items: (c) => c.quick && (c.lines || []).length && c.kind !== 'links', fields: ['kicker', 'title', 'lines', 'hoursText'], show: 'Show as a tile', hint: 'The tile shows the first two lines.' },
+  spotlight: {},
+  coverage: { head: ['Weekend coverage', 'Who’s on, and when'], items: (c) => (c.coverage || []).length, fields: ['coverage'], show: 'Show on the map' },
+  routing: { head: ['Quick guide', 'Who to contact for what'], items: (c, t) => c.need && c.kind !== 'links' && !(c.group === 'tech' && t.tech), fields: ['need', 'title', 'line0', 'hoursText', 'summary', 'note'], show: 'Show in the guide' },
+  playbooks: { items: (c) => (c.steps || []).length && c.group !== 'tech' && c.kind !== 'links', fields: ['kicker', 'title', 'summary', 'steps', 'note'], show: 'Show this playbook' },
+  tech: { head: ['Tech help', 'Pick the right lane'], items: (c) => c.group === 'tech', fields: ['kicker', 'title', 'need', 'summary', 'lines', 'hoursText', 'note'], show: 'Show this lane', hint: 'Each line becomes a button.' },
+  resources: { items: (c) => c.kind === 'links' && (c.lines || []).length, fields: ['kicker', 'title', 'summary', 'lines'], show: 'Show these links' },
+  wins: { head: ['Wins & shout-outs', 'Celebrating the team'] },
+};
+const FIELD_UI = { kicker: 'Short label', title: 'Title', need: 'When agents need this', summary: 'Summary', hoursText: 'Hours as shown', note: 'Heads-up note' };
+const storedField = (f) => (f === 'line0' ? 'lines' : f);
+function editedCore(c, e) {
+  if (!e) return c;
+  const o = { ...c }; EDIT_FIELDS.forEach((k) => { if (e[k] !== undefined) o[k] = e[k]; });
+  o._hide = Array.isArray(e.hideIn) ? e.hideIn : []; return o;
+}
+const blocksFor = (c, t) => Object.keys(SEC_EDIT).filter((k) => SEC_EDIT[k].items && t[k] && SEC_EDIT[k].items(c, t));
+// Canonical shapes so a line or step typed back exactly as it was compares equal to standard info.
+const canon = {
+  lines: (a) => (a || []).map((l) => ({ label: l.label || '', value: l.value || '', href: l.href || '' })),
+  steps: (a) => (a || []).map((x) => ({ title: x.title || '', body: x.body || '', cta: x.cta || '', href: x.href || '' })),
+  coverage: (a) => (a || []).map((v) => ({ days: (v.days || []).slice(), start: Number(v.start), end: Number(v.end), label: v.label || '' })),
+};
+const sameVal = (k, a, b) => (canon[k] ? JSON.stringify(canon[k](a)) === JSON.stringify(canon[k](b)) : String(a ?? '') === String(b ?? ''));
+function secItems(key) {
+  const cfg = SEC_EDIT[key]; const d = S.draft; if (!cfg.items) return [];
+  return S.core.slice().sort(byOrder).filter((c) => c.visible !== false).map((c) => ({ base: c, cur: editedCore(c, (d.coreEdits || {})[c.id]) }))
+    .filter(({ base, cur }) => cfg.items(base, d.toggles) || cfg.items(cur, d.toggles));
+}
+function secEdited(key) {
+  const d = S.draft; const cfg = SEC_EDIT[key];
+  if (Object.keys((d.heads || {})[key] || {}).length) return true;
+  if (key === 'spotlight') { const f = (d.spotlightIds || [])[0]; return !!(f && Object.keys((d.spotEdits || {})[f] || {}).length); }
+  if (!cfg.items) return false;
+  const fs = (cfg.fields || []).map(storedField);
+  return secItems(key).some(({ base }) => { const e = (d.coreEdits || {})[base.id]; return !!e && ((e.hideIn || []).includes(key) || fs.some((f) => e[f] !== undefined)); });
+}
+const seField = (f, v, rows) => (rows
+  ? `<label class="field"><span>${esc(FIELD_UI[f])}</span><textarea class="textarea" rows="${rows}" data-f="${f}">${esc(v || '')}</textarea></label>`
+  : `<label class="field"><span>${esc(FIELD_UI[f])}</span><input class="input" data-f="${f}" value="${esc(v || '')}"></label>`);
+function secEditDrawer(key) {
+  const cfg = SEC_EDIT[key]; const d = S.draft; const h = (d.heads || {})[key] || {}; const name = SECTION_INFO[key][0];
+  const headVal = (i) => { const k = i ? 'title' : 'eyebrow'; return h[k] !== undefined ? h[k] : cfg.head[i] || ''; };
+  let body = `<p class="muted" style="font-size:13.5px;margin:0">Changes apply to <b>this email only</b>. Standard info stays the same for everyone, and anything you leave alone keeps the standard wording. <b>Reset</b> brings the standard wording back.</p>`;
+  if (cfg.head) body += `<div class="section-label">Section heading</div>${cfg.head.length > 1 ? '<div class="row2">' : ''}<label class="field"><span>Small label above</span><input class="input" id="se_eb" value="${esc(headVal(0))}"></label>${cfg.head.length > 1 ? `<label class="field"><span>Heading</span><input class="input" id="se_tt" value="${esc(headVal(1))}"></label></div>` : ''}`;
+  if (key === 'announce') {
+    body += `<div class="section-label">Announcement</div><label class="field"><span>Headline</span><input class="input" id="se_aTitle" value="${esc(d.announceTitle)}" placeholder="Open house blitz this Sunday"></label>
+      <label class="field"><span>Message</span><textarea class="textarea" rows="4" id="se_aBody">${esc(d.announceBody)}</textarea></label>
+      <div class="row2"><label class="field"><span>Button label (optional)</span><input class="input" id="se_aCta" value="${esc(d.announceCta)}"></label><label class="field"><span>Button link</span><input class="input" id="se_aUrl" value="${esc(d.announceUrl)}" placeholder="https://…" inputmode="url"></label></div>`;
+  } else if (key === 'wins') {
+    body += `<div class="section-label">Wins</div><label class="field"><span>One per line</span><textarea class="textarea" rows="5" id="se_wins" placeholder="Maria closed her first listing in Pasadena!">${esc(d.wins)}</textarea></label>`;
+  } else if (key === 'spotlight') {
+    const id = (d.spotlightIds || [])[0]; const base = id && liveSpotlights().find((x) => x.id === id);
+    if (!base) body += `<p class="muted">Pick a spotlight in step 4 first. Then you can reword it here for this email.</p>`;
+    else {
+      const v = { ...base, ...((d.spotEdits || {})[id] || {}) }; const defEb = `This weekend’s focus${base.category ? ' · ' + base.category : ''}`;
+      body += `<div class="section-label">Featured: ${esc(base.title)}</div>
+        <label class="field"><span>Small label above</span><input class="input" id="se_eb" value="${esc(h.eyebrow !== undefined ? h.eyebrow : defEb)}"></label>
+        <label class="field"><span>Title</span><input class="input" id="sp_title" value="${esc(v.title)}"></label>
+        <label class="field"><span>Summary</span><textarea class="textarea" rows="3" id="sp_summary">${esc(v.summary || '')}</textarea></label>
+        <label class="field"><span>What to know (one per line)</span><textarea class="textarea" rows="4" id="sp_takeaways">${esc((v.takeaways || []).join('\n'))}</textarea></label>
+        <div class="row2"><label class="field"><span>Prompts heading</span><input class="input" id="sp_promptsLabel" value="${esc(v.promptsLabel || '')}" placeholder="Try these"></label><label class="field"><span>Button label</span><input class="input" id="sp_ctaLabel" value="${esc(v.ctaLabel || '')}"></label></div>
+        <label class="field"><span>Prompts (one per line)</span><textarea class="textarea" rows="3" id="sp_prompts">${esc((v.prompts || []).join('\n'))}</textarea></label>
+        <label class="field"><span>Button and image link</span><input class="input" id="sp_ctaUrl" value="${esc(v.ctaUrl || '')}" inputmode="url"></label>`;
+    }
+  }
+  if (key === 'coverage') {
+    const mg = d.manager; const tz = h.tz !== undefined ? h.tz : brandSettings().tz;
+    body += `${mg.name ? `<div class="section-label">Your MOD hours</div><div class="row2"><label class="field"><span>Reachable from</span><select class="select" id="se_from">${hourOptions(mg.availStart, 'Not shown')}</select></label><label class="field"><span>Until</span><select class="select" id="se_until">${hourOptions(mg.availEnd, 'Not shown')}</select></label></div>` : ''}
+      <label class="field"><span>Time zone note under the map</span><input class="input" id="se_tz" value="${esc(tz)}"></label>`;
+  }
+  if (key === 'routing') {
+    const mn = h.modNeed !== undefined ? h.modNeed : 'Something urgent, or not sure who to ask?';
+    body += `<label class="field"><span>Your row in the guide</span><input class="input" id="se_modNeed" value="${esc(mn)}"><small>Your name and cell come from step 1.</small></label>`;
+  }
+  if (cfg.items) {
+    const items = secItems(key);
+    if (!S.core.length) body += '<p class="muted">Standard info hasn’t loaded yet.</p>';
+    else if (!items.length) body += '<p class="muted">No standard info feeds this section right now.</p>';
+    body += '<div class="se-list">' + items.map(({ base, cur }, i) => {
+      const hidden = !shown(cur, key);
+      let f = `<label class="switch-row"><span><b>${esc(cfg.show)}</b><small>Turn off to leave this out of this email</small></span><input type="checkbox" class="switch" data-show ${hidden ? '' : 'checked'}></label>`;
+      cfg.fields.forEach((k) => {
+        if (FIELD_UI[k]) f += seField(k, cur[k], k === 'summary' ? 3 : 0);
+        else if (k === 'lines') f += `<div class="section-label">Contact lines and links${cfg.hint ? ` <span class="muted" style="text-transform:none;letter-spacing:0;font-weight:500">· ${esc(cfg.hint)}</span>` : ''}</div><div class="rep" id="se_lines_${i}">${(cur.lines || []).map(lineRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="line" data-target="#se_lines_${i}">+ Add line</button></div>`;
+        else if (k === 'line0') { const l = (cur.lines || [])[0] || {}; f += `<div class="row2"><label class="field"><span>Contact shown</span><input class="input" data-l0="value" value="${esc(l.value || '')}"></label><label class="field"><span>Contact link</span><input class="input" data-l0="href" value="${esc(l.href || '')}" placeholder="mailto:, tel:, sms: or https://"></label></div>`; }
+        else if (k === 'steps') f += `<div class="section-label">Steps</div><div class="rep" id="se_steps_${i}">${(cur.steps || []).map(stepRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="step" data-target="#se_steps_${i}">+ Add step</button></div>`;
+        else if (k === 'coverage') f += `<div class="rep" id="se_cov_${i}">${(cur.coverage || []).map(covRow).join('')}</div><div><button class="btn btn-sm" data-action="rep-add" data-kind="cov" data-target="#se_cov_${i}">+ Add hours</button></div>`;
+      });
+      const e = (d.coreEdits || {})[base.id]; const mine = !!e && ((e.hideIn || []).includes(key) || cfg.fields.map(storedField).some((x) => e[x] !== undefined));
+      return `<details class="se-item" data-cid="${esc(base.id)}" ${i === 0 ? 'open' : ''}><summary><b>${esc(base.title)}</b>${hidden ? '<span class="chip">Hidden</span>' : ''}${mine ? '<span class="chip red">Edited</span>' : ''}</summary><div class="se-body">${f}</div></details>`;
+    }).join('') + '</div>';
+  }
+  openDrawer(`${dHead(`Edit · ${name}`)}<div class="drawer-body">${body}</div><div class="drawer-foot">${secEdited(key) ? `<button class="btn btn-ghost" data-action="reset-sec" data-key="${key}" style="margin-right:auto">Reset to standard</button>` : ''}<button class="btn" data-action="close-drawer">Cancel</button><button class="btn btn-primary" data-action="save-sec" data-key="${key}">Save for this email</button></div>`);
+}
+function saveSecEdit(key) {
+  const cfg = SEC_EDIT[key]; const d = S.draft; const v = (id) => { const el = $('#' + id); return el ? el.value.trim() : undefined; };
+  d.heads = d.heads || {}; d.coreEdits = d.coreEdits || {}; d.spotEdits = d.spotEdits || {};
+  const h = { ...(d.heads[key] || {}) };
+  const setHead = (k, val, def) => { if (val === undefined) return; if (val === (def ?? '')) delete h[k]; else h[k] = val; };
+  if (cfg.head) { setHead('eyebrow', v('se_eb'), cfg.head[0]); if (cfg.head.length > 1) setHead('title', v('se_tt'), cfg.head[1]); }
+  if (key === 'announce') { d.announceTitle = v('se_aTitle'); d.announceBody = $('#se_aBody').value.trim(); d.announceCta = v('se_aCta'); d.announceUrl = v('se_aUrl'); if (d.announceTitle || d.announceBody) d.toggles.announce = true; }
+  if (key === 'wins') { d.wins = $('#se_wins').value.trim(); if (d.wins) d.toggles.wins = true; }
+  if (key === 'coverage') {
+    setHead('tz', v('se_tz'), brandSettings().tz);
+    if ($('#se_from')) { d.manager.availStart = $('#se_from').value; d.manager.availEnd = $('#se_until').value; }
+  }
+  if (key === 'routing') setHead('modNeed', v('se_modNeed'), 'Something urgent, or not sure who to ask?');
+  if (key === 'spotlight') {
+    const id = (d.spotlightIds || [])[0]; const base = id && liveSpotlights().find((x) => x.id === id);
+    if (base) {
+      setHead('eyebrow', v('se_eb'), `This weekend’s focus${base.category ? ' · ' + base.category : ''}`);
+      const list = (t) => t.split('\n').map((x) => x.trim()).filter(Boolean);
+      const vals = { title: v('sp_title'), summary: $('#sp_summary').value.trim(), takeaways: list($('#sp_takeaways').value), promptsLabel: v('sp_promptsLabel'), prompts: list($('#sp_prompts').value), ctaLabel: v('sp_ctaLabel'), ctaUrl: v('sp_ctaUrl') };
+      const e = {}; Object.entries(vals).forEach(([k, val]) => { const b = base[k] ?? (Array.isArray(val) ? [] : ''); if (JSON.stringify(val) !== JSON.stringify(Array.isArray(b) ? b.filter(Boolean) : String(b))) e[k] = val; });
+      if (!e.title && vals.title === '') delete e.title;
+      if (Object.keys(e).length) d.spotEdits[id] = e; else delete d.spotEdits[id];
+    }
+  }
+  if (Object.keys(h).length) d.heads[key] = h; else delete d.heads[key];
+  if (cfg.items) {
+    const reps = (box, map) => (box ? $$('.rep-item', box).map((el) => { const o = {}; $$('[data-k]', el).forEach((i) => { o[i.dataset.k] = i.value.trim(); }); return map(o); }).filter(Boolean) : []);
+    $$('#drawer .se-item').forEach((card) => {
+      const cid = card.dataset.cid; const base = S.core.find((x) => x.id === cid); if (!base) return;
+      const cur = editedCore(base, d.coreEdits[cid]); const vals = {};
+      $$('[data-f]', card).forEach((i) => { vals[i.dataset.f] = i.value.trim(); });
+      cfg.fields.forEach((k) => {
+        if (k === 'lines') vals.lines = reps($('[id^="se_lines_"]', card), (o) => (o.label || o.value || o.href ? { label: o.label, value: o.value, href: o.href } : null));
+        if (k === 'steps') vals.steps = reps($('[id^="se_steps_"]', card), (o) => (o.title ? { title: o.title, body: o.body, cta: o.cta, href: o.href } : null));
+        if (k === 'coverage') vals.coverage = reps($('[id^="se_cov_"]', card), (o) => (o.start !== '' && o.end !== '' && Number(o.end) > Number(o.start) ? { days: o.days.split(','), start: Number(o.start), end: Number(o.end), label: o.label } : null));
+        if (k === 'line0') { const ls = canon.lines(cur.lines); const first = ls[0] || { label: '', value: '', href: '' }; ls[0] = { ...first, value: $('[data-l0="value"]', card).value.trim(), href: $('[data-l0="href"]', card).value.trim() }; vals.lines = ls; }
+      });
+      if (!vals.title && vals.title !== undefined) vals.title = base.title;
+      const e = { ...(d.coreEdits[cid] || {}) };
+      Object.entries(vals).forEach(([k, val]) => { if (sameVal(k, val, base[k])) delete e[k]; else e[k] = val; });
+      const hide = new Set(e.hideIn || []); if ($('[data-show]', card).checked) hide.delete(key); else hide.add(key);
+      if (hide.size) e.hideIn = [...hide]; else delete e.hideIn;
+      if (Object.keys(e).length) d.coreEdits[cid] = e; else delete d.coreEdits[cid];
+    });
+  }
+  saveDraft(); closeDrawer(); renderToggles(); renderMgrFields(); renderWeekendFields(); schedulePreview(); updateProgress(); renderSendPanel();
+  toast(secEdited(key) ? `${SECTION_INFO[key][0]} updated for this email.` : `${SECTION_INFO[key][0]} uses the standard wording.`);
+}
+function resetSec(key) {
+  const cfg = SEC_EDIT[key]; const d = S.draft;
+  if (d.heads) delete d.heads[key];
+  if (key === 'spotlight') { const id = (d.spotlightIds || [])[0]; if (id && d.spotEdits) delete d.spotEdits[id]; }
+  if (cfg.items) {
+    const fs = cfg.fields.map(storedField);
+    secItems(key).forEach(({ base }) => {
+      const e = d.coreEdits && d.coreEdits[base.id]; if (!e) return;
+      fs.forEach((f) => delete e[f]); if (e.hideIn) { e.hideIn = e.hideIn.filter((k) => k !== key); if (!e.hideIn.length) delete e.hideIn; }
+      if (!Object.keys(e).length) delete d.coreEdits[base.id];
+    });
+  }
+  saveDraft(); closeDrawer(); renderToggles(); schedulePreview();
+  toast(`${SECTION_INFO[key][0]} is back to the standard wording.`);
+}
 function coreDrawer(id) {
   const c = S.core.find((x) => x.id === id) || null;
   const v = c || { title: '', kicker: '', need: '', summary: '', hoursText: '', note: '', group: '', kind: 'contact', quick: false, visible: true, lines: [], steps: [], coverage: [], needsReview: false, reviewNote: '' };
@@ -2273,7 +2455,7 @@ const handlers = {
   'delete-core': (a) => { if (armed(a)) write(() => S.db.collection('core').doc(a.dataset.id).delete(), 'Section deleted.').then((ok) => ok && closeDrawer()); },
   'move-core': (a) => moveCore(a.dataset.id, a.dataset.dir),
   'verify-core': (a) => write(() => S.db.collection('core').doc(a.dataset.id).update({ needsReview: false, lastVerified: nowISO(), verifiedBy: S.me.id || '' }), 'Marked verified.'),
-  'rep-add': (a) => { const k = a.dataset.kind; const box = $(k === 'line' ? '#repLines' : k === 'step' ? '#repSteps' : '#repCov'); box.insertAdjacentHTML('beforeend', k === 'line' ? lineRow() : k === 'step' ? stepRow() : covRow()); const f = box.lastElementChild.querySelector('input,textarea'); if (f) f.focus(); },
+  'rep-add': (a) => { const k = a.dataset.kind; const box = $(a.dataset.target || (k === 'line' ? '#repLines' : k === 'step' ? '#repSteps' : '#repCov')); box.insertAdjacentHTML('beforeend', k === 'line' ? lineRow() : k === 'step' ? stepRow() : covRow()); const f = box.lastElementChild.querySelector('input,textarea'); if (f) f.focus(); },
   'rep-remove': (a) => { const it = a.closest('.rep-item'); if (it) it.remove(); },
   'suggest': (a) => suggestDrawer(a.dataset.id || ''),
   'save-suggestion': (a) => { const text = $('#s_text').value.trim(); if (!text) { toast('Describe the change first.', 'err'); return; } busy(a, 'Sending…', () => write(() => S.db.collection('suggestions').doc(`sg-${Date.now()}-${rid()}`).set({ sectionId: $('#s_sec').value, text, status: 'open', createdBy: S.me.id || '', createdAt: nowISO() }), `Sent to ${adminName()}.`).then((ok) => ok && closeDrawer())); },
@@ -2288,6 +2470,9 @@ const handlers = {
   'copy-bcc-all': () => { const l = S.distribution.filter((r) => r.active !== false).sort(byListOrder).map((r) => r.email).filter(Boolean); if (!l.length) { toast('The list is empty.', 'err'); return; } copyTextMsg(l.join(', '), `Copied ${l.length} address${l.length === 1 ? '' : 'es'}.`); },
   'toggle-bcc': () => { S.bccOpen = !S.bccOpen; renderSendPanel(); },
   'move-sec': (a) => moveSection(a.dataset.key, a.dataset.dir),
+  'edit-sec': (a) => secEditDrawer(a.dataset.key),
+  'save-sec': (a) => saveSecEdit(a.dataset.key),
+  'reset-sec': (a) => resetSec(a.dataset.key),
   'reset-order': () => { S.draft.order = DEFAULT_ORDER.slice(); saveDraft(); renderToggles(); schedulePreview(); toast('Back to the standard order.'); },
   'bulk-upload': () => $('#filePickMulti').click(),
   'sp-filter': (a) => { S.spTrash = a.dataset.trash === '1'; renderLibrary(); },
@@ -2388,6 +2573,7 @@ function flush() {
   d.spotlightIds = d.spotlightIds.filter((id) => !S.loaded.has('spotlights') || liveSpotlights().some((x) => x.id === id));
   const rc = $('#recipCount'); if (rc) rc.textContent = S.distribution.length ? String(S.distribution.filter((r) => r.active !== false).length) : '';
   if (keys.has('managers') || keys.has('headshots') || keys.has('schedule')) { renderMgrPicker(); renderHsPicker(); renderCropBox(); }
+  if ((keys.has('core') || keys.has('spotlights')) && !$('.sort-item.is-dragging')) renderToggles();
   if (keys.has('managers') && !$('#mgrFields').contains(document.activeElement)) renderMgrFields();
   if (keys.has('spotlights')) renderSpPicker();
   renderSendPanel(); updateProgress(); updateCoreBadge(); renderWho();
