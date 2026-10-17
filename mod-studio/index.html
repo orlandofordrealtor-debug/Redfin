@@ -631,8 +631,8 @@ function textHref(href, name) {
   if (!page || d.length < 10) return href;
   return `${page}${page.includes('?') ? '&' : '?'}to=${d}${name ? '&n=' + encodeURIComponent(name) : ''}`;
 }
-const outHref = (h) => (/^sms:/i.test(h || '') ? textHref(h) : h);
-const hasSmsLinks = (html) => /href="sms:/i.test(html);
+// Without a text link page, an sms: line shows as plain text instead of a link Gmail would break.
+const outHref = (h) => (/^sms:/i.test(h || '') ? (brandSettings().textPage ? textHref(h) : '') : h);
 
 function ebtn(href, label, bg, fg, o = {}) {
   href = outHref(href);
@@ -640,6 +640,15 @@ function ebtn(href, label, bg, fg, o = {}) {
   const pad = o.small ? '9px 16px' : '13px 22px';
   const border = `border:2px solid ${o.border || bg};`;
   return `<a href="${esc(href)}" target="_blank" class="${o.cls || ''}" style="display:inline-block;margin:0 8px 8px 0;background:${bg};${border}color:${fg};border-radius:${o.radius ?? 999}px;padding:${pad};${ff(SANS, o.small ? 13 : 15, 700, 1.1)}text-decoration:none;white-space:nowrap">${esc(label)}</a>`;
+}
+// Full-width button for a fixed-width cell, so Call and Email sit side by side even on a narrow phone.
+function heroBtn(href, label, bg, fg, o = {}) {
+  const icon = o.icon ? `<img src="${esc(o.icon)}" width="17" height="17" alt="" style="display:inline-block;width:17px;height:17px;border:0;vertical-align:-3px;margin-right:8px">` : '';
+  return `<a href="${esc(href)}" target="_blank" class="${o.cls || ''}" style="display:block;text-align:center;background:${bg};border:2px solid ${o.border || bg};color:${fg};border-radius:999px;padding:12px 10px;${ff(SANS, 15, 700, 1.1)}text-decoration:none;white-space:nowrap">${icon}${esc(label)}</a>`;
+}
+function eBtnRow(list) {
+  const b = list.filter(Boolean); if (!b.length) return '';
+  return `<table ${TBL} width="100%" style="max-width:${b.length > 1 ? 330 : 170}px;margin:2px 0 10px"><tr>${b.map((x, i) => `<td width="${Math.round(100 / b.length)}%" valign="top" style="padding:0 ${i < b.length - 1 ? 5 : 0}px 0 ${i ? 5 : 0}px">${x}</td>`).join('')}</tr></table>`;
 }
 let SEC_N = 0;
 function ehead(s, eyebrow, title, o = {}) {
@@ -661,7 +670,9 @@ function ecols(items, widths, o = {}) {
   return `<div style="font-size:0;line-height:0">${list.map((h, i) => `<div style="display:inline-block;vertical-align:${o.valign || 'top'};width:100%;max-width:${Array.isArray(widths) ? widths[i] : widths}px;font-size:15px;line-height:1.5"><div style="padding:${pad}px">${h}</div></div>`).join('')}</div>`;
 }
 function epill(s, img, text) {
-  return `<table ${TBL} style="border-collapse:separate"><tr><td bgcolor="${s.pillBg}" style="background:${s.pillBg};border-radius:999px;padding:5px 14px 5px ${img.dot ? 7 : 14}px;white-space:nowrap">${img.dot ? `<img src="${esc(img.dot)}" width="20" height="20" alt="" style="display:inline-block;vertical-align:middle;border:0;width:20px;height:20px">` : ''}<span style="${ff(SANS, 11, 800, 1, `letter-spacing:1.3px;text-transform:uppercase;color:${s.pillInk};vertical-align:middle;padding-left:${img.dot ? 5 : 0}px`)}">${esc(text)}</span></td></tr></table>`;
+  // The dot sits in its own cell so the label wraps neatly beside it on narrow phones instead of widening the email.
+  const label = String(text).split(' · ').map((t) => `<span style="white-space:nowrap">${esc(t)}</span>`).join(' · ');
+  return `<table ${TBL} bgcolor="${s.pillBg}" style="background:${s.pillBg};border-radius:16px;border-collapse:separate"><tr>${img.dot ? `<td valign="middle" style="padding:5px 0 5px 7px;width:20px"><img src="${esc(img.dot)}" width="20" height="20" alt="" style="display:block;border:0;width:20px;height:20px"></td>` : ''}<td valign="middle" style="padding:5px 14px 5px ${img.dot ? 6 : 14}px;${ff(SANS, 11, 800, 1.5, `letter-spacing:1.3px;text-transform:uppercase;color:${s.pillInk}`)}">${label}</td></tr></table>`;
 }
 function elink(href, text, color, weight = 700) {
   const h = outHref(safeHref(href));
@@ -677,11 +688,12 @@ function eHero(m, s, img) {
   const name = mg.name || 'Your Manager on Duty';
   const sub = [mg.title, mg.market].filter(Boolean).join(' · ');
   const pillTxt = `On duty · ${m.weekend.pill}`;
-  const btns = [
-    tel ? ebtn(textHref('sms:' + tel, first), `Text ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : (mg.email ? ebtn('mailto:' + mg.email, `Email ${first || 'me'}`, s.heroBtnBg, s.heroBtnInk, { cls: 'mod-pulse' }) : ''),
-    tel ? ebtn('tel:' + tel, 'Call', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
-    tel && mg.email ? ebtn('mailto:' + mg.email, 'Email', 'transparent', s.heroBtn2Ink, { border: s.heroBtn2Border }) : '',
-  ].join('');
+  // Gmail strips sms: links, so the hero offers Call and Email only; the cell number stays printed for texting.
+  const ico = img.icons || {};
+  const btns = eBtnRow([
+    tel ? heroBtn('tel:' + tel, 'Call', s.heroBtnBg, s.heroBtnInk, { icon: ico.callP, cls: 'mod-pulse' }) : '',
+    mg.email ? (tel ? heroBtn('mailto:' + mg.email, 'Email', 'transparent', s.heroBtn2Ink, { icon: ico.mailS, border: s.heroBtn2Border }) : heroBtn('mailto:' + mg.email, 'Email', s.heroBtnBg, s.heroBtnInk, { icon: ico.mailP, cls: 'mod-pulse' })) : '',
+  ]);
   const welcome = m.welcome ? `<div style="${ff(SANS, 15.5, 400, 1.55, `color:${s.heroInk};margin:0 0 18px`)}">${nl2br(m.welcome)}</div>` : '';
   const reach = mg.reach ? `<div style="${ff(SANS, 13, 400, 1.5, `color:${s.heroMuted};margin:4px 0 0`)}">${nl2br(mg.reach)}</div>` : '';
   const contactLine = [mg.phone ? elink('tel:' + tel, mg.phone, s.heroInk, 700) : '', mg.email ? elink('mailto:' + mg.email, mg.email, s.heroInk, 600) : ''].filter(Boolean).join(` <span style="color:${s.heroMuted}">·</span> `);
@@ -733,7 +745,7 @@ function eHero(m, s, img) {
         <td align="center" style="${ff(SANS, 10.5, 700, 1.3, `color:${s.ink};letter-spacing:1px;text-transform:uppercase`)}">${esc(dayLong)}</td>
         <td width="25%" align="right" style="${ff(SANS, 10.5, 700, 1.3, `color:${s.accent};letter-spacing:1px;text-transform:uppercase`)}">MOD desk</td></tr></table></td></tr></table>`;
     const byline = `<table ${TBL}><tr>${img.headshot ? `<td width="54" valign="middle"><img src="${esc(img.headshot)}" width="44" height="44" alt="" style="display:block;width:44px;height:44px;border-radius:50%;border:0"></td>` : ''}<td valign="middle" style="${ff(SANS, 13, 400, 1.45, `color:${s.muted}`)}">By <b style="color:${s.ink}">${esc(name)}</b>${sub ? `, ${esc(sub)}` : ''}${contactLine ? `<br>${contactLine}` : ''}</td></tr></table>`;
-    const deck = tel ? 'Text first for anything urgent. Inside: who to call, when they’re open, and this weekend’s focus.' : 'Inside: who to call, when they’re open, and this weekend’s focus.';
+    const deck = tel ? 'Call or text first for anything urgent. Inside: who to call, when they’re open, and this weekend’s focus.' : 'Inside: who to call, when they’re open, and this weekend’s focus.';
     const inner = `${mast}${spacer(18)}${epill(s, img, pillTxt)}${spacer(12)}
       <div style="${ff(SERIF, 32, 700, 1.12, `color:${s.ink};margin:0 0 10px;letter-spacing:-.3px`)}">${mg.name ? `${esc(mg.name)} takes the MOD desk this weekend` : 'Your Manager on Duty this weekend'}</div>
       <div style="${ff(SERIF, 17, 400, 1.45, `color:${s.muted};font-style:italic;margin:0 0 14px`)}">${deck}</div>
@@ -744,7 +756,7 @@ function eHero(m, s, img) {
   if (s.hero === 'blueprint') {
     const dash = '#3E6487';
     const row = (k, v) => `<tr><td width="112" valign="top" style="padding:8px 10px 8px 0;border-top:1px dashed ${dash};${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1px;text-transform:uppercase`)}">${k}</td><td valign="top" style="padding:8px 0;border-top:1px dashed ${dash};${ff(SANS, 14, 600, 1.45, `color:${s.heroInk}`)}">${v}</td></tr>`;
-    const spec = `<table ${TBL} width="100%" style="border-bottom:1px dashed ${dash};margin:4px 0 14px">${row('Manager', esc(name))}${sub ? row('Role', esc(sub)) : ''}${row('Weekend', esc(m.weekend.pill))}${tel ? row('First contact', `Text ${elink(textHref('sms:' + tel, firstName(mg.name)), mg.phone, s.heroInk)}`) : ''}${mg.email ? row('Email', elink('mailto:' + mg.email, mg.email, s.heroInk, 600)) : ''}</table>`;
+    const spec = `<table ${TBL} width="100%" style="border-bottom:1px dashed ${dash};margin:4px 0 14px">${row('Manager', esc(name))}${sub ? row('Role', esc(sub)) : ''}${row('Weekend', esc(m.weekend.pill))}${tel ? row('First contact', `Call ${elink('tel:' + tel, mg.phone, s.heroInk)}`) : ''}${mg.email ? row('Email', elink('mailto:' + mg.email, mg.email, s.heroInk, 600)) : ''}</table>`;
     const av = img.headshot ? `<table ${TBL} style="border:1px dashed #5C86B0;border-collapse:separate"><tr><td style="padding:6px"><img src="${esc(img.headshot)}" width="132" height="132" alt="${esc(name)}" style="display:block;width:132px;height:132px;border:0"></td></tr></table><div style="${ff(MONO, 10, 700, 1.4, `color:${s.heroMuted};letter-spacing:1px;margin:6px 0 14px`)}">FIG. 1 · ON DUTY</div>` : '';
     const inner = `${img.logo ? `<img src="${esc(img.logo)}" width="130" alt="Redfin Powered by Rocket" style="display:block;width:130px;height:auto;border:0;margin:0 0 20px">` : ''}${epill(s, img, pillTxt)}${spacer(16)}
       <div style="${ff(MONO, 11, 700, 1.45, `color:${s.heroMuted};letter-spacing:1.5px;text-transform:uppercase`)}">Sheet A-1 · Weekend MOD plan · ${esc(m.weekend.short)}</div>
@@ -882,7 +894,7 @@ function eRouting(m, s) {
   const rows = [];
   const mg = m.manager; const first = firstName(mg.name); const tel = e164(mg.phone);
   const modNeed = ((m.heads || {}).routing || {}).modNeed;
-  if (mg.name) rows.push({ need: modNeed !== undefined ? modNeed : 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? textHref('sms:' + tel, first) : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Text ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
+  if (mg.name) rows.push({ need: modNeed !== undefined ? modNeed : 'Something urgent, or not sure who to ask?', title: `${first}, your MOD`, href: tel ? 'tel:' + tel : (mg.email ? 'mailto:' + mg.email : ''), value: tel ? `Call ${mg.phone}` : mg.email, hours: '', summary: '', note: '' });
   m.core.filter((c) => c.visible !== false && shown(c, 'routing') && c.need && c.kind !== 'links' && !(c.group === 'tech' && m.toggles.tech)).forEach((c) => {
     const l = (c.lines || [])[0] || {}; const detailed = (c.steps || []).length || c.group === 'tech';
     rows.push({ need: c.need, title: c.title, href: l.href || l.value, value: l.value, hours: c.hoursText, summary: detailed ? '' : c.summary, note: detailed ? '' : c.note });
@@ -1084,6 +1096,17 @@ function initialsDataURL(name, size) {
   g.fillText(initials(name), size / 2, size / 2 + size * 0.03);
   return c.toDataURL('image/png');
 }
+// Button icons: Feather "phone" and "mail" outlines (MIT licence), drawn at 2x in the button's text color.
+const ICON_PATHS = {
+  phone: ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'],
+  mail: ['M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z', 'M22 6l-10 7L2 6'],
+};
+function iconDataURL(kind, color, px = 36) {
+  const c = canvasFor(px, px); const g = c.getContext('2d');
+  g.scale(px / 24, px / 24); g.strokeStyle = color; g.lineWidth = 2.1; g.lineCap = 'round'; g.lineJoin = 'round';
+  ICON_PATHS[kind].forEach((d) => g.stroke(new Path2D(d)));
+  return c.toDataURL('image/png');
+}
 const isHttps = (u) => /^https:\/\//i.test(String(u || '').trim());
 async function brandImg(kind, variant, exp) {
   const b = brandSettings(); const slot = (kind === 'logo' ? b.logos : b.dots)[variant] || {};
@@ -1106,6 +1129,7 @@ async function resolveImages(m, key, exp) {
     safe(brandImg('logo', s.logo, exp)).then((v) => { out.logo = v; }),
     safe(brandImg('logo', s.footLogo, exp)).then((v) => { out.footLogo = v; }),
     m.toggles.live ? safe(brandImg('dot', s.dot, exp)).then((v) => { out.dot = v; }) : null,
+    safe(Promise.all([['phone', s.heroBtnInk], ['mail', s.heroBtnInk], ['mail', s.heroBtn2Ink]].map(([k, c]) => memo(`ico:${k}:${c}`, async () => iconDataURL(k, c))))).then((v) => { if (v) out.icons = { callP: v[0], mailP: v[1], mailS: v[2] }; }),
   ];
   if (s.avatar === 'portrait' || s.avatar === 'stamp') jobs.push(safe(src ? memo(`hs:${sk}:${ck}:pt`, () => cropDataURL(src, crop, 'portrait', 400)) : sq(400)).then((v) => { out.portrait = v; }));
   m.spotlights.forEach((sp, i) => {
@@ -1137,7 +1161,7 @@ function buildModel() {
   const first = firstName(mg.name);
   return {
     manager: mg, weekend: weekend(d.saturday), subject: subjectFor(d),
-    preheader: mg.phone ? `Text ${first || 'your MOD'} at ${mg.phone} for anything urgent. Tour hotline, TC/LC hours, Rocket and IT help inside.` : 'Tour hotline, TC/LC hours, Rocket and IT help for the weekend, all in one place.',
+    preheader: mg.phone ? `Call or text ${first || 'your MOD'} at ${mg.phone} for anything urgent. Tour hotline, TC/LC hours, Rocket and IT help inside.` : 'Tour hotline, TC/LC hours, Rocket and IT help for the weekend, all in one place.',
     welcome: d.welcome, wins: d.wins,
     core: S.core.slice().sort(byOrder).map((c) => editedCore(c, (d.coreEdits || {})[c.id])),
     spotlights: (d.spotlightIds || []).map((id) => liveSpotlights().find((x) => x.id === id)).filter(Boolean).map((x) => ({ ...x, ...((d.spotEdits || {})[x.id] || {}) })),
@@ -1590,7 +1614,7 @@ function renderSendPanel() {
   if (el.contains(act) && act && /^(INPUT|TEXTAREA)$/.test(act.tagName)) { refreshSendBits(); return; }
   const items = [
     [!!d.manager.name, 'Manager name'],
-    [!!e164(d.manager.phone), 'Cell number so agents can text you'],
+    [!!e164(d.manager.phone), 'Cell number so agents can call or text you'],
     [!!d.headshotId, 'Headshot selected'],
     [d.spotlightIds.length > 0 || !d.toggles.spotlight, 'Focus spotlight picked'],
     [S.core.length > 0, 'Standard info loaded'],
@@ -1598,9 +1622,7 @@ function renderSendPanel() {
   ];
   const review = S.core.filter((c) => c.needsReview && c.visible !== false).length;
   const actives = S.distribution.filter((r) => r.active !== false).sort(byListOrder);
-  const smsBreaks = !brandSettings().textPage && (!!e164(d.manager.phone) || S.core.some((c) => c.visible !== false && (c.lines || []).some((l) => /^sms:/i.test(l.href || ''))));
-  const smsNote = smsBreaks ? `<div><span class="no">!</span><span>Gmail removes Text links, so the Text buttons won’t open Messages for agents reading in Gmail. Call and Email still work. ${S.me.isOwner || S.mode !== 'live' ? '<a href="#brand" data-action="go-brand">Set up the text link page</a> to fix it.' : `Ask ${esc(adminName())} to set up the text link page in Brand &amp; access.`}</span></div>` : '';
-  el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}${smsNote}</div>
+  el.innerHTML = `<div class="checklist">${items.map(([ok, t]) => `<div><span class="${ok ? 'ok' : 'no'}">${ok ? '✓' : '•'}</span><span>${esc(t)}</span></div>`).join('')}${review ? `<div><span class="no">!</span><span>${review} standard info item${review > 1 ? 's are' : ' is'} flagged for review. <a href="#core" data-action="go-core">Check them</a> before you send.</span></div>` : ''}</div>
     <div class="send-to">
       <div class="rowline"><span>To</span><input class="input" id="b_to" data-bind="to" value="${esc(d.to)}" placeholder="${esc(d.manager.email || 'your.name@redfin.com')}" inputmode="email" aria-label="To"></div>
       <div class="rowline"><span>BCC</span><div style="font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b id="bccCount">${esc(bccSummary())}</b><button class="btn btn-xs btn-ghost" data-action="toggle-bcc">${S.bccOpen ? 'Done' : 'Adjust for this email'}</button></div></div>
@@ -2015,9 +2037,9 @@ function renderBrand() {
         <div class="row2"><label class="field"><span>Admin name in help text</span><input class="input" id="br_admin" data-brand="adminName" value="${esc(b.adminName)}" ${dis}></label><label class="field"><span>Time zone note</span><input class="input" id="br_tz" data-brand="tz" value="${esc(b.tz)}" ${dis}></label></div>
         <label class="field"><span>Who can edit the distribution list</span><select class="select" id="br_list" data-brand="listEditors" ${dis}><option value="owner" ${b.listEditors === 'owner' ? 'selected' : ''}>Only ${esc(b.adminName || 'the owner')}</option><option value="editors" ${b.listEditors === 'editors' ? 'selected' : ''}>${esc(b.adminName || 'The owner')} and every Editor</option></select></label>
         <label class="field"><span>Default style for new drafts</span><select class="select" id="br_style" data-brand="defaultStyle" ${dis}>${Object.entries(STYLES).map(([k, s]) => `<option value="${k}" ${b.defaultStyle === k ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label></section>
-      <section class="panel"><h3>Text links</h3><p class="muted" style="font-size:13.5px">Gmail removes Text (sms:) links from emails, so on their own the Text buttons do nothing for agents reading in Gmail. Add the web address of the text link page here, and every Text button and texting link in the email opens Messages with the number already filled in.</p>
+      <section class="panel"><h3>Text links</h3><p class="muted" style="font-size:13.5px">Gmail removes Text (sms:) links, so the email uses Call and Email buttons and shows text numbers, like a hotline’s, as plain text. Optional: host the text link page and add its address here to make those numbers tappable.</p>
         <label class="field"><span>Text link page (https)</span><input class="input" id="br_textpage" data-brand="textPage" value="${esc((S.brand && S.brand.textPage) || '')}" placeholder="https://…/text.html" inputmode="url" ${dis}></label>
-        <div class="btn-row" style="align-items:center"><span style="font-size:13px;font-weight:700;color:${b.textPage ? 'var(--ok, #1E7F4F)' : 'var(--red, #DE3341)'}">${b.textPage ? '✓ On. Text buttons open Messages in Gmail.' : '• Off. Text buttons won’t work in Gmail.'}</span>${b.textPage ? `<a class="btn btn-xs" href="${esc(textHref('sms:' + (e164(S.draft.manager.phone) || '+13105550123'), firstName(S.draft.manager.name) || 'Test'))}" target="_blank" rel="noopener">Test on this device</a>` : ''}</div></section>
+        <div class="btn-row" style="align-items:center"><span style="font-size:13px;font-weight:700;color:${b.textPage ? 'var(--ok, #1E7F4F)' : 'var(--muted)'}">${b.textPage ? '✓ On. Text numbers in the email open Messages.' : '• Off. Text numbers show as plain text. Call and Email work everywhere.'}</span>${b.textPage ? `<a class="btn btn-xs" href="${esc(textHref('sms:' + (e164(S.draft.manager.phone) || '+13105550123'), firstName(S.draft.manager.name) || 'Test'))}" target="_blank" rel="noopener">Test on this device</a>` : ''}</div></section>
       <section class="panel"><h3>Animated “On duty” badge</h3><p class="muted" style="font-size:13.5px">A pulsing dot GIF that animates in Gmail and Apple Mail. Each style uses the version that matches its background.</p>
         <div style="display:flex;gap:16px;flex-wrap:wrap">${['light', 'dark', 'tint', 'red'].map((k) => `<div style="display:grid;gap:6px;justify-items:center;font-size:12px;font-weight:700"><img src="${BUILTIN[k]}" width="40" height="40" alt="" style="border-radius:8px;border:1px solid var(--line)">${k}</div>`).join('')}</div>
         ${['light', 'dark', 'tint', 'red'].map((k) => `<label class="field"><span>Public link · ${k} (optional)</span><input class="input" id="br_dot_${k}" data-brand="dots.${k}.publicUrl" value="${esc((b.dots[k] || {}).publicUrl || '')}" placeholder="https://…/live-dot-${k}.gif" ${dis}></label>`).join('')}</section>

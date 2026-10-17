@@ -27,6 +27,7 @@ Published as a claude.ai artifact. The shared data (managers, headshots, infogra
 ## Email output
 
 - Table-based layout with inline styles only, so it survives a paste into Gmail.
+- The top of the email has **Call** and **Email** buttons with line icons (Feather phone and mail, MIT licence, drawn to match each style). They sit side by side and fit phones down to 320 px. There's no Text button, because Gmail strips `sms:` links; the cell number stays printed under the manager's name for texting, and the quick guide's MOD row links to Call.
 - Ten styles. Classic: Signature Red, After Hours, Golden Hour, Executive Brief, Billboard. Creative: Open House, Featured Listing, Weekend Edition, Blueprint, Postcard.
 - **Copy email for Gmail** puts rich HTML on the clipboard with images embedded. **Download .html** saves a web version that also plays CSS entrance animations.
 - Any image can be given a public `https://` link instead, so it loads in every inbox.
