@@ -1,0 +1,1133 @@
+<title>Motion Studio Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a production call sheet on graph paper. Sticky progress bar, scene rail on the left, one brief column of question cards. */
+:root{
+  --paper:#f5f5f8; --grid:rgba(70,55,150,.055); --bar:rgba(245,245,248,.88);
+  --surface:#ffffff; --surface-2:#f1f0f7; --line:#e1dfeb;
+  --ink:#17151f; --muted:#5e5b70;
+  --accent:#5a3ff0; --accent-ink:#ffffff; --accent-soft:#ede9ff;
+  --good:#12805a; --warn:#9a5800;
+  --font-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --font-body:"Instrument Sans","Helvetica Neue",Arial,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f0e15; --grid:rgba(190,180,255,.045); --bar:rgba(15,14,21,.88);
+    --surface:#18161f; --surface-2:#221f2c; --line:#2e2b3b;
+    --ink:#eceaf5; --muted:#a4a0b8;
+    --accent:#937fff; --accent-ink:#0f0e15; --accent-soft:#2a2348;
+    --good:#4fd1a0; --warn:#f0b35a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f0e15; --grid:rgba(190,180,255,.045); --bar:rgba(15,14,21,.88);
+  --surface:#18161f; --surface-2:#221f2c; --line:#2e2b3b;
+  --ink:#eceaf5; --muted:#a4a0b8;
+  --accent:#937fff; --accent-ink:#0f0e15; --accent-soft:#2a2348;
+  --good:#4fd1a0; --warn:#f0b35a;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bar)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Hero */
+.hero{padding-block:44px 8px;display:grid;gap:18px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;gap:10px;align-items:center;margin:0}
+.eyebrow::before{content:"";width:22px;height:2px;background:currentColor}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(34px,5.4vw,60px);line-height:1.02;letter-spacing:-.025em;margin:0;text-wrap:balance;max-width:16ch}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{max-width:62ch;color:var(--muted);font-size:17px;margin:0}
+.how{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px}
+.how li{display:flex;gap:8px;align-items:baseline}
+.how b{font-family:var(--font-mono);font-weight:500;font-size:12px;color:var(--accent)}
+
+.standards{margin-top:10px;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);padding:16px 18px;display:grid;gap:12px}
+.standards-head{display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.std-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.std-list li{display:flex;gap:7px;align-items:center;padding:6px 12px;border-radius:999px;background:var(--accent-soft);font-weight:500;font-size:13.5px}
+.std-list li::before{content:"✓";color:var(--good);font-weight:700}
+.engine{font-family:var(--font-mono);font-size:12px;line-height:1.7;color:var(--muted);margin:0}
+
+/* Sticky progress bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line);margin-top:28px}
+.bar .wrap{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding-block:10px}
+.meter{flex:1 1 240px;display:flex;align-items:center;gap:12px;min-width:0}
+.meter-track{flex:1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.meter-fill{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.meter-label{font-family:var(--font-mono);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.status{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.status[data-s="saved"] .dot{background:var(--good)}
+.status[data-s="saving"] .dot{background:var(--accent);animation:pulse 1s ease-in-out infinite}
+.status[data-s="local"] .dot,.status[data-s="error"] .dot{background:var(--warn)}
+@keyframes pulse{50%{opacity:.3}}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:600 13.5px/1.1 var(--font-body);padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.sm{padding:7px 10px;font-size:12.5px}
+.btn.ghost{background:transparent}
+.btn.confirm{border-color:var(--warn);color:var(--warn)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:40px;padding-block:32px 72px}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 80px);align-self:start}
+.rail-title{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 10px}
+.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rail a{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:7px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px}
+.rail a:hover{background:var(--surface);color:var(--ink)}
+.rail .code{font-family:var(--font-mono);font-size:11px;margin-right:6px}
+.rail .cnt{font-family:var(--font-mono);font-size:11.5px;font-variant-numeric:tabular-nums}
+.rail a.done{color:var(--ink)}
+.rail a.done .cnt{color:var(--good)}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}.rail{display:none}}
+
+.scenes{display:grid;gap:56px;min-width:0}
+.scene{scroll-margin-top:100px;display:grid;gap:16px;min-width:0}
+.scene-head{display:grid;gap:6px;border-top:2px solid var(--ink);padding-top:14px}
+.scene-code{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;color:var(--accent)}
+.scene h2{font-family:var(--font-display);font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;line-height:1.1;margin:0;text-wrap:balance}
+.scene-intro{margin:0;color:var(--muted);max-width:64ch}
+
+/* Question cards */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:12px;min-width:0}
+.q-head{display:flex;gap:6px 12px;align-items:baseline;flex-wrap:wrap}
+.q-num{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:2.4em}
+.q.answered .q-num{color:var(--good)}
+.q.answered .q-num::after{content:" ✓"}
+.q h3{margin:0;font-family:var(--font-display);font-weight:700;font-size:19px;line-height:1.25;letter-spacing:-.005em;flex:1 1 240px;text-wrap:balance}
+.q-kind{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:3px 8px;border:1px solid var(--line);border-radius:6px;white-space:nowrap}
+.q-help{margin:0;color:var(--muted);font-size:14px;max-width:70ch}
+
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.opts.compact{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative;cursor:pointer;display:block;min-width:0}
+.opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.opt-box{display:grid;align-content:start;gap:4px;height:100%;padding:12px 14px 13px 42px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);transition:border-color .15s,background-color .15s;position:relative}
+.opt-box::before{content:"";position:absolute;left:14px;top:14px;width:16px;height:16px;border:1.5px solid var(--muted);border-radius:5px;background:var(--surface);transition:background-color .15s,border-color .15s}
+.opt input[type="radio"] + .opt-box::before{border-radius:50%}
+.opt:hover .opt-box{border-color:var(--accent)}
+.opt input:focus-visible + .opt-box{outline:2px solid var(--accent);outline-offset:2px}
+.opt.on .opt-box{border-color:var(--accent);background:var(--accent-soft)}
+.opt.on .opt-box::before{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--accent-soft)}
+.opts.compact .opt-box{padding:8px 14px 8px 36px;border-radius:999px}
+.opts.compact .opt-box::before{left:12px;top:50%;margin-top:-8px}
+.opt-title{font-weight:600;font-size:14.5px;line-height:1.3}
+.opt-desc{font-size:13px;color:var(--muted);line-height:1.45}
+.rec{font-style:normal;font-family:var(--font-mono);font-size:9.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid currentColor;border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+
+/* Look cards */
+.opts.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:640px){.opts.cards{grid-template-columns:minmax(0,1fr)}}
+.opts.cards .opt-box{padding:10px 10px 14px;gap:8px}
+.opts.cards .opt-box::before{left:auto;right:20px;top:20px;z-index:3;width:20px;height:20px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.opts.cards .opt.on .opt-box::before{box-shadow:inset 0 0 0 4px var(--accent-soft),0 1px 4px rgba(0,0,0,.25)}
+.opts.cards .opt-title,.opts.cards .opt-desc,.opts.cards .src,.opts.cards .slots{padding-inline:4px}
+.src{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.slots{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.slots > span{font-size:11px;font-family:var(--font-mono);padding:3px 7px;border-radius:6px;background:var(--surface-2);color:var(--muted)}
+.opt.on .slots > span{background:var(--surface)}
+
+/* Swatches: fixed illustrations of each look, identical in both themes */
+.sw{position:relative;display:block;aspect-ratio:16/9;max-width:100%;border-radius:9px;overflow:hidden;isolation:isolate;container-type:inline-size}
+.sw > span{position:absolute;display:block}
+.float{animation:float 6s ease-in-out infinite}
+.float.d2{animation-delay:-2s}.float.d3{animation-delay:-4s}
+@keyframes float{50%{transform:translateY(-5%)}}
+
+.sw-clay{background:radial-gradient(130% 100% at 50% 0%,#ffffff 0%,#f1eee9 55%,#e3ded6 100%)}
+.sw-clay::after{content:"";position:absolute;left:-10%;right:-10%;top:60%;bottom:-20%;background-image:radial-gradient(rgba(79,70,229,.32) 1px,transparent 1.7px);background-size:9px 9px;transform:perspective(160px) rotateX(55deg);-webkit-mask-image:linear-gradient(to top,#000 20%,transparent 95%);mask-image:linear-gradient(to top,#000 20%,transparent 95%)}
+.clay{border-radius:50%;aspect-ratio:1;box-shadow:0 12px 14px -8px rgba(80,55,30,.32);z-index:1}
+.clay.c1{width:23%;left:12%;top:30%;background:radial-gradient(circle at 34% 30%,#fff0e6,#f3b38f 72%)}
+.clay.c2{width:14%;left:40%;top:52%;background:radial-gradient(circle at 34% 30%,#eef6ff,#93c0ea 72%)}
+.clay.c3{width:11%;left:61%;top:22%;background:radial-gradient(circle at 34% 30%,#fff8d9,#ecd170 72%)}
+.clay.c4{width:19%;left:70%;top:46%;background:radial-gradient(circle at 34% 30%,#ecfaf1,#9fd8b6 72%)}
+.clay-card{left:38%;top:12%;width:18%;height:34%;border-radius:7px;background:linear-gradient(#ffffff,#f3efe9);box-shadow:0 10px 16px -10px rgba(80,55,30,.35);transform:rotate(-8deg);z-index:1}
+.clay-card::before{content:"";position:absolute;left:16%;right:16%;top:18%;height:58%;background:repeating-linear-gradient(#d8d2ea 0 2px,transparent 2px 9px)}
+.clay-ring{left:44%;top:56%;width:20%;aspect-ratio:1;border-radius:50%;border:2px solid #4f46e5;box-shadow:0 0 10px rgba(79,70,229,.7),inset 0 0 6px rgba(79,70,229,.5);transform:rotateX(68deg);z-index:0}
+.sw-label{font-family:var(--font-mono);font-size:3.6cqw;letter-spacing:.08em;left:5%;top:7%;z-index:2}
+.sw-clay .sw-label{color:#4f46e5}
+
+.sw-globe{background:#01040b}
+.sw-globe::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.75) .6px,transparent 1.1px),radial-gradient(rgba(255,255,255,.45) .6px,transparent 1.1px);background-size:29px 23px,17px 31px;background-position:0 0,9px 13px}
+.globe{width:50%;aspect-ratio:1;right:9%;top:13%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 38% 34%,#0d3a4e 0%,#05182a 55%,#020810 100%);box-shadow:0 0 0 1px rgba(63,231,255,.4),0 0 28px rgba(0,210,255,.35)}
+.globe::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#4fecff 1px,transparent 1.5px);background-size:5px 5px;-webkit-mask-image:radial-gradient(ellipse 26% 20% at 32% 34%,#000 70%,transparent 72%),radial-gradient(ellipse 15% 28% at 58% 62%,#000 70%,transparent 72%),radial-gradient(ellipse 22% 13% at 70% 30%,#000 70%,transparent 72%),radial-gradient(ellipse 12% 10% at 30% 70%,#000 70%,transparent 72%);mask-image:radial-gradient(ellipse 26% 20% at 32% 34%,#000 70%,transparent 72%),radial-gradient(ellipse 15% 28% at 58% 62%,#000 70%,transparent 72%),radial-gradient(ellipse 22% 13% at 70% 30%,#000 70%,transparent 72%),radial-gradient(ellipse 12% 10% at 30% 70%,#000 70%,transparent 72%)}
+.globe::after{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-linear-gradient(90deg,rgba(63,231,255,.13) 0 1px,transparent 1px 16.6%),repeating-linear-gradient(0deg,rgba(63,231,255,.13) 0 1px,transparent 1px 16.6%)}
+.arc{left:44%;top:20%;width:36%;aspect-ratio:2/1;border:2px solid transparent;border-top-color:#ffb547;border-radius:50% 50% 0 0/100% 100% 0 0;filter:drop-shadow(0 0 4px #ffb547);transform:rotate(-14deg);z-index:2}
+.packet{left:56%;top:19%;width:3.4%;aspect-ratio:1;background:#ffd18a;border-radius:2px;box-shadow:0 0 8px #ffb547;z-index:3}
+.sw-globe .sw-label{color:#ffb547}
+.holo-head{left:5%;top:34%;width:40%;font-family:var(--font-body);font-weight:600;font-size:6cqw;line-height:1.1;color:#e6fbff;text-shadow:0 0 10px rgba(63,231,255,.7);z-index:2}
+.holo-rail{left:5%;bottom:8%;font-family:var(--font-mono);font-size:3.2cqw;color:#58e9ff;letter-spacing:.06em;z-index:2}
+
+.sw-gd{background:#07060e}
+.blob{border-radius:50%;aspect-ratio:1;filter:blur(16px);opacity:.9}
+.blob.b1{width:48%;left:-10%;top:-22%;background:#7c3aed}
+.blob.b2{width:40%;left:58%;top:-26%;background:#ff8a4c}
+.blob.b3{width:42%;left:18%;top:58%;background:#2563eb}
+.blob.b4{width:32%;left:72%;top:56%;background:#ec4899}
+.sw .gd-pane{left:20%;top:17%;width:60%;height:66%;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 12px 30px rgba(0,0,0,.4);padding:6% 7%;display:flex;flex-direction:column;gap:4%;z-index:2}
+.gd-step{font-family:var(--font-mono);font-size:3.4cqw;color:#ff8a4c;letter-spacing:.1em}
+.gd-word{font-family:var(--font-display);font-weight:800;font-size:8cqw;line-height:1;color:#ffffff}
+.gd-line{display:flex;gap:4%;align-items:center;font-size:3.2cqw;color:rgba(255,255,255,.85)}
+.gd-line i{font-style:normal;width:4cqw;height:4cqw;border-radius:50%;background:#ff8a4c;display:grid;place-items:center;font-size:2.6cqw;color:#07060e;flex:none}
+.gd-line s{text-decoration-color:#ff8a4c;opacity:.75}
+
+.sw-gl{background-color:#f6f6fa;background-image:linear-gradient(rgba(80,70,140,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(80,70,140,.08) 1px,transparent 1px);background-size:13px 13px}
+.gl-s{border-radius:50%;aspect-ratio:1}
+.gl-s.s1{width:34%;left:42%;top:4%;background:radial-gradient(circle at 34% 28%,#ddd0ff 0%,#8b5cf6 38%,#5b21b6 85%);box-shadow:0 18px 22px -12px rgba(60,20,140,.45)}
+.gl-s.s2{width:12%;left:76%;top:3%;background:radial-gradient(circle at 34% 28%,#fdd6ff,#d946ef 45%,#a21caf 88%)}
+.gl-s.s3{width:21%;left:70%;top:50%;background:radial-gradient(circle at 34% 28%,#f3efff,#b6a2ff 65%)}
+.gl-s.s4{width:11%;left:40%;top:72%;background:radial-gradient(circle at 34% 28%,#f3efff,#c5b6ff 65%)}
+.gl-pane{left:46%;top:20%;width:46%;height:54%;border-radius:6px;background:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.95);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);box-shadow:0 22px 30px -20px rgba(40,30,80,.4);z-index:2}
+.gl-pane.p2{left:62%;top:60%;width:30%;height:33%;z-index:3}
+.gl-head{left:5%;top:30%;font-family:var(--font-display);font-weight:800;font-size:7.4cqw;line-height:1;color:#17151f;letter-spacing:-.02em;z-index:4}
+.gl-sub{left:5%;top:47%;font-family:var(--font-display);font-weight:800;font-size:5cqw;line-height:1;color:#7c4dff;z-index:4}
+
+/* Text inputs */
+textarea,input[type="text"],select{width:100%;font:inherit;font-size:14.5px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{resize:vertical;min-height:44px;display:block}
+textarea.long{min-height:112px}
+textarea.note{min-height:44px;background:transparent;border-style:dashed}
+textarea::placeholder,input::placeholder{color:var(--muted);opacity:.85}
+select{appearance:auto}
+
+/* Uploads */
+.uploads{display:grid;gap:14px}
+.drop{border:1.5px dashed var(--line);border-radius:var(--radius);background:var(--surface-2);padding:22px;display:grid;gap:8px;justify-items:start;transition:border-color .15s,background-color .15s}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop-title{font-family:var(--font-display);font-weight:700;font-size:18px;line-height:1.2}
+.drop-sub{color:var(--muted);font-size:13.5px;max-width:66ch}
+.drop-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.drop-msg{margin:0;font-size:13.5px;color:var(--muted);min-height:1.2em}
+.drop-msg[data-k="good"]{color:var(--good)}
+.drop-msg[data-k="warn"]{color:var(--warn)}
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.mcard{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);display:grid;align-content:start;min-width:0}
+.mthumb{aspect-ratio:16/10;max-width:100%;background:var(--surface-2);display:grid;place-items:center;overflow:hidden}
+.mthumb img,.mthumb video{width:100%;height:100%;object-fit:cover;display:block}
+.mtype{font-family:var(--font-mono);font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.mbody{padding:10px 12px 12px;display:grid;gap:8px;min-width:0}
+.mname{font-weight:600;font-size:13.5px;overflow-wrap:anywhere;line-height:1.3}
+.mmeta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.mrow{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.media-empty{margin:0;color:var(--muted);font-size:14px}
+
+/* People */
+.people{display:grid;gap:10px}
+.prow{display:grid;grid-template-columns:1.1fr 1fr 1.1fr auto;gap:8px;align-items:center}
+@media (max-width:680px){.prow{grid-template-columns:1fr 1fr}.prow select{grid-column:1/2}.prow .btn{justify-self:start}}
+
+/* Send panel */
+.send{background:var(--ink);color:var(--paper);border-radius:18px;padding:26px;display:grid;gap:14px}
+.send h2{font-family:var(--font-display);font-weight:800;font-size:clamp(24px,3vw,32px);line-height:1.1;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.send p{margin:0;max-width:62ch;opacity:.82}
+.send .actions .btn:not(.primary){background:transparent;color:var(--paper);border-color:color-mix(in srgb,var(--paper) 35%,transparent)}
+.send-state{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em}
+.copy-panel{display:grid;gap:8px}
+.copy-panel textarea{min-height:220px;font-family:var(--font-mono);font-size:12.5px;background:var(--surface);color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;transition:opacity .2s,transform .2s;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<header class="hero wrap">
+  <p class="eyebrow">Motion Studio · Production brief · v1</p>
+  <h1>Spec the studio that makes your <em>motion graphics.</em></h1>
+  <p class="lede">Your four reference looks become reusable Three.js templates you can re-skin, re-script and feed with your own screenshots, data and photos. Answer what you know, skip what you don't, and add detail in any box. I'll build the studio from this brief.</p>
+  <ol class="how">
+    <li><b>01</b> Pick answers and add notes</li>
+    <li><b>02</b> Drop in screenshots and media</li>
+    <li><b>03</b> Mark the brief ready, then tell me in chat</li>
+  </ol>
+  <div class="standards">
+    <div class="standards-head"><span>Locked into every template</span><span>From your prompt checklist</span></div>
+    <ul class="std-list">
+      <li>Three.js + custom shaders</li>
+      <li>Professional and sleek</li>
+      <li>Showreel-grade polish</li>
+      <li>3D camera moves + moving elements</li>
+      <li>Verification loop on still frames</li>
+    </ul>
+    <p class="engine">Shared engine: every frame driven by time t for deterministic renders · 2D text layer composited after tone mapping · 3D labels pinned by screen projection · half-float HDR target with 4× MSAA · bloom, grain, vignette, chromatic aberration · NaN-safe shader math</p>
+  </div>
+</header>
+
+<div class="bar" id="bar">
+  <div class="wrap">
+    <div class="meter">
+      <div class="meter-track" role="progressbar" aria-label="Questions answered" aria-valuemin="0" id="meterTrack"><div class="meter-fill" id="meterFill"></div></div>
+      <span class="meter-label" id="meterLabel">0 of 0 answered</span>
+    </div>
+    <span class="status" id="status" data-s="idle" role="status"><span class="dot"></span><span id="statusText">Answers save as you go</span></span>
+    <div class="actions">
+      <button type="button" class="btn" id="recBtn">Fill my recommended picks</button>
+      <button type="button" class="btn primary" id="copyTop">Copy brief</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap layout">
+  <nav class="rail" aria-label="Brief sections">
+    <p class="rail-title">Scenes</p>
+    <ol id="railList"></ol>
+  </nav>
+  <main class="scenes" id="scenes">
+    <!-- sections are built from the SECTIONS list below -->
+  </main>
+</div>
+
+<div class="wrap" style="padding-block:0 64px">
+  <section class="send" id="send" aria-labelledby="sendTitle">
+    <span class="send-state" id="sendState">DRAFT</span>
+    <h2 id="sendTitle">Hand the brief to Claude</h2>
+    <p id="sendText">When you've answered what you can, mark the brief ready and tell me in our chat. I'll read your answers and uploads straight from this page. Copy brief also gives you a text version you can paste anywhere.</p>
+    <div class="actions">
+      <button type="button" class="btn primary" id="readyBtn">Mark brief ready</button>
+      <button type="button" class="btn" id="copyBottom">Copy brief</button>
+    </div>
+    <div class="copy-panel" id="copyPanel" hidden>
+      <p>Your browser blocked the copy. Select all of the text below and copy it.</p>
+      <textarea id="briefText" readonly aria-label="Brief text"></textarea>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const LS_KEY = 'motion-studio-brief-v1';
+
+  const SECTIONS = [
+    { id:'setup', code:'SC 01', title:'Studio setup',
+      intro:'How the studio runs day to day. This decides the architecture, so it comes first.',
+      qs:[
+        { id:'platform', type:'single', q:'Where should the studio live?', opts:[
+          { t:'Browser studio + Claude Code final render', d:'Edit and preview live in a web page. Claude Code renders the frame-perfect 60fps MP4 with Playwright and ffmpeg.', rec:true },
+          { t:'Browser-only studio', d:'Everything happens in one web page, export included. Fastest to use; export smoothness depends on the device.' },
+          { t:'Code-only renderer', d:'You describe videos in chat. Claude Code edits scene files in this repo and renders MP4s. No editor screen.' } ]},
+        { id:'operators', type:'single', q:'Who will build videos in it?', opts:[
+          { t:'Just me' }, { t:'Me plus a few leads or admins' }, { t:'Every agent on my team, self-serve' } ]},
+        { id:'workflow', type:'single', q:'How hands-on do you want to be on each video?', opts:[
+          { t:'Fill in a form', d:'Pick a template, type the text, drop in media, render.' },
+          { t:'Describe it, then tweak', d:'Write or paste rough notes. AI drafts the storyboard; you adjust any scene.', rec:true },
+          { t:'Full control', d:'Timeline, keyframes and camera paths, like a motion design app.' } ]},
+        { id:'volume', type:'single', q:'How many videos a month do you expect to make?', help:'Higher volume moves batch mode and saved presets up the build order.', opts:[
+          { t:'1–4' }, { t:'5–15' }, { t:'16–40' }, { t:'40+' } ]},
+      ]},
+    { id:'uses', code:'SC 02', title:'What you will make',
+      intro:'The use cases set which scene types, data fields and end cards the studio needs on day one.',
+      qs:[
+        { id:'usecases', type:'multi', q:'Which videos do you want to produce?', opts:[
+          { t:'Just Listed, Just Sold and closing celebrations' },
+          { t:'Monthly market updates' },
+          { t:'Team wins, leaderboards and shout-outs' },
+          { t:'Recruiting and career-growth stories' },
+          { t:'Agent training and process explainers' },
+          { t:'Client explainers: buyer consult, offers, escrow timeline' },
+          { t:'Rocket mortgage and attach explainers' },
+          { t:'Agent spotlights and milestones' },
+          { t:'Open house and event promos' },
+          { t:'Meeting openers and agenda intros' } ]},
+        { id:'audience', type:'multi', q:'Who watches them?', opts:[
+          { t:'My agents' }, { t:'Leadership and peer managers' }, { t:'Buyers and sellers' }, { t:'Recruits' }, { t:'Social media followers' } ]},
+        { id:'firstvideo', type:'text', q:'Describe the first real video you want out of the studio.',
+          ph:'Example: 15-second vertical recap of this month\'s team results. Closings, top appointment setter, Rocket attach progress, ending on "Let\'s run it back next month."' },
+      ]},
+    { id:'looks', code:'SC 03', title:'Foundational looks',
+      intro:'Your four reference prompts, generalized into templates. Every chip under a look becomes a setting you can change per video.',
+      qs:[
+        { id:'templates', type:'cards', q:'Which looks should ship in version one?', opts:[
+          { t:'Premium Clay', sw:'clay', src:'How RAG works · clay demo',
+            d:'Soft, light and premium. Off-white studio dome, dotted floor that fades out, pastel clay objects that dissolve in with glowing edges.',
+            slots:['4 pastels + 1 accent','Cards, spheres, orb','Step chips','Dissolve glow'] },
+          { t:'Holographic Globe', sw:'globe', src:'How the internet sends a message · globe demo',
+            d:'Deep navy void with a star field. A globe of glowing dots, arcs that fly between real places, a ticking timecode rail.',
+            slots:['Places and routes','Cyan + amber accents','Log panel text','Orbit keyframes'] },
+          { t:'Glass Explainer', sw:'glassdark', src:'From idea to app · glassmorphism demo',
+            d:'Dark space under a gradient-blob dome. Frosted glass panels carry live UI; the camera drifts in each step and whips between them.',
+            slots:['STEP labels','Chat, checklist, chart, phone panels','Accent color','Light trail'] },
+          { t:'Glass Studio', sw:'glasslight', src:'Premium glass style',
+            d:'Bright grid studio. Frosted panes float over glossy violet spheres and blur whatever sits behind them.',
+            slots:['Headline + subline','Photos on panes','Sphere colors','Pane depth'] } ]},
+        { id:'defaultLook', type:'single', q:'Which look should be the house default?', opts:[
+          { t:'Premium Clay' }, { t:'Holographic Globe' }, { t:'Glass Explainer' }, { t:'Glass Studio' }, { t:'A new look built from our brand colors' } ]},
+        { id:'newLooks', type:'multi', q:'Which looks should come next?', opts:[
+          { t:'Luxury listing', d:'Black, warm metallics, slow cinematic moves.' },
+          { t:'Neighborhood map', d:'3D LA terrain with pins, routes and drive times.' },
+          { t:'Data newsroom', d:'Bold charts, tickers and counters.' },
+          { t:'Celebration', d:'Confetti, trophies and light bursts for wins.' },
+          { t:'Kinetic type', d:'Text-only, fast and punchy.' },
+          { t:'Architectural', d:'A wireframe home that builds into a finished render.' } ]},
+      ]},
+    { id:'brand', code:'SC 04', title:'Brand and compliance',
+      intro:'How your brand shows up across every look, and what has to appear before anything gets posted.',
+      qs:[
+        { id:'brandMode', type:'single', q:'How should brand colors work across the looks?', opts:[
+          { t:'Keep each look\'s own palette', d:'Brand shows up through the logo and one accent color.' },
+          { t:'One brand switch re-skins every look', d:'Each template maps its palette to brand tokens, so any look can go on-brand in one click.', rec:true },
+          { t:'Choose per video' } ]},
+        { id:'fonts', type:'single', q:'Which typefaces should the videos use?', opts:[
+          { t:'Our brand fonts', d:'You upload the font files and I wire them in.' },
+          { t:'A close, free-to-use alternative to SF Pro', d:'Apple licenses SF Pro for designing apps on its platforms, so a lookalike is safer for published video.', rec:true },
+          { t:'Let each look pick its own' } ]},
+        { id:'brandAssets', type:'multi', q:'Which brand assets can you provide?', opts:[
+          { t:'Official Redfin | Powered by Rocket logo files' },
+          { t:'Brand color codes' },
+          { t:'Brand font files' },
+          { t:'Brand guidelines PDF' },
+          { t:'Agent headshots' },
+          { t:'Property photography' },
+          { t:'Licensed music or sound library' },
+          { t:'Nothing yet, use placeholders' } ]},
+        { id:'endcard', type:'multi', q:'What should the end card include by default?', help:'Confirm the required items with your compliance team. I\'ll make them a locked end-card layer so nothing gets left off.', opts:[
+          { t:'Agent name and DRE license number' },
+          { t:'Brokerage name' },
+          { t:'Equal Housing Opportunity logo' },
+          { t:'Phone and email' },
+          { t:'QR code to a listing or landing page' },
+          { t:'Rate or data disclaimer text' },
+          { t:'Data source and "as of" date' } ]},
+      ]},
+    { id:'formats', code:'SC 05', title:'Formats and delivery',
+      intro:'Sizes, lengths and where finished videos go. The engine renders one scene file to every size you pick.',
+      qs:[
+        { id:'aspect', type:'multi', q:'Which sizes do you need?', opts:[
+          { t:'9:16 vertical · 1080×1920', d:'Reels, TikTok, Stories, Shorts.', rec:true },
+          { t:'16:9 wide · 1920×1080', d:'YouTube, team meetings, Slack, presentations.', rec:true },
+          { t:'1:1 square · 1080×1080', d:'Feed posts and LinkedIn.' },
+          { t:'4:5 portrait · 1080×1350', d:'Instagram feed.' } ]},
+        { id:'duration', type:'multi', q:'Which lengths?', opts:[
+          { t:'6s bumper' }, { t:'15s', rec:true }, { t:'30s' }, { t:'45–60s' }, { t:'Set per video' } ]},
+        { id:'fps', type:'single', q:'Which frame rate?', opts:[
+          { t:'60fps', d:'Smoothest motion. Matches your reference prompts.', rec:true },
+          { t:'30fps', d:'Smaller files. Native for most social apps.' },
+          { t:'Choose per video' } ]},
+        { id:'audio', type:'multi', q:'What about sound?', opts:[
+          { t:'Silent, captions carry it' },
+          { t:'Music bed from tracks I supply' },
+          { t:'AI voiceover' },
+          { t:'Burned-in captions' },
+          { t:'Sound effects: whooshes, ticks, pops' } ]},
+        { id:'exports', type:'multi', q:'Which files should each render produce?', opts:[
+          { t:'MP4 video', rec:true },
+          { t:'Poster frame PNG', rec:true },
+          { t:'GIF for Slack and email' },
+          { t:'Transparent overlay for editing apps' },
+          { t:'Storyboard sheet with stills from every scene' } ]},
+        { id:'delivery', type:'multi', q:'Where should finished videos go?', opts:[
+          { t:'Download the file' },
+          { t:'Post to a Slack channel' },
+          { t:'Save to Google Drive' },
+          { t:'Draft an email with it attached' },
+          { t:'Commit to this GitHub repo' } ]},
+      ]},
+    { id:'controls', code:'SC 06', title:'Editor controls',
+      intro:'What you can change without touching code. Everything you don\'t pick stays a sensible default.',
+      qs:[
+        { id:'controls', type:'multi', q:'Which controls do you want in the editor?', opts:[
+          { t:'Edit the text in every scene' },
+          { t:'Add, remove and reorder scenes' },
+          { t:'Scene timing sliders' },
+          { t:'Camera presets: orbit, push-in, whip, dolly' },
+          { t:'One-click palette switch' },
+          { t:'Drop images onto 3D panels and cards' },
+          { t:'Data fields that drive charts and counters' },
+          { t:'Switch look, keep content' },
+          { t:'Save my own templates' },
+          { t:'Live preview with a scrubber' },
+          { t:'Batch mode: one look, many agents or listings from a spreadsheet' } ]},
+        { id:'aiAssist', type:'single', q:'Should the studio have AI assist built in?', opts:[
+          { t:'Yes, built in', d:'Paste notes or a screenshot and AI drafts scenes, text and timing inside the studio.', rec:true },
+          { t:'No, I\'ll work with Claude in chat' },
+          { t:'Add it later' } ]},
+      ]},
+    { id:'media', code:'SC 07', title:'Media and data',
+      intro:'What you\'ll feed the studio, and how screenshots and numbers should turn into motion.',
+      qs:[
+        { id:'inputs', type:'multi', q:'What will you feed it most often?', opts:[
+          { t:'Dashboard screenshots' },
+          { t:'Market report PDFs' },
+          { t:'Spreadsheets or CSV exports' },
+          { t:'Property photos' },
+          { t:'Agent headshots' },
+          { t:'Logos and brand marks' },
+          { t:'Slack posts, emails and rough notes' },
+          { t:'Short video clips' } ]},
+        { id:'screenshotUse', type:'single', q:'When you drop in a dashboard screenshot, what should happen?', opts:[
+          { t:'Show it as-is on a glass panel', d:'Fastest. Fine for internal recaps.' },
+          { t:'Rebuild the numbers as animated charts', d:'Cleaner on video. I pull the numbers out and you confirm them before render.' },
+          { t:'Both', d:'Animated charts, with the original screenshot shown as the source.', rec:true } ]},
+        { id:'privacy', type:'single', q:'Can videos show agent names and real performance numbers?', opts:[
+          { t:'Yes, in internal videos only' },
+          { t:'Yes, anywhere' },
+          { t:'Real for internal, anonymized for social', rec:true },
+          { t:'Never show agent names' } ]},
+        { id:'uploads', type:'uploads', q:'Drop in your references, brand files and sample content.',
+          help:'Screenshots of looks you love, logos, headshots, a dashboard you want animated, a market report. Tag each file so I know how to use it.' },
+      ]},
+    { id:'team', code:'SC 08', title:'Team and contacts',
+      intro:'The people who appear in videos, approve them, help make them, or should receive them.',
+      qs:[
+        { id:'people', type:'people', q:'Who\'s involved?', help:'Add agents to feature, approvers, co-creators, and anyone who should get finished videos.' },
+        { id:'approval', type:'single', q:'What approval happens before posting?', opts:[
+          { t:'No approval step' },
+          { t:'I approve anything going to social' },
+          { t:'Compliance review for client-facing videos' },
+          { t:'Both of the above' } ]},
+        { id:'library', type:'single', q:'Where should templates and finished videos live?', opts:[
+          { t:'This GitHub repo', d:'Versioned templates and renders, managed by Claude Code.' },
+          { t:'A Google Drive folder', d:'Easy for the team to browse and download.' },
+          { t:'Both', d:'Source in the repo, finished videos in Drive.', rec:true } ]},
+      ]},
+    { id:'wrap', code:'SC 09', title:'Priorities and vision',
+      intro:'What to build first, how soon, and what great looks like to you.',
+      qs:[
+        { id:'priority', type:'single', q:'What should I build first?', opts:[
+          { t:'One flagship video end-to-end, then generalize', d:'Proves showreel quality fast. The engine and editor grow out of a real deliverable.', rec:true },
+          { t:'Engine plus all four looks with sample content' },
+          { t:'Editor screen first' } ]},
+        { id:'timeline', type:'single', q:'When do you need the first finished video?', opts:[
+          { t:'This week' }, { t:'Within 2 weeks' }, { t:'This month' }, { t:'No fixed date' } ]},
+        { id:'wow', type:'text', q:'What would make you say "that\'s exactly it"?', ph:'The feeling, the reaction from your team, the standard it should hit.' },
+        { id:'references', type:'text', q:'Links to videos, accounts or brands whose motion you love.', ph:'Paste links, one per line, with a word on what you like about each.' },
+        { id:'anything', type:'text', q:'Anything else I should know?', ph:'Ideas, constraints, must-haves, things to avoid.' },
+      ]},
+  ];
+
+  const MEDIA_USES = ['Style reference','Brand asset: logo, font, colors','Content to feature: photo, headshot','Data source: dashboard, report','Motion inspiration'];
+  const INVOLVEMENT = ['Featured on camera','Approves before posting','Co-creator','Receives finished videos'];
+  const ACCEPT = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', mp4:'video/mp4', webm:'video/webm', pdf:'application/pdf', csv:'text/csv', md:'text/markdown', json:'application/json', txt:'text/plain' };
+
+  const ALL_QS = SECTIONS.flatMap(s => s.qs);
+  const COUNTED = ALL_QS.filter(q => q.type !== 'uploads');
+  const TOTAL = COUNTED.length;
+
+  const state = { answers:{}, notes:{}, people:[], status:'draft', updatedAt:null, submittedAt:null };
+  let db = null, briefRef = null, assets = null, dbWritable = true;
+  let saveTimer = null, writing = false, writeAgain = false, retried = false;
+
+  const $ = s => document.querySelector(s);
+
+  function h(tag, attrs, ...kids){
+    const el = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of kids.flat()) {
+      if (c == null || c === false) continue;
+      el.append(c.nodeType ? c : document.createTextNode(String(c)));
+    }
+    return el;
+  }
+
+  /* ---------- Swatches ---------- */
+  const SWATCH = {
+    clay: () => h('span',{class:'sw sw-clay','aria-hidden':'true'},
+      h('span',{class:'sw-label',text:'EMBED · SEARCH · GENERATE'}),
+      h('span',{class:'clay-ring'}),
+      h('span',{class:'clay-card float d2'}),
+      h('span',{class:'clay c1 float'}), h('span',{class:'clay c2 float d3'}),
+      h('span',{class:'clay c3 float d2'}), h('span',{class:'clay c4 float'})),
+    globe: () => h('span',{class:'sw sw-globe','aria-hidden':'true'},
+      h('span',{class:'sw-label',text:'LAX → SFO → TYO'}),
+      h('span',{class:'globe'}), h('span',{class:'arc'}), h('span',{class:'packet'}),
+      h('span',{class:'holo-head',text:'Where our buyers come from'}),
+      h('span',{class:'holo-rail',text:'TC 00:00:07:24'})),
+    glassdark: () => h('span',{class:'sw sw-gd','aria-hidden':'true'},
+      h('span',{class:'blob b1'}), h('span',{class:'blob b2'}), h('span',{class:'blob b3'}), h('span',{class:'blob b4'}),
+      h('span',{class:'gd-pane'},
+        h('span',{class:'gd-step',text:'STEP 02'}),
+        h('span',{class:'gd-word',text:'Plan it'}),
+        h('span',{class:'gd-line'}, h('i',{text:'✓'}), h('s',{text:'Pre-approval with Rocket'})),
+        h('span',{class:'gd-line'}, h('i',{text:'✓'}), h('s',{text:'Tour shortlist'})),
+        h('span',{class:'gd-line'}, h('i',{text:''}), 'Write the offer'))),
+    glasslight: () => h('span',{class:'sw sw-gl','aria-hidden':'true'},
+      h('span',{class:'gl-s s1 float'}), h('span',{class:'gl-s s2 float d2'}),
+      h('span',{class:'gl-pane'}), h('span',{class:'gl-s s3 float d3'}), h('span',{class:'gl-s s4 float'}),
+      h('span',{class:'gl-pane p2'}),
+      h('span',{class:'gl-head',text:'Just Sold'}), h('span',{class:'gl-sub',text:'Silver Lake'})),
+  };
+
+  /* ---------- Build ---------- */
+  const KIND = { single:'Pick one', multi:'Pick any', cards:'Pick any', text:'Open answer', people:'Add people', uploads:'Upload' };
+
+  function buildQ(q, num){
+    const box = h('div',{class:'q',id:'q-'+q.id},
+      h('div',{class:'q-head'},
+        h('span',{class:'q-num',text:num}),
+        h('h3',{id:'qt-'+q.id,text:q.q}),
+        h('span',{class:'q-kind',text:KIND[q.type]})));
+    if (q.help) box.append(h('p',{class:'q-help',text:q.help}));
+    if (q.type === 'single' || q.type === 'multi' || q.type === 'cards') {
+      const cls = q.type === 'cards' ? 'opts cards' : (q.opts.some(o => o.d) ? 'opts' : 'opts compact');
+      const grid = h('div',{class:cls, role:q.type === 'single' ? 'radiogroup' : 'group', 'aria-labelledby':'qt-'+q.id});
+      q.opts.forEach((o, i) => {
+        const id = `q-${q.id}-${i}`;
+        const inner = [];
+        if (o.sw) inner.push(SWATCH[o.sw]());
+        inner.push(h('span',{class:'opt-title'}, o.t, o.rec ? h('em',{class:'rec',text:'Recommended'}) : null));
+        if (o.src) inner.push(h('span',{class:'src',text:'From: '+o.src}));
+        if (o.d) inner.push(h('span',{class:'opt-desc',text:o.d}));
+        if (o.slots) inner.push(h('span',{class:'slots'}, o.slots.map(x => h('span',{text:x}))));
+        grid.append(h('label',{class:'opt',for:id},
+          h('input',{type:q.type === 'single' ? 'radio' : 'checkbox', name:q.id, id, value:o.t}),
+          h('span',{class:'opt-box'}, inner)));
+      });
+      box.append(grid,
+        h('textarea',{class:'note',id:'n-'+q.id,rows:'2','aria-label':'More detail: '+q.q,placeholder:'Add detail, or another option…'}));
+    } else if (q.type === 'text') {
+      box.append(h('textarea',{class:'long',id:'a-'+q.id,rows:'4','aria-labelledby':'qt-'+q.id,placeholder:q.ph || ''}));
+    } else if (q.type === 'people') {
+      box.append(h('div',{class:'people',id:'peopleList'}),
+        h('div',null,h('button',{type:'button',class:'btn',id:'addPerson',text:'+ Add person'})));
+    } else if (q.type === 'uploads') {
+      box.append(buildUploads());
+    }
+    return box;
+  }
+
+  function buildUploads(){
+    return h('div',{class:'uploads'},
+      h('div',{class:'drop',id:'drop'},
+        h('span',{class:'drop-title',text:'Drop screenshots, logos, headshots, PDFs or short clips'}),
+        h('span',{class:'drop-sub',text:'Or paste a screenshot with Ctrl/Cmd + V. PNG, JPG, GIF, WebP, SVG, MP4, WebM, PDF, CSV, TXT, JSON or Markdown, up to 20 MB each.'}),
+        h('div',{class:'drop-actions'},
+          h('button',{type:'button',class:'btn primary',id:'pickBtn',disabled:true,text:'Choose files'}),
+          h('input',{type:'file',id:'fileInput',class:'sr',multiple:true,tabindex:'-1','aria-hidden':'true',
+            accept:'.png,.jpg,.jpeg,.gif,.webp,.svg,.mp4,.webm,.pdf,.csv,.md,.json,.txt'})),
+        h('p',{class:'drop-msg',id:'dropMsg',role:'status',text:'Connecting uploads…'})),
+      h('div',{class:'media-grid',id:'mediaGrid'}),
+      h('p',{class:'media-empty',id:'mediaEmpty',text:'Nothing uploaded yet. Each file gets a tag and a note so you can tell me how to use it.'}));
+  }
+
+  const scenes = $('#scenes'), railList = $('#railList');
+  SECTIONS.forEach((s, si) => {
+    const sec = h('section',{class:'scene',id:'s-'+s.id,'aria-labelledby':'h-'+s.id},
+      h('header',{class:'scene-head'},
+        h('span',{class:'scene-code',text:s.code}),
+        h('h2',{id:'h-'+s.id,text:s.title}),
+        h('p',{class:'scene-intro',text:s.intro})));
+    s.qs.forEach((q, qi) => sec.append(buildQ(q, `${si+1}.${qi+1}`)));
+    scenes.append(sec);
+    railList.append(h('li',null,
+      h('a',{href:'#s-'+s.id,id:'r-'+s.id,'data-target':'s-'+s.id},
+        h('span',null,h('span',{class:'code',text:s.code.slice(3)}),s.title),
+        h('span',{class:'cnt'}))));
+  });
+  railList.addEventListener('click', e => {
+    const a = e.target.closest('a[data-target]');
+    if (!a) return;
+    e.preventDefault();
+    document.getElementById(a.dataset.target)?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
+  });
+
+  /* ---------- State ---------- */
+  function isAnswered(q){
+    if (q.type === 'people') return state.people.some(p => (p.name || '').trim());
+    const a = state.answers[q.id];
+    if (Array.isArray(a)) return a.length > 0;
+    return !!(a && String(a).trim());
+  }
+
+  function normalize(raw){
+    let src = null;
+    try { src = JSON.parse(JSON.stringify(raw || {})); } catch (e) { src = {}; }
+    return {
+      answers: (src && typeof src.answers === 'object' && src.answers) || {},
+      notes: (src && typeof src.notes === 'object' && src.notes) || {},
+      people: Array.isArray(src && src.people) ? src.people.map(p => ({ name:p.name || '', role:p.role || '', inv:p.inv || '' })) : [],
+      status: (src && src.status) === 'ready' ? 'ready' : 'draft',
+      updatedAt: (src && src.updatedAt) || null,
+      submittedAt: (src && src.submittedAt) || null,
+    };
+  }
+
+  function applyState(){
+    ALL_QS.forEach(q => {
+      if (q.type === 'single' || q.type === 'multi' || q.type === 'cards') {
+        const a = state.answers[q.id];
+        document.getElementsByName(q.id).forEach(inp => {
+          inp.checked = Array.isArray(a) ? a.includes(inp.value) : a === inp.value;
+          inp.closest('.opt').classList.toggle('on', inp.checked);
+        });
+        const n = document.getElementById('n-'+q.id);
+        if (n && document.activeElement !== n) n.value = state.notes[q.id] || '';
+      } else if (q.type === 'text') {
+        const t = document.getElementById('a-'+q.id);
+        if (t && document.activeElement !== t) t.value = state.answers[q.id] || '';
+      }
+    });
+    renderPeople();
+    refresh();
+  }
+
+  function refresh(){
+    const done = COUNTED.filter(isAnswered).length;
+    $('#meterFill').style.width = (done / TOTAL * 100) + '%';
+    $('#meterLabel').textContent = `${done} of ${TOTAL} answered`;
+    const track = $('#meterTrack');
+    track.setAttribute('aria-valuemax', TOTAL);
+    track.setAttribute('aria-valuenow', done);
+    SECTIONS.forEach(s => {
+      const qs = s.qs.filter(q => q.type !== 'uploads');
+      const d = qs.filter(isAnswered).length;
+      const a = document.getElementById('r-'+s.id);
+      a.querySelector('.cnt').textContent = `${d}/${qs.length}`;
+      a.classList.toggle('done', d === qs.length);
+    });
+    COUNTED.forEach(q => document.getElementById('q-'+q.id)?.classList.toggle('answered', isAnswered(q)));
+    renderSendState();
+  }
+
+  function renderSendState(){
+    const ready = state.status === 'ready';
+    $('#sendState').textContent = ready ? `READY · MARKED ${fmtTime(state.submittedAt)}` : 'DRAFT';
+    $('#readyBtn').textContent = ready ? 'Update the ready brief' : 'Mark brief ready';
+    if (ready) $('#sendText').textContent = db && dbWritable
+      ? 'Marked ready. Tell me in our chat and I\'ll read your answers and uploads from this page. Keep editing anytime; your changes save automatically.'
+      : 'Marked ready on this device. This view can\'t save for Claude, so copy the brief and paste it into our chat.';
+  }
+
+  function fmtTime(iso){
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }).toUpperCase(); }
+    catch (e) { return ''; }
+  }
+
+  /* ---------- Saving ---------- */
+  const STATUS_TEXT = {
+    idle:'Answers save as you go',
+    saving:'Saving…',
+    saved:'Saved for Claude',
+    local:'Saved on this device only',
+    error:'Not saved yet. Use Copy brief to keep your answers.',
+  };
+  function setStatus(s){
+    $('#status').dataset.s = s;
+    $('#statusText').textContent = STATUS_TEXT[s];
+  }
+
+  function changed(){
+    state.updatedAt = new Date().toISOString();
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+    refresh();
+    if (briefRef && dbWritable) {
+      setStatus('saving');
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(flush, 900);
+    } else if (db === null && !dbPending) {
+      setStatus('local');
+    }
+  }
+
+  async function flush(){
+    if (!briefRef || !dbWritable) return;
+    if (writing) { writeAgain = true; return; }
+    writing = true;
+    setStatus('saving');
+    try {
+      await briefRef.set(JSON.parse(JSON.stringify(state)));
+      setStatus('saved');
+      retried = false;
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'invalid_argument' || code === 'not_granted' || code === 'revoked' || code === 'capability_disabled' || code === 'capability_removed') {
+        dbWritable = false;
+        setStatus('local');
+      } else if ((code === 'unavailable' || code === 'resource_exhausted') && !retried) {
+        retried = true;
+        setStatus('error');
+        setTimeout(flush, 2500 + Math.random() * 1500);
+      } else {
+        setStatus('error');
+      }
+    }
+    writing = false;
+    if (writeAgain) { writeAgain = false; flush(); }
+  }
+
+  /* ---------- Events ---------- */
+  scenes.addEventListener('change', e => {
+    const t = e.target;
+    if (t.matches('input[type="radio"][name], input[type="checkbox"][name]')) {
+      const q = ALL_QS.find(x => x.id === t.name);
+      if (!q) return;
+      const inputs = [...document.getElementsByName(q.id)];
+      if (q.type === 'single') state.answers[q.id] = (inputs.find(i => i.checked) || {}).value || '';
+      else state.answers[q.id] = inputs.filter(i => i.checked).map(i => i.value);
+      inputs.forEach(i => i.closest('.opt').classList.toggle('on', i.checked));
+      changed();
+    }
+  });
+
+  scenes.addEventListener('input', e => {
+    const t = e.target;
+    if (t.tagName === 'TEXTAREA' && t.id.startsWith('n-')) { state.notes[t.id.slice(2)] = t.value; changed(); }
+    else if (t.tagName === 'TEXTAREA' && t.id.startsWith('a-')) { state.answers[t.id.slice(2)] = t.value; changed(); }
+    else if (t.dataset && t.dataset.f && t.dataset.i != null) {
+      const p = state.people[+t.dataset.i];
+      if (p) { p[t.dataset.f] = t.value; changed(); }
+    }
+  });
+
+  /* People */
+  function renderPeople(){
+    const list = $('#peopleList');
+    if (!list) return;
+    list.textContent = '';
+    if (!state.people.length) {
+      list.append(h('p',{class:'q-help',text:'No one added yet. Add agents to feature, approvers and collaborators.'}));
+      return;
+    }
+    state.people.forEach((p, i) => {
+      const name = h('input',{type:'text',id:`p-${i}-name`,placeholder:'Name','aria-label':'Name','data-i':i,'data-f':'name'});
+      const role = h('input',{type:'text',id:`p-${i}-role`,placeholder:'Role, e.g. Listing agent','aria-label':'Role','data-i':i,'data-f':'role'});
+      const inv = h('select',{id:`p-${i}-inv`,'aria-label':'Involvement','data-i':i,'data-f':'inv'},
+        h('option',{value:'',text:'Involvement…'}), INVOLVEMENT.map(x => h('option',{value:x,text:x})));
+      name.value = p.name; role.value = p.role; inv.value = p.inv;
+      const rm = h('button',{type:'button',class:'btn ghost sm','aria-label':'Remove '+(p.name || 'person'),text:'Remove'});
+      rm.addEventListener('click', () => { state.people.splice(i, 1); renderPeople(); changed(); });
+      list.append(h('div',{class:'prow'}, name, role, inv, rm));
+    });
+  }
+  $('#peopleList').addEventListener('change', e => {
+    const t = e.target;
+    if (t.tagName === 'SELECT' && t.dataset.f) { const p = state.people[+t.dataset.i]; if (p) { p.inv = t.value; changed(); } }
+  });
+  $('#addPerson').addEventListener('click', () => {
+    state.people.push({ name:'', role:'', inv:'' });
+    renderPeople();
+    changed();
+    document.getElementById(`p-${state.people.length - 1}-name`)?.focus();
+  });
+
+  /* Recommended picks */
+  $('#recBtn').addEventListener('click', () => {
+    let n = 0;
+    ALL_QS.forEach(q => {
+      if (!q.opts || isAnswered(q)) return;
+      const recs = q.opts.filter(o => o.rec).map(o => o.t);
+      if (!recs.length) return;
+      state.answers[q.id] = q.type === 'single' ? recs[0] : recs;
+      n++;
+    });
+    if (!n) { toast('Every question with a recommendation already has an answer.'); return; }
+    applyState();
+    changed();
+    toast(`Filled ${n} question${n === 1 ? '' : 's'} with my recommended picks. Change any of them.`);
+  });
+
+  /* Ready */
+  $('#readyBtn').addEventListener('click', () => {
+    state.status = 'ready';
+    state.submittedAt = new Date().toISOString();
+    changed();
+    clearTimeout(saveTimer);
+    flush();
+    toast(db && dbWritable ? 'Brief marked ready. Tell me in our chat.' : 'Marked ready. Copy the brief and paste it into our chat.');
+  });
+
+  /* ---------- Brief text ---------- */
+  const mediaData = new Map();
+
+  function briefText(){
+    const L = ['# Motion Studio Brief',
+      `Status: ${state.status === 'ready' ? 'Ready' : 'Draft'} · ${COUNTED.filter(isAnswered).length} of ${TOTAL} answered`];
+    SECTIONS.forEach(s => {
+      L.push('', `## ${s.code} · ${s.title}`);
+      s.qs.forEach(q => {
+        L.push('', `**${q.q}**`);
+        if (q.type === 'uploads') {
+          if (!mediaData.size) L.push('- No uploads');
+          mediaData.forEach(d => L.push(`- ${d.name} (${d.contentType})${d.use ? ' · ' + d.use : ''}${d.note ? ' · ' + d.note : ''}`));
+          return;
+        }
+        if (q.type === 'people') {
+          const ps = state.people.filter(p => (p.name || '').trim());
+          if (!ps.length) L.push('- No one added');
+          ps.forEach(p => L.push(`- ${p.name}${p.role ? ', ' + p.role : ''}${p.inv ? ' · ' + p.inv : ''}`));
+          return;
+        }
+        const a = state.answers[q.id];
+        if (Array.isArray(a) && a.length) a.forEach(x => L.push('- ' + x));
+        else if (a && String(a).trim()) String(a).trim().split('\n').forEach(x => L.push(q.type === 'text' ? x : '- ' + x));
+        else L.push('- No answer');
+        const n = (state.notes[q.id] || '').trim();
+        if (n) L.push('- Note: ' + n.replace(/\n+/g, ' / '));
+      });
+    });
+    return L.join('\n');
+  }
+
+  function copyBrief(){
+    const text = briefText();
+    const panel = $('#copyPanel');
+    const fallback = () => {
+      panel.hidden = false;
+      const ta = $('#briefText');
+      ta.value = text;
+      ta.focus(); ta.select();
+      panel.scrollIntoView({ block:'nearest' });
+    };
+    try {
+      navigator.clipboard.writeText(text).then(() => toast('Brief copied. Paste it into our chat.'), fallback);
+    } catch (e) { fallback(); }
+  }
+  $('#copyTop').addEventListener('click', copyBrief);
+  $('#copyBottom').addEventListener('click', copyBrief);
+
+  let toastTimer;
+  function toast(msg){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  /* ---------- Media ---------- */
+  const mediaEls = new Map();
+  const mTimers = {}, mBusy = {}, mQueued = {};
+
+  function setDropMsg(msg, kind){
+    const m = $('#dropMsg');
+    m.textContent = msg;
+    if (kind) m.dataset.k = kind; else delete m.dataset.k;
+  }
+
+  function fmtSize(b){
+    if (!b && b !== 0) return '';
+    if (b < 1024 * 1024) return Math.max(1, Math.round(b / 1024)) + ' KB';
+    return (b / 1024 / 1024).toFixed(1) + ' MB';
+  }
+  function typeLabel(ct){
+    const ext = Object.keys(ACCEPT).find(k => ACCEPT[k] === ct);
+    return (ext || 'file').toUpperCase();
+  }
+
+  function queueMediaUpdate(id, patch){
+    mQueued[id] = Object.assign(mQueued[id] || {}, patch);
+    clearTimeout(mTimers[id]);
+    mTimers[id] = setTimeout(() => flushMedia(id), 700);
+  }
+  async function flushMedia(id){
+    if (mBusy[id]) { mTimers[id] = setTimeout(() => flushMedia(id), 400); return; }
+    const patch = mQueued[id];
+    if (!patch) return;
+    delete mQueued[id];
+    mBusy[id] = true;
+    try { await db.collection('media').doc(id).update(patch); }
+    catch (e) { toast('That file note didn\'t save. Try again in a moment.'); }
+    mBusy[id] = false;
+  }
+
+  function buildMediaCard(id, d){
+    const url = '/_blob/' + d.assetId;
+    const ct = d.contentType || '';
+    let thumb;
+    if (ct.startsWith('image/')) {
+      thumb = h('img',{src:url,alt:d.name || 'Uploaded image',loading:'lazy'});
+      thumb.addEventListener('error', () => thumb.replaceWith(h('span',{class:'mtype',text:'Preview unavailable'})));
+    } else if (ct.startsWith('video/')) {
+      thumb = h('video',{src:url,muted:true,playsinline:true,controls:true,preload:'metadata'});
+    } else {
+      thumb = h('span',{class:'mtype',text:typeLabel(ct)});
+    }
+    const use = h('select',{id:'mu-'+id,'aria-label':'How should I use '+(d.name || 'this file')},
+      h('option',{value:'',text:'How should I use this?'}), MEDIA_USES.map(u => h('option',{value:u,text:u})));
+    use.value = d.use || '';
+    use.addEventListener('change', () => queueMediaUpdate(id, { use:use.value }));
+    const note = h('textarea',{id:'mn-'+id,rows:'2','aria-label':'Note for '+(d.name || 'this file'),placeholder:'What is it, and what matters in it?'});
+    note.value = d.note || '';
+    note.addEventListener('input', () => queueMediaUpdate(id, { note:note.value }));
+    const row = h('div',{class:'mrow'}, h('span',{class:'mmeta',text:`${typeLabel(ct)} · ${fmtSize(d.sizeBytes)}`}));
+    if (assets) {
+      const rm = h('button',{type:'button',class:'btn ghost sm',text:'Remove'});
+      let armed;
+      rm.addEventListener('click', async () => {
+        if (!rm.classList.contains('confirm')) {
+          rm.classList.add('confirm'); rm.textContent = 'Confirm remove';
+          armed = setTimeout(() => { rm.classList.remove('confirm'); rm.textContent = 'Remove'; }, 4000);
+          return;
+        }
+        clearTimeout(armed);
+        rm.disabled = true;
+        try {
+          await db.collection('media').doc(id).delete();
+          await assets.delete(d.assetId).catch(() => {});
+          toast('File removed.');
+        } catch (e) {
+          rm.disabled = false;
+          toast('That file couldn\'t be removed. Try again.');
+        }
+      });
+      row.append(rm);
+    }
+    return h('article',{class:'mcard'},
+      h('div',{class:'mthumb'}, thumb),
+      h('div',{class:'mbody'}, h('span',{class:'mname',text:d.name || 'Untitled file'}), row, use, note));
+  }
+
+  function updateMediaCard(id, d){
+    const use = document.getElementById('mu-'+id);
+    if (use && document.activeElement !== use && !mQueued[id]) use.value = d.use || '';
+    const note = document.getElementById('mn-'+id);
+    if (note && document.activeElement !== note && !mQueued[id]) note.value = d.note || '';
+  }
+
+  function onMedia(snap){
+    const grid = $('#mediaGrid');
+    snap.docChanges().forEach(ch => {
+      const id = ch.doc.id;
+      if (ch.type === 'removed') {
+        mediaEls.get(id)?.remove();
+        mediaEls.delete(id); mediaData.delete(id);
+        return;
+      }
+      const d = ch.doc.data() || {};
+      mediaData.set(id, d);
+      if (!mediaEls.has(id)) mediaEls.set(id, buildMediaCard(id, d));
+      else updateMediaCard(id, d);
+    });
+    const want = snap.docs.map(doc => mediaEls.get(doc.id)).filter(Boolean);
+    const have = [...grid.children];
+    if (want.length !== have.length || want.some((el, i) => el !== have[i])) want.forEach(el => grid.append(el));
+    $('#mediaEmpty').hidden = snap.size > 0;
+  }
+
+  function typeFor(file){
+    const ext = ((file.name || '').split('.').pop() || '').toLowerCase();
+    if (ACCEPT[ext]) return ACCEPT[ext];
+    if (Object.values(ACCEPT).includes(file.type)) return file.type;
+    return null;
+  }
+
+  function uploadError(name, e){
+    const code = e && e.code;
+    if (code === 'too_large') return `${name} is over the size limit (20 MB, or 2 MB for SVG). Compress it or attach it in our chat.`;
+    if (code === 'unsupported_type') return `${name} isn't a supported file type. Attach it in our chat instead.`;
+    if (code === 'quota_or_state') return 'This page\'s file storage is full. Remove a few files and try again.';
+    if (code === 'rate_limited') return 'Too many uploads at once. Wait a moment, then try again.';
+    return `${name} didn't upload. Try again, or attach it in our chat.`;
+  }
+
+  let uploading = false;
+  async function uploadFiles(list, fromPaste){
+    if (!assets || !db) return;
+    const files = [...list];
+    if (!files.length) return;
+    if (uploading) { setDropMsg('One batch at a time. Wait for the current upload to finish.', 'warn'); return; }
+    uploading = true;
+    let ok = 0, problems = [];
+    for (const f of files) {
+      const name = fromPaste ? `Pasted screenshot ${new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit', second:'2-digit' })}` : (f.name || 'Untitled file');
+      const type = typeFor(f);
+      if (!type) { problems.push(`${name}: that file type isn't supported here. Export it as one of the listed types, or attach it in our chat.`); continue; }
+      setDropMsg(`Uploading ${name}…`);
+      try {
+        const r = await assets.upload(f, { type });
+        await db.collection('media').add({ assetId:r.id, name, contentType:r.contentType, sizeBytes:r.sizeBytes, use:'', note:'', createdAt:new Date().toISOString() });
+        ok++;
+      } catch (e) {
+        problems.push(uploadError(name, e));
+        if (e && e.code === 'rate_limited') break;
+      }
+    }
+    uploading = false;
+    if (problems.length) setDropMsg((ok ? `Added ${ok}. ` : '') + problems[0] + (problems.length > 1 ? ` (+${problems.length - 1} more)` : ''), 'warn');
+    else setDropMsg(`Added ${ok} file${ok === 1 ? '' : 's'}. Tag each one below.`, 'good');
+  }
+
+  function enableUploads(){
+    const drop = $('#drop'), input = $('#fileInput'), pick = $('#pickBtn');
+    pick.disabled = false;
+    setDropMsg('');
+    pick.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => { uploadFiles(input.files); input.value = ''; });
+    ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+    drop.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files) uploadFiles(e.dataTransfer.files); });
+    document.addEventListener('paste', e => {
+      const files = e.clipboardData && e.clipboardData.files;
+      if (files && files.length) { e.preventDefault(); uploadFiles(files, true); }
+    });
+  }
+
+  /* ---------- Boot ---------- */
+  let dbPending = true;
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) Object.assign(state, normalize(JSON.parse(raw)));
+  } catch (e) {}
+  applyState();
+
+  const use = name => (window.claude && typeof window.claude.use === 'function')
+    ? window.claude.use(name).catch(() => null)
+    : Promise.resolve(null);
+
+  (async () => {
+    db = await use('db');
+    dbPending = false;
+    if (!db) {
+      setStatus(state.updatedAt ? 'local' : 'idle');
+      if (!state.updatedAt) $('#statusText').textContent = 'Answers save on this device';
+      setDropMsg('Uploads work when you open this page signed in on claude.ai. You can also attach files in our chat.', 'warn');
+      return;
+    }
+    briefRef = db.doc('brief/answers');
+    try {
+      const snap = await briefRef.get();
+      if (snap.exists) {
+        const remote = normalize(snap.data());
+        if (!state.updatedAt || (remote.updatedAt && remote.updatedAt >= state.updatedAt)) {
+          Object.assign(state, remote);
+          try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+          applyState();
+          setStatus('saved');
+        } else {
+          flush();
+        }
+      } else if (state.updatedAt) {
+        flush();
+      } else {
+        setStatus('idle');
+      }
+    } catch (e) {
+      setStatus(state.updatedAt ? 'local' : 'idle');
+    }
+
+    db.collection('media').orderBy('createdAt').onSnapshot(onMedia, () => {
+      setDropMsg('Uploaded files couldn\'t load. Reload the page to try again.', 'warn');
+    });
+
+    assets = await use('assets');
+    if (assets) enableUploads();
+    else setDropMsg('Only the page owner and editors can upload here. Attach files in our chat instead.', 'warn');
+  })();
+})();
+</script>
