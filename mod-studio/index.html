@@ -1909,7 +1909,9 @@ async function extendSched(btn) {
   const list = S.schedule.slice().sort((a, b) => a.id.localeCompare(b.id));
   if (list.length < 4) { toast('Add a few weekends first so there’s a rotation to continue.', 'err'); return; }
   const recent = list.slice(-20); const period = new Set(recent.map((x) => x.managerId)).size || 10;
-  const map = new Map(list.map((x) => [x.id, x.managerId])); let last = list[list.length - 1].id; let n = 0;
+  // A swap is one-time, so the rotation continues from whoever originally held each slot.
+  const slotOwner = (x) => (x.originalManagerId && mgrById(x.originalManagerId) ? x.originalManagerId : x.managerId);
+  const map = new Map(list.map((x) => [x.id, slotOwner(x)])); let last = list[list.length - 1].id; let n = 0;
   await busy(btn, 'Adding…', async () => {
     for (let k = 0; k < 13; k += 1) {
       const date = addDays(last, 7); const src = map.get(addDays(date, -7 * period)); if (!src) break;
