@@ -33,6 +33,12 @@ export class Overlay {
   }
 
   font(size, weight = 700, family = 'display', style = 'normal') {
+    // A look can swap the headline face (e.g. serif for Luxury) via theme.displayFamily
+    if (family === 'display' && this.theme?.displayFamily) {
+      family = this.theme.displayFamily;
+      if (this.theme.displayWeight) weight = this.theme.displayWeight;
+      if (this.theme.displayStyle) style = this.theme.displayStyle;
+    }
     const fam = FONTS[family] || family;
     return `${style} ${weight} ${Math.round(size * 10) / 10}px ${fam}`;
   }

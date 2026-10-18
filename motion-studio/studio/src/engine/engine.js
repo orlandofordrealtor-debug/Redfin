@@ -181,6 +181,8 @@ export class MotionEngine {
       const info = { dur: s.dur, k: clamp(lt / s.dur), t, T, first: s.index === 0, last: s.index === this.scenes.length - 1 };
       s.inst.draw?.(o, lt, info);
     }
+    // Look-specific HUD (timecode rails, tickers, brackets...) under the brand chrome
+    this.world.drawOverlay?.(o, t, { scenes: this.scenes, duration: this.duration, current: this.scenes.find(s => t < s.end) || this.scenes[this.scenes.length - 1] });
     this.drawChrome(o, t);
 
     // Gentle fade in at the very start and out at the very end

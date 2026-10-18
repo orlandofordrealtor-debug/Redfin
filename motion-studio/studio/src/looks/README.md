@@ -65,6 +65,17 @@ and keep neutrals. `palette('native')` is the look's original palette.
 | `glow()` | HDR glow rings (values above 1 bloom) |
 | `line()` | flowing trail material |
 
+## Optional hooks
+
+- `drawOverlay(o, t, { scenes, duration, current })` on your world class draws look-specific HUD on the
+  2D layer every frame (corner brackets, a mono timecode rail, a news ticker). Keep it inside `o.safe`
+  margins and away from the top-center brand logo and the scene's text zones.
+- `overlayTheme` may set `displayFamily: 'serif'` (Cormorant Garamond), `displayWeight` and
+  `displayStyle` to change the headline typeface for the look.
+- Override any `BaseWorld` factory (`card`, `panel`, `orb`, `ring`, `bars`...) in your world class if
+  the look needs a different object, as long as it returns the same shape (`userData.setOpacity`,
+  `userData.redraw` for panels, `userData.set` for bars, etc.).
+
 ## Rules
 
 - Everything that moves is a pure function of `t`. Never use `Math.random()`; use `rng(seed)` from `engine/util.js`.
