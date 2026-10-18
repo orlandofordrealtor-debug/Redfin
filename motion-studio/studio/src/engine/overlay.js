@@ -2,18 +2,22 @@
 import { FONTS } from './brand.js';
 import { clamp, ease, seg, rgba, lerp } from './util.js';
 
+const DEFAULT_THEME = {
+  text: '#111111', sub: '#5D626B', accent: '#DE3341', accentText: '#FFFFFF',
+  scrim: '#FFFFFF', scrimAlpha: 0.0, chipBg: '#111111', chipText: '#FFFFFF',
+  shadow: 'rgba(0,0,0,0)', panel: 'rgba(255,255,255,0.82)', panelStroke: 'rgba(255,255,255,0.9)',
+  mono: '#5D626B', logo: 'tagline', dark: false,
+  displayFamily: null, displayWeight: null, displayStyle: null,
+};
+
 export class Overlay {
   constructor(stage) {
     this.stage = stage;
-    this.theme = {
-      text: '#111111', sub: '#5D626B', accent: '#DE3341', accentText: '#FFFFFF',
-      scrim: '#FFFFFF', scrimAlpha: 0.0, chipBg: '#111111', chipText: '#FFFFFF',
-      shadow: 'rgba(0,0,0,0)', panel: 'rgba(255,255,255,0.82)', panelStroke: 'rgba(255,255,255,0.9)',
-      mono: '#5D626B', logo: 'tagline', dark: false,
-    };
+    this.theme = { ...DEFAULT_THEME };
   }
 
-  setTheme(t) { this.theme = { ...this.theme, ...t }; }
+  /** Replaces the theme (starting from defaults) so nothing leaks from the previous look. */
+  setTheme(t) { this.theme = { ...DEFAULT_THEME, ...t }; }
 
   begin() {
     this.ctx = this.stage.beginOverlay();

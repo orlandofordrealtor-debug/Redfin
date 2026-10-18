@@ -198,6 +198,21 @@ class KineticWorld extends BaseWorld {
     return g;
   }
 
+  /** Chart bars get flat side edges in the tone's edge color so they never merge into a slab. */
+  bars(values, opts = {}) {
+    const g = super.bars(values, opts);
+    const tone = this.buildTone;
+    const width = opts.width ?? 0.6, depth = opts.depth ?? 0.6;
+    const mat = new THREE.MeshBasicMaterial({ color: tone.edge });
+    const geo = slab(width + 0.09, 1.0, depth * 0.4, Math.min(0.08, width * 0.2));
+    g.userData.meshes.forEach(m => {
+      const e = new THREE.Mesh(geo, mat);
+      e.position.z = -depth * 0.32;
+      m.add(e);
+    });
+    return g;
+  }
+
   /** Rings are flat strokes in the tone's color: graphic, never glowing. */
   ring(r = 1, tube = 0.04) {
     const mesh = new THREE.Mesh(new THREE.TorusGeometry(r, Math.max(0.014, tube * 1.1), 6, 128), new THREE.MeshBasicMaterial({ color: this.buildTone.ring }));

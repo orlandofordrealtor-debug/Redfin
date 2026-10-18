@@ -349,12 +349,20 @@ class BlueprintWorld extends BaseWorld {
   onTimeline(scenes, duration) {
     this.palette.dark = this.baseDark;
     const p = this.palette;
+    // The big-message ornament sits right behind the words: on blueprint blue (white type) it is
+    // modelled in a mid blueprint tone instead of white board so the headline keeps its contrast
+    if (this.mode === 'native') {
+      scenes.filter(s => s.type === 'message').forEach(s => s.group.traverse(o => {
+        if (o.isMesh && o.geometry?.type === 'TorusKnotGeometry') o.material.color.set('#2E66AD');
+      }));
+    }
     const r = rng((this.ctx.seed || 5) + 401);
     const portrait = this.stage.aspect < 0.95;
     this.builds = [];
     scenes.forEach((s, si) => {
-      // never behind mid-frame text: the big message, and on vertical the intro lockup and end card
-      if (s.type === 'message' || (portrait && (s.type === 'intro' || s.type === 'endcard'))) return;
+      // never behind mid-frame text: the big message, the vertical end card, and the vertical intro
+      // lockup when it is white (native); ink type on paper reads fine over the model
+      if (s.type === 'message' || (portrait && (s.type === 'endcard' || (s.type === 'intro' && this.mode === 'native')))) return;
       const H = this.houses[si % this.houses.length];
       const group = new THREE.Group();
       const solidMat = buildMaterial(p.house.solid, p.house.edge);

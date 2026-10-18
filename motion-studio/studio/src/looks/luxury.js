@@ -9,7 +9,6 @@ import { slab } from '../engine/geo.js';
 import { rng, noise1 } from '../engine/util.js';
 
 const GOLD = '#D9B57C';        // champagne gold (metals, glow)
-const GOLD_CHIP = '#9E7A44';   // deeper antique gold: carries white chip text on the native palette
 const FACE_GOLD = '#E3C690';  // canvas-face highlight on black panels
 const PUTTY = BRAND.putty;     // #F3EEE7 warm text
 const ESPRESSO = '#0B0807';
@@ -25,8 +24,8 @@ export function luxuryPalette(mode = 'brand') {
       { dir: [0.8, 0.2, -0.5], color: '#160F0B', size: 0.45 },
     ],
     text: PUTTY, sub: 'rgba(243,238,231,0.70)',
-    accent: brand ? BRAND.red : GOLD_CHIP,
-    accent2: GOLD, accentText: '#FFFFFF',
+    accent: brand ? BRAND.red : GOLD,
+    accent2: GOLD, accentText: brand ? '#FFFFFF' : '#17110B',
     ink: PUTTY, glassTint: '#1A1612',
     decor: [GOLD, '#0E0C0B', PUTTY, GOLD],
     muted: '#3B3026', glow: '#F2D39C', line: 'rgba(217,181,124,0.38)', floorLine: GOLD,
@@ -142,7 +141,7 @@ class LuxuryWorld extends BaseWorld {
     return {
       frame: () => blackGlass(),
       panel: () => blackGlass({ color: '#0E0C0A', roughness: 0.16, env: 0.85 }),
-      accent: () => (brand ? M.satin('#C92637', { clearcoat: 1, roughness: 0.26, rim: 0.15, rimColor: '#FFD9C4', edgeColor: '#FFD27F' }) : goldMat({ color: '#E6C48C', roughness: 0.18 })),
+      accent: () => (brand ? M.satin('#B51E2F', { clearcoat: 0.8, roughness: 0.3, rim: 0.15, rimColor: '#FFD9C4', edgeColor: '#FFD27F' }) : goldMat({ color: '#E6C48C', roughness: 0.18 })),
       glyph: () => goldMat(),
       decor: i => (i % 3 === 1 ? blackGlass() : i % 3 === 2 ? M.satin(PUTTY, { roughness: 0.28, clearcoat: 1 }) : goldMat()),
       ink: () => M.satin(PUTTY, { roughness: 0.3, clearcoat: 0.8 }),
@@ -351,15 +350,15 @@ export default {
   swatch: ['#120E0B', '#040303', '#D9B57C', '#F3EEE7'],
   native: 'native',
   post: {
-    bloom: { strength: 0.6, radius: 0.7, threshold: 1.0 },
+    bloom: { strength: 0.6, radius: 0.7, threshold: 1.15 },
     grain: 0.034, vignette: 0.5, ca: 0.0014, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000', scanlines: 0, band: 0,
   },
   transition: { style: 'glide', duration: 1.3 },
   drift: 0.45,
   palette: mode => luxuryPalette(mode === 'native' ? 'native' : 'brand'),
   overlayTheme: p => ({
-    text: p.text, sub: p.sub, accent: p.accent, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
-    chipBg: p.accent, chipText: '#FFFFFF', panel: 'rgba(14,11,9,0.86)', panelStroke: 'rgba(217,181,124,0.45)', dark: true,
+    text: p.text, sub: p.sub, accent: p.accent, accentText: p.accentText, scrim: p.scrim, scrimAlpha: p.scrimAlpha,
+    chipBg: p.accent, chipText: p.accentText, panel: 'rgba(14,11,9,0.86)', panelStroke: 'rgba(217,181,124,0.45)', dark: true,
     mono: 'rgba(243,238,231,0.6)', displayFamily: 'serif', displayWeight: 600, displayStyle: null,
   }),
   create: ctx => new LuxuryWorld(ctx, ctx.project?.brand?.mode === 'native' ? 'native' : 'brand'),

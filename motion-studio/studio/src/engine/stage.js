@@ -57,7 +57,7 @@ export class Stage {
     this.overlayTex.magFilter = THREE.LinearFilter;
     this.overlayTex.generateMipmaps = false;
 
-    this.post = { bloom: { strength: 0.35, radius: 0.55, threshold: 0.9 }, grain: 0.03, vignette: 0.25, ca: 0.002, tone: 'neutral', exposure: 1, scanlines: 0, band: 0, vignetteColor: '#000000' };
+    this.post = defaultPost();
     this.setFormat(format, scale);
   }
 
@@ -101,8 +101,10 @@ export class Stage {
     this.applyPost(this.post);
   }
 
-  applyPost(post = {}) {
-    this.post = { ...this.post, ...post, bloom: { ...this.post.bloom, ...(post.bloom || {}) } };
+  /** Merges post settings; with reset, starts from defaults so nothing leaks between looks. */
+  applyPost(post = {}, reset = false) {
+    const base = reset ? defaultPost() : this.post;
+    this.post = { ...base, ...post, bloom: { ...base.bloom, ...(post.bloom || {}) } };
     const p = this.post;
     this.renderer.toneMapping = TONE[p.tone] ?? THREE.NeutralToneMapping;
     this.renderer.toneMappingExposure = p.exposure;
@@ -169,3 +171,7 @@ export class Stage {
 }
 
 const _v = new THREE.Vector3();
+
+function defaultPost() {
+  return { bloom: { strength: 0.35, radius: 0.55, threshold: 0.9 }, grain: 0.03, vignette: 0.25, ca: 0.002, tone: 'neutral', exposure: 1, scanlines: 0, band: 0, vignetteColor: '#000000' };
+}

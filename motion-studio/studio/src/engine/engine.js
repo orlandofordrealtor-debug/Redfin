@@ -82,7 +82,7 @@ export class MotionEngine {
     this.look = look;
     const palette = look.palette(p.brand?.mode === 'native' ? 'native' : 'brand', p.brand);
     this.palette = palette;
-    this.stage.applyPost({ ...look.post, ...(p.post || {}) });
+    this.stage.applyPost({ ...look.post, ...(p.post || {}) }, true);
     this.overlay.setTheme(look.overlayTheme(palette));
     const ctx = {
       stage: this.stage, project: p, palette, assets: this.assets, logos: this.logos,
@@ -211,7 +211,7 @@ export class MotionEngine {
       const activeLabel = cur?.step;
       for (let i = steps.length - 1; i >= 0; i--) {
         const on = steps[i] === activeLabel;
-        const { w } = o.chip(steps[i].toUpperCase(), x, y, { align: 'right', size: 19 * o.U, bg: on ? pal.accent : 'rgba(0,0,0,0)', color: on ? '#ffffff' : pal.sub, stroke: on ? null : pal.line || 'rgba(0,0,0,0.15)', alpha: clamp(seg(t, 0.8, 0.5)) });
+        const { w } = o.chip(steps[i].toUpperCase(), x, y, { align: 'right', size: 19 * o.U, bg: on ? pal.accent : 'rgba(0,0,0,0)', color: on ? (pal.accentText || '#ffffff') : pal.sub, stroke: on ? null : pal.line || 'rgba(0,0,0,0.15)', alpha: clamp(seg(t, 0.8, 0.5)) });
         x -= w + 10 * o.U;
       }
     }
