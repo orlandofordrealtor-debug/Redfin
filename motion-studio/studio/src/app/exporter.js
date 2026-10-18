@@ -53,15 +53,18 @@ export async function exportMP4(project, format, { fps = 60, onProgress = () => 
   if (wantAudio && typeof window.AudioEncoder === 'function') {
     onProgress(0, 'Mixing sound');
     audioBuf = await renderSoundtrack({ duration: eng.duration, cues: eng.cues(), music: await decodeData(p.audio.music), musicVolume: p.audio.musicVolume, voiceover: await decodeData(p.audio.voiceover), sfx: p.audio.sfx, sfxVolume: p.audio.sfxVolume });
-    const cfg = { codec: 'mp4a.40.2', sampleRate: audioBuf.sampleRate, numberOfChannels: 2, bitrate: 192000 };
-    try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) audioCfg = cfg; } catch (e) { audioCfg = null; }
+    // AAC where the browser has an encoder (Chrome and Edge on Windows and Mac), otherwise Opus
+    for (const [codec, muxCodec] of [['mp4a.40.2', 'aac'], ['opus', 'opus']]) {
+      const cfg = { codec, sampleRate: audioBuf.sampleRate, numberOfChannels: 2, bitrate: 192000 };
+      try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) { audioCfg = { ...cfg, muxCodec }; break; } } catch (e) { /* try next */ }
+    }
   }
 
   const target = new ArrayBufferTarget();
   const muxer = new Muxer({
     target, fastStart: 'in-memory', firstTimestampBehavior: 'offset',
     video: { codec: mux, width: W, height: H, frameRate: fps },
-    audio: audioCfg ? { codec: 'aac', sampleRate: audioCfg.sampleRate, numberOfChannels: 2 } : undefined,
+    audio: audioCfg ? { codec: audioCfg.muxCodec, sampleRate: audioCfg.sampleRate, numberOfChannels: 2 } : undefined,
   });
   let encErr = null;
   const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { encErr = e; } });
@@ -83,7 +86,7 @@ export async function exportMP4(project, format, { fps = 60, onProgress = () => 
   if (audioCfg && audioBuf) {
     onProgress(1, 'Encoding sound');
     const aenc = new AudioEncoder({ output: (chunk, meta) => muxer.addAudioChunk(chunk, meta), error: e => { encErr = e; } });
-    aenc.configure(audioCfg);
+    aenc.configure({ codec: audioCfg.codec, sampleRate: audioCfg.sampleRate, numberOfChannels: 2, bitrate: audioCfg.bitrate });
     const sr = audioBuf.sampleRate, N = audioBuf.length, CH = 1024 * 4;
     const L = audioBuf.getChannelData(0), R = audioBuf.getChannelData(Math.min(1, audioBuf.numberOfChannels - 1));
     for (let o = 0; o < N; o += CH) {
@@ -100,9 +103,13 @@ export async function exportMP4(project, format, { fps = 60, onProgress = () => 
   }
   muxer.finalize();
   eng.dispose();
-  onProgress(1, mux === 'avc' ? 'Done' : 'Done (VP9/AV1: this browser has no H.264 encoder; for widest compatibility render with Claude Code)');
+  const notes = [];
+  if (mux !== 'avc') notes.push('this browser has no H.264 encoder, so the video uses VP9/AV1');
+  if (wantAudio && !audioCfg) notes.push('this browser cannot encode sound, so the video is silent');
+  onProgress(1, notes.length ? `Done. Note: ${notes.join('; ')}. For the widest compatibility, render with Claude Code.` : 'Done');
   const blob = new Blob([target.buffer], { type: 'video/mp4' });
   blob.codec = mux;
+  blob.silent = !!(wantAudio && !audioCfg);
   return blob;
 }
 

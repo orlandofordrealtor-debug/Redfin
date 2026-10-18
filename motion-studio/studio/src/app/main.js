@@ -610,20 +610,25 @@ function exportStep(body) {
     }
     if (!jobs.length) { toast('Choose at least one file type to export here.'); prog.hidden = true; return; }
     const base = slug(S.project.name);
+    const notes = new Set();
     try {
       for (let j = 0; j < jobs.length; j++) {
         const [fmt, kind] = jobs[j];
         const onProgress = (k, msg) => { bar.style.width = `${((j + k) / jobs.length) * 100}%`; label.textContent = `${kind.toUpperCase()} · ${fmt.replace('x', ':')} · ${msg}`; };
         onProgress(0, 'Starting');
         let blob, ext;
-        if (kind === 'mp4') { blob = await exportMP4(S.project, fmt, { fps: S.project.fps || 60, onProgress, signal: ctl.signal }); ext = 'mp4'; }
+        if (kind === 'mp4') {
+          blob = await exportMP4(S.project, fmt, { fps: S.project.fps || 60, onProgress, signal: ctl.signal }); ext = 'mp4';
+          if (blob.codec !== 'avc') notes.add('this browser saved the MP4 as VP9/AV1 instead of H.264');
+          if (blob.silent) notes.add('this browser could not encode sound, so the MP4 is silent');
+        }
         if (kind === 'poster') { blob = await exportPoster(S.project, fmt); ext = 'png'; }
         if (kind === 'gif') { blob = await exportGIF(S.project, fmt, { onProgress, signal: ctl.signal }); ext = 'gif'; }
         if (kind === 'storyboard') { blob = await exportStoryboard(S.project, fmt, { onProgress }); ext = 'png'; }
         download(blob, `${base}-${fmt}${kind === 'poster' ? '-poster' : kind === 'storyboard' ? '-storyboard' : ''}.${ext}`);
       }
       bar.style.width = '100%';
-      label.textContent = 'Done. Your files are in your downloads folder.';
+      label.textContent = 'Done. Your files are in your downloads folder.' + (notes.size ? ` Note: ${[...notes].join('; ')}. For the widest compatibility, use Send with Claude.` : '');
       toast('Export complete');
       S.project.thumb = preview.snapshot(200);
       store.save(true);
