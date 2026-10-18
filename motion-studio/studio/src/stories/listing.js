@@ -29,7 +29,7 @@ function makeListingStory({ id, name, status, blurb, bestFor, icon }) {
     icon,
     blurb,
     bestFor,
-    defaultLook: status === 'open-house' ? 'brand-glass' : status.includes('sold') || status === 'just-closed' ? 'brand-glass' : 'brand-glass',
+    defaultLook: 'brand-glass',
     defaultFormat: '9x16',
     durations: { min: 12, default: 20, max: 40 },
     minPhotos: 3,

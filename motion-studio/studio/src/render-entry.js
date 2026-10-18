@@ -10,7 +10,11 @@ let engine = null;
 window.MS = {
   async load(project, { scale = 1, quality = 'final' } = {}) {
     if (engine) engine.dispose();
-    const canvas = document.getElementById('stage');
+    // A canvas whose WebGL context was released cannot host a new one, so each load gets a fresh canvas
+    const old = document.getElementById('stage');
+    const canvas = document.createElement('canvas');
+    canvas.id = 'stage';
+    old.replaceWith(canvas);
     engine = new MotionEngine({ canvas, scale, quality });
     await engine.load(project);
     const s = engine.stage;

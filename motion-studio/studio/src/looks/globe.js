@@ -44,7 +44,7 @@ function globePalette(mode) {
       accentText: '#01040B',
       sub: 'rgba(206,240,255,0.80)', accent: AMBER, accent2: CYAN, accent3d: '#EC8E17',
       ink: '#E6F8FF', glassTint: '#0a2236', decor: [AMBER, CYAN, '#E6FBFF', CYAN],
-      muted: '#103049', glow: '#46cfe8', line: 'rgba(127,231,255,0.28)', floorLine: CYAN,
+      muted: '#103049', glow: '#38c2dc', line: 'rgba(127,231,255,0.28)', floorLine: CYAN,
       // look-specific keys
       holo: CYAN, hot: '#dcfdff', hub: AMBER, atmo: '#22b8ff', ocean: '#010509', grid: '#3fdcff',
       hud: '#86ecff', hudDim: 'rgba(134,236,255,0.38)', rec: AMBER, textGlow: '#17c8ff', chip: '#46EBFF', chipText: '#01121C',
@@ -407,7 +407,6 @@ class GlobeWorld extends BaseWorld {
     env(m, 0.5);
     M.enhance(m, { rim: 0.9, rimColor: p.edge, rimPower: 2.4, edgeColor: p.hot });
     m.userData.alwaysTransparent = true;
-    m.userData.baseOpacity = opacity;
     return m;
   }
 
@@ -747,8 +746,8 @@ class GlobeWorld extends BaseWorld {
     const railA = a * this.railVisibility(t, scenes, o.portrait);
     if (railA <= 0.001) return;
     const f = Math.floor(t * 60 + 1e-4);
-    const ff = f % 60, ss = Math.floor(f / 60) % 60, mm = Math.floor(f / 3600) % 60;
-    const tc = `TC 00:${pad2(mm)}:${pad2(ss)}:${pad2(ff)}`;
+    const ff = f % 60, ss = Math.floor(f / 60) % 60, mm = Math.floor(f / 3600) % 60, hh = Math.floor(f / 216000);
+    const tc = `TC ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}:${pad2(ff)}`;
     const size = (o.portrait ? 21 : 17) * U;
     let y = y1 - 14 * U;
     if (o.portrait) {

@@ -258,7 +258,6 @@ class MapWorld extends BaseWorld {
     this.floorY = -3.0;
     this.scenes = [];
     this.routes = [];
-    this.pins = [];
   }
 
   materials() {
