@@ -132,6 +132,26 @@ async function contactSheet(files, out, cols = 4) {
   return out;
 }
 
+/** Reads an audio reference (file path relative to the project, or a data URL) as base64. */
+function audioB64(ref) {
+  if (!ref) return null;
+  if (typeof ref === 'string' && ref.startsWith('data:')) return ref.slice(ref.indexOf(',') + 1);
+  const f = path.resolve(projectDir, typeof ref === 'string' ? ref : ref.src || '');
+  return fs.existsSync(f) ? fs.readFileSync(f).toString('base64') : null;
+}
+
+/** Soundtrack WAV (base64) from the page: sound effects + music + voiceover, or null if silent. */
+async function soundtrack(browser, fmt) {
+  const a = project.audio || {};
+  const musicB64 = audioB64(a.musicFile || a.music);
+  const voiceB64 = audioB64(a.voiceoverFile || a.voiceover);
+  if (a.sfx === false && !musicB64 && !voiceB64) return null;
+  const { page } = await openPage(browser, fmt);
+  const wav = await page.evaluate(o => window.MS.soundtrackWav(o), { musicB64, voiceB64 });
+  await page.close();
+  return wav;
+}
+
 async function renderVideo(browser, fmt) {
   const probe = await openPage(browser, fmt);
   const info = probe.info;
@@ -182,18 +202,17 @@ async function renderVideo(browser, fmt) {
     fs.unlinkSync(list);
   }
   const out = `${base}.mp4`;
-  const audio = project.audio || {};
-  const musicPath = audio.musicFile ? path.resolve(projectDir, audio.musicFile) : null;
-  if (musicPath && fs.existsSync(musicPath)) {
-    const dur = (to - from).toFixed(3);
-    await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-i', musicPath, '-filter_complex',
-      `[1:a]atrim=0:${dur},afade=t=in:d=0.6,afade=t=out:st=${Math.max(0, dur - 1.2)}:d=1.2,volume=${audio.musicVolume ?? 0.8}[a]`,
-      '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
-    fs.unlinkSync(silent);
+  const wavB64 = await soundtrack(browser, fmt);
+  if (wavB64) {
+    const wav = `${base}.wav`;
+    fs.writeFileSync(wav, Buffer.from(wavB64, 'base64'));
+    await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-ss', String(from), '-i', wav, '-map', '0:v', '-map', '1:a',
+      '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
+    fs.unlinkSync(wav);
   } else {
     await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-c', 'copy', '-movflags', '+faststart', out]);
-    fs.unlinkSync(silent);
   }
+  fs.unlinkSync(silent);
   console.log(`  ✓ ${path.relative(process.cwd(), out)}  (${((Date.now() - t0) / 1000).toFixed(0)}s)`);
   return { out, info };
 }

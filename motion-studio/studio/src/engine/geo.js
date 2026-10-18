@@ -8,8 +8,23 @@ import { LOGO_SVGS } from './brand.js';
 
 const glyphCache = new Map();
 
+function starShape() {
+  // five-point star sized like a capital letter (cap height 745 font units)
+  const sh = new THREE.Shape();
+  const cx = 400, cy = 372, R = 410, r = 175;
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 === 0 ? R : r;
+    const a = Math.PI / 2 + (i * Math.PI) / 5;
+    const x = cx + Math.cos(a) * rad, y = cy + Math.sin(a) * rad;
+    if (i === 0) sh.moveTo(x, y); else sh.lineTo(x, y);
+  }
+  sh.closePath();
+  return { shapes: [sh], advance: 800 };
+}
+
 function glyphShapes(ch) {
   if (glyphCache.has(ch)) return glyphCache.get(ch);
+  if (ch === '★') { const st = starShape(); glyphCache.set(ch, st); return st; }
   const g = GLYPHS.glyphs[ch] || GLYPHS.glyphs['?'];
   const sp = new THREE.ShapePath();
   for (const c of g.p) {

@@ -1,6 +1,9 @@
 // Minimal page entry used by the Node renderer: a canvas plus a small frame API on window.MS.
 import { MotionEngine } from './engine/engine.js';
 import { normalizeProject, defaultProject } from './engine/project.js';
+import { STORIES, STORY_ORDER } from './stories/index.js';
+import { LOOKS, LOOK_ORDER } from './looks/index.js';
+import { renderSoundtrack, audioBufferToWav } from './engine/audio.js';
 
 let engine = null;
 
@@ -25,5 +28,28 @@ window.MS = {
   cues() { return engine.cues(); },
   normalizeProject,
   defaultProject,
+  sample(id) { return STORIES[id]?.sample || {}; },
+  storyList() {
+    return STORY_ORDER.filter(id => !STORIES[id].hidden).map(id => {
+      const s = STORIES[id];
+      const defaults = {};
+      s.fields.forEach(f => { if (f.default !== undefined) defaults[f.key] = f.default; });
+      return { id, defaultLook: s.defaultLook, sample: s.sample || {}, defaults };
+    });
+  },
+  lookList() { return LOOK_ORDER.map(id => ({ id, placeholder: !!LOOKS[id].placeholder })); },
+  /** Soundtrack as a base64 WAV (sound effects + music/voiceover passed in as base64). */
+  async soundtrackWav({ musicB64 = null, voiceB64 = null } = {}) {
+    const p = engine.project;
+    const dec = b64 => (b64 ? Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer : null);
+    const buf = await renderSoundtrack({
+      duration: engine.duration, cues: engine.cues(), music: dec(musicB64), musicVolume: p.audio.musicVolume ?? 0.8,
+      voiceover: dec(voiceB64), sfx: p.audio.sfx !== false, sfxVolume: p.audio.sfxVolume ?? 0.6,
+    });
+    const wav = audioBufferToWav(buf);
+    let s = '';
+    for (let i = 0; i < wav.length; i += 0x8000) s += String.fromCharCode.apply(null, wav.subarray(i, i + 0x8000));
+    return btoa(s);
+  },
 };
 window.MS_READY = true;

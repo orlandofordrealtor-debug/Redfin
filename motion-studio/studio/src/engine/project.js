@@ -37,6 +37,7 @@ export function normalizeProject(p = {}) {
     format: p.format || '9x16',
     formats: Array.isArray(p.formats) && p.formats.length ? p.formats : [p.format || '9x16'],
     duration: p.duration || null,
+    fps: [24, 30, 60].includes(Number(p.fps)) ? Number(p.fps) : 60,
     energy: p.energy || 'standard',
     brand: { mode: 'brand', ...(p.brand || {}) },
     fields: { ...(p.fields || {}) },
@@ -49,6 +50,8 @@ export function normalizeProject(p = {}) {
     chrome: { logo: true, steps: null, ...(p.chrome || {}) },
     post: p.post || null,
     fadeEdges: p.fadeEdges !== false,
+    isTemplate: !!p.isTemplate,
+    thumb: p.thumb || null,
     createdAt: p.createdAt || new Date().toISOString(),
     updatedAt: p.updatedAt || new Date().toISOString(),
   };
@@ -81,6 +84,12 @@ export function planScenes(p) {
     }
   }
   scenes = scenes.filter(s => SCENES[s.type]);
+  const minDur = story.durations?.min;
+  if (!p.duration && minDur) {
+    // stories with a minimum length (data recaps run 30s+) stretch evenly to reach it
+    const total = scenes.reduce((a, s) => a + s.dur, 0);
+    if (total < minDur) scenes = scenes.map(s => ({ ...s, dur: s.dur * (minDur / total) }));
+  }
   if (p.duration) {
     const total = scenes.reduce((a, s) => a + s.dur, 0);
     const k = p.duration / total;

@@ -162,6 +162,7 @@ export class Stage {
   dispose() {
     this.composer?.dispose?.();
     this.renderer.dispose();
+    this.renderer.forceContextLoss?.();
     this.envTexture.dispose();
     this.overlayTex.dispose();
   }
