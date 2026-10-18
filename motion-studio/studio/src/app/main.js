@@ -312,7 +312,12 @@ function contentStep(body) {
       h('span', { class: 'chip red' }, story.name),
       h('button', { class: 'btn sm', onclick: switchTemplate }, 'Switch template')),
     h('p', { class: 'help' }, story.blurb));
-  body.append(coach, h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Project name'), nameInput), ...sections, switcher);
+  const filledCount = story.fields.filter(f => { const v = p.fields[f.key]; return v !== undefined && v !== '' && v !== null && !(Array.isArray(v) && !v.length) && f.default === undefined; }).length;
+  const sampleBtn = story.sample && filledCount < 2 ? h('div', { class: 'coach' },
+    h('div', { class: 'coach-head' }, h('span', { class: 'dot' }, icon('spark')), 'First time with this template?'),
+    h('p', null, 'Load clearly labelled sample content to see how it plays, then replace it with yours.'),
+    h('div', null, h('button', { class: 'btn sm', onclick: () => { store.update(pr => { Object.assign(pr.fields, JSON.parse(JSON.stringify(story.sample))); }, 'structure'); render(); toast('Sample content loaded. Replace it with your own before exporting.'); } }, icon('spark'), 'Try it with sample content'))) : null;
+  body.append(coach, sampleBtn, h('label', { class: 'field' }, h('span', { class: 'field-label' }, 'Project name'), nameInput), ...sections, switcher);
   const refreshCoach = () => renderCoach(coach, body);
   refreshCoach();
   const off = store.on(kind => {
@@ -360,6 +365,10 @@ async function switchTemplate() {
   toast(`Switched to ${STORIES[chosen].name}`);
 }
 
+function coachCard(title, text) {
+  return h('div', { class: 'coach' }, h('div', { class: 'coach-head' }, h('span', { class: 'dot' }, icon('coach')), title), h('p', null, text));
+}
+
 // ---------- step 2: look
 function lookStep(body) {
   const p = S.project;
@@ -375,8 +384,28 @@ function lookStep(body) {
   const brand = h('label', { class: 'toggle' }, h('input', { type: 'checkbox', checked: p.brand?.mode !== 'native', onchange: e => { store.update(pr => { pr.brand.mode = e.target.checked ? 'brand' : 'native'; }, 'structure'); preview.refresh(); } }), 'Redfin brand colors');
   const energy = h('div', { class: 'segmented', role: 'group', 'aria-label': 'Camera energy' },
     ...[['calm', 'Calm'], ['standard', 'Standard'], ['energetic', 'Energetic']].map(([v, l]) => h('button', { class: (p.energy || 'standard') === v ? 'on' : '', onclick: e => { store.update(pr => { pr.energy = v; }, 'structure'); energy.querySelectorAll('button').forEach(b => b.classList.remove('on')); e.target.classList.add('on'); preview.refresh(); } }, l)));
+  const fontBox = h('div', { style: { display: 'grid', gap: '8px' } });
+  const renderFonts = () => {
+    const f = S.project.brand.fonts || {};
+    const slot = (key, label) => h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' } },
+      h('span', { style: { fontWeight: 650, fontSize: '13.5px', minWidth: '110px' } }, label),
+      f[key] ? h('span', { class: 'chip red' }, f[`${key}Name`] || 'Added') : h('span', { class: 'help' }, 'Default'),
+      h('button', { class: 'btn sm', onclick: async () => {
+        const [file] = await pickFiles({ accept: '.otf,.ttf,.woff,.woff2,font/*' });
+        if (!file) return;
+        if (file.size > 4e6) { toast('That font file is over 4 MB. Use a WOFF2 or OTF version.', { error: true }); return; }
+        const reader = new FileReader();
+        reader.onload = () => { store.update(pr => { pr.brand.fonts = { ...(pr.brand.fonts || {}), [key]: reader.result, [`${key}Name`]: file.name }; }, 'structure'); renderFonts(); toast(`${label} font added`); };
+        reader.readAsDataURL(file);
+      } }, icon('upload'), f[key] ? 'Replace' : 'Upload'),
+      f[key] ? h('button', { class: 'btn sm ghost', onclick: () => { store.update(pr => { const n = { ...(pr.brand.fonts || {}) }; delete n[key]; delete n[`${key}Name`]; pr.brand.fonts = n; }, 'structure'); renderFonts(); } }, 'Remove') : null);
+    fontBox.replaceChildren(slot('display', 'Headlines'), slot('body', 'Body text'));
+  };
+  renderFonts();
   body.append(
+    coachCard('Not sure which look?', 'Redfin Glass is the house look and works for almost everything. Luxury for high-end listings, Celebration for wins, Data Newsroom for numbers, Premium Clay for friendly explainers. Click any look and the preview updates.'),
     h('div', { class: 'group' }, h('h3', null, 'Brand'), brand, h('p', { class: 'help' }, 'On: every look uses Redfin red, ink and the official Redfin Powered by Rocket lockup. Off: the look’s original palette (still with the logo).')),
+    h('div', { class: 'group' }, h('h3', null, 'Brand fonts', h('small', null, 'Optional')), fontBox, h('p', { class: 'help' }, 'Upload the official brand font files (OTF, TTF or WOFF2) to use them in every look. Without them, the Studio uses Plus Jakarta Sans, a close free match to the logo\u2019s geometric type.')),
     h('div', { class: 'group' }, h('h3', null, 'Camera energy'), energy, h('p', { class: 'help' }, 'Calm for luxury and client pieces, Energetic for wins and social hooks.')),
     h('div', { class: 'group' }, h('h3', null, 'Looks', h('small', null, `${LOOK_ORDER.length} styles`)), grid));
 }
@@ -432,6 +461,7 @@ function formatStep(body) {
   const privacy = h('div', { class: 'segmented' }, ...[['internal', 'Internal: real names'], ['social', 'Social: initials only']].map(([v, l]) => h('button', { class: p.privacy === v ? 'on' : '', onclick: e => { store.update(pr => { pr.privacy = v; }, 'structure'); privacy.querySelectorAll('button').forEach(b => b.classList.remove('on')); e.target.classList.add('on'); preview.refresh(); } }, l)));
 
   body.append(
+    coachCard('Where will it be watched?', 'Reels, TikTok and Stories: 9:16. Team meetings, YouTube and slides: 16:9. Feed posts: 1:1 or 4:5. Select every size you need and export makes them all from the same project.'),
     h('div', { class: 'group' }, h('h3', null, 'Sizes', h('small', null, 'Pick every size you need')), fmts, h('p', { class: 'help' }, 'The preview shows one size at a time; switch with the buttons under the preview. Export renders every size you select.')),
     h('div', { class: 'group' }, h('h3', null, 'Length', lenLabel), slider, h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' } }, autoBtn, h('span', { class: 'help' }, `This template works best between ${min} and ${max} seconds.`))),
     h('div', { class: 'group' }, h('h3', null, 'Frame rate'), fps, h('p', { class: 'help' }, '60 fps is the smoothest. 30 fps makes smaller files.')),
@@ -607,6 +637,9 @@ function exportStep(body) {
     h('input', { type: 'checkbox', checked: !!p.delivery[k], onchange: e => store.update(pr => { pr.delivery[k] = e.target.checked; }, 'meta') }), h('span', null, h('b', null, l)), k === 'download' ? h('span', { class: 'chip' }, 'Here') : h('span', { class: 'chip' }, 'Via Claude'))));
 
   body.append(
+    coachCard('Two ways to finish', canEncodeMP4()
+      ? 'Export now renders frame-perfect files right here; keep this tab open while it works. For the transparent overlay, batch jobs or delivery to Slack, Drive or email, use Send with Claude.'
+      : 'This browser can\u2019t encode MP4, but the poster, GIF and storyboard work here. For MP4s, open the Studio in Chrome or Edge, or use Send with Claude for a final render.'),
     errors.length ? h('div', { class: 'coach' }, h('div', { class: 'coach-head' }, h('span', { class: 'dot' }, icon('coach')), 'Before you export'), h('ul', { class: 'checks' }, errors.map(e => h('li', { class: 'error' }, h('span', { class: 'i' }, '!'), e.msg)))) : null,
     h('div', { class: 'group' }, h('h3', null, 'Sizes'), fmtChips),
     h('div', { class: 'group' }, h('h3', null, 'Files'), typeList),

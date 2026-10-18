@@ -25,22 +25,23 @@ const STORY_RULES = [
   ['event-promo', /event|workshop|seminar|webinar|rsvp|invite/i, 2],
 ];
 
+// Looks switch only on explicit style words; otherwise the template's default look (Redfin Glass) is used
 const LOOK_RULES = [
-  ['luxury', /luxury|premier|high.?end|estate|cinematic|elegant/i],
-  ['clay', /clay|playful|soft|pastel|friendly|explainer/i],
-  ['globe', /globe|world|relocat|hologra|sci.?fi|international/i],
-  ['celebration', /celebrat|party|confetti|congrat|wins?|trophy/i],
-  ['newsroom', /news|data|dashboard|market|report|numbers/i],
-  ['kinetic', /kinetic|bold type|typography|punchy|text only/i],
-  ['architectural', /blueprint|architect|build|construction|new construction/i],
-  ['neighborhood', /neighborhood|map|area|community|drive time/i],
-  ['brand-night', /dark|night|dramatic|meeting/i],
-  ['glass-explainer', /glass explainer|futuristic|app|tech/i],
+  ['luxury', /luxury|premier|high.?end look|cinematic/i],
+  ['clay', /\bclay\b|pastel/i],
+  ['globe', /\bglobe\b|hologra|sci.?fi/i],
+  ['celebration', /confetti|party look|trophy|celebration look/i],
+  ['newsroom', /newsroom|news style|ticker|broadcast/i],
+  ['kinetic', /kinetic|bold type|type.?only|text only/i],
+  ['architectural', /blueprint|wireframe|architectural/i],
+  ['neighborhood', /\bmap\b|neighborhood map|drive times?/i],
+  ['brand-night', /dark look|night look|dark mode|dramatic/i],
+  ['glass-explainer', /glass explainer|futuristic/i],
   ['glass-studio', /glassmorph|frosted|violet|purple/i],
 ];
 
 const FORMAT_RULES = [
-  ['9x16', /vertical|reel|tiktok|story|stories|shorts|9:16|phone/i],
+  ['9x16', /vertical|reel|tiktok|instagram story|stories|shorts|9:16|phone|social media/i],
   ['16x9', /youtube|presentation|meeting|slide|wide|16:9|landscape|zoom|screen/i],
   ['1x1', /square|1:1|feed post|linkedin/i],
   ['4x5', /4:5|portrait post|instagram feed/i],
@@ -84,12 +85,16 @@ export async function smartDraft(text = '', files = []) {
   const name = findName(t);
   if (name) setF('agentName', name, `Agent: ${name}`);
   const price = t.match(/\$\s?\d[\d,.]*\s?[KkMm]?\b/)?.[0];
-  if (price) setF('price', price.replace(/\s/g, ''), `Price: ${price}`);
+  if (price) { const pr = price.replace(/\s/g, '').replace(/[.,]+$/, ''); setF('price', pr, `Price: ${pr}`); }
   const addr = t.match(/\b\d{2,6}\s+(?:[NSEW]\.?\s+)?[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)*\s(?:St|Street|Ave|Avenue|Blvd|Boulevard|Dr|Drive|Rd|Road|Ln|Lane|Way|Pl|Place|Ct|Court|Ter|Terrace|Cir|Circle|Pkwy)\b\.?/)?.[0];
   if (addr) setF('address', addr, `Address: ${addr}`);
   const beds = t.match(/(\d+)\s*(?:bd|beds?|bedrooms?)\b/i)?.[1]; if (beds) setF('beds', beds);
   const baths = t.match(/(\d+(?:\.\d)?)\s*(?:ba|baths?|bathrooms?)\b/i)?.[1]; if (baths) setF('baths', baths);
   const sqft = t.match(/([\d,]{3,6})\s*(?:sq\.?\s*ft|square feet|sf)\b/i)?.[1]; if (sqft) setF('sqft', sqft);
+  const period = t.match(/\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}|Q[1-4]\s+\d{4}|week of [A-Z][a-z]+\.? \d{1,2})\b/)?.[0];
+  if (period) setF('period', period, `Period: ${period}`);
+  const area = t.match(/\b((?:LA|L\.A\.|[A-Z][a-z]+)(?:\s[A-Z][a-z]+)*\s(?:County|Valley|Beach|Hills|Park|Bay|Westside|Coast))\b/)?.[1] || t.match(/\b(Los Angeles|Orange County|Inland Empire|San Fernando Valley|South Bay|Pasadena|Long Beach|Santa Monica)\b/)?.[1];
+  if (area) setF('area', area, `Market: ${area}`);
   const thanks = t.match(/(thank you[^.!?\n]*[.!?]?)/i)?.[1];
   if (thanks) setF('message', capitalize(thanks.trim().replace(/[.!?]?$/, '.')), 'Thank-you message from your notes');
   const status = statusFrom(t);
@@ -148,7 +153,7 @@ export async function smartDraft(text = '', files = []) {
   if (fileKinds.audio.length) { music = await fileToDataURL(fileKinds.audio[0]); notes.push(`Music: ${fileKinds.audio[0].name}`); }
   if (fileKinds.video.length) notes.push('Video clips can’t be placed in scenes yet. Grab a still frame as a photo, or ask Claude to cut the clip into the final render.');
 
-  for (const f of story.fields) if (f.required && (fields[f.key] === undefined || fields[f.key] === '')) missing.push(f.label);
+  for (const f of story.fields) if (f.required && f.default === undefined && (fields[f.key] === undefined || fields[f.key] === '')) missing.push(f.label);
 
   return { story: best, look, format, duration, fields, music, notes, missing };
 }
@@ -168,12 +173,17 @@ function classifyFiles(files) {
   return k;
 }
 
-const NOT_NAMES = /^(Redfin|Rocket|Powered|Just|Sold|Listed|The|This|That|Thank|Celebrat\w*|Happy|Team|Our|My|Los|San|Santa|New|Open|House|Market|Update|Monthly|Weekly|Video|Make|Create|Agent|Agents|With|And|For|Years?|Anniversary)$/;
+const NOT_NAMES = /^(Redfin|Rocket|Powered|Just|Sold|Listed|The|This|That|Thank|Celebrat\w*|Happy|Team|Our|My|Los|San|Santa|New|Open|House|Market|Update|Monthly|Weekly|Video|Make|Create|Agent|Agents|With|And|For|Years?|Anniversary|County|September|October|November|December|January|February|March|April|May|June|July|August)$/;
+/** Finds a person's name only next to a person cue ("for", "my agent", "congratulations"...). */
 function findName(t) {
-  const cues = t.match(/(?:for|agent|celebrat\w* |congratulat\w* |spotlight on|featuring)\s+(?:my agent\s+|our agent\s+|agent\s+)?([A-Z][a-z'’-]+(?:\s+[A-Z][a-z'’-]+){1,2})/);
-  if (cues && !NOT_NAMES.test(cues[1].split(/\s+/)[0])) return cues[1];
-  const all = [...t.matchAll(/\b([A-Z][a-z'’-]+)\s+([A-Z][a-z'’-]+)\b/g)].map(m => [m[1], m[2]]).filter(([a, b]) => !NOT_NAMES.test(a) && !NOT_NAMES.test(b));
-  return all.length ? `${all[0][0]} ${all[0][1]}` : '';
+  const re = /(?:\bfor|\bagents?|celebrat\w*|congratulat\w*|spotlight on|featuring|\bmeet|\bto|named)\s+(?:(?:one of )?(?:my|our) (?:agents?|teammates?)\s+|agents?\s+)?([A-Z][a-z'’-]+(?:\s+[A-Z][a-z'’-]+){1,2})/g;
+  for (const m of t.matchAll(re)) {
+    const parts = m[1].split(/\s+/);
+    if (parts.some(w => NOT_NAMES.test(w))) continue;
+    if (/\b(St|Street|Ave|Avenue|Blvd|Dr|Drive|Rd|Road|Ln|Lane|Way|Pl|Ct|Lake|Hills|Beach|Park|Valley)\b/.test(m[1])) continue;
+    return m[1];
+  }
+  return '';
 }
 
 function statusFrom(t) {

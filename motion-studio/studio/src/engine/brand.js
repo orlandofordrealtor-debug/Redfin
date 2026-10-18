@@ -37,10 +37,30 @@ export const FONTS = {
   serif: '"Cormorant Garamond", "Times New Roman", Georgia, serif',
 };
 
-/** Swaps in a user-supplied brand font (registered as "Brand Display" / "Brand Body"). */
-export function applyBrandFonts(fonts = {}) {
-  if (fonts.display) FONTS.display = `"Brand Display", ${FONTS.display}`;
-  if (fonts.body) FONTS.body = `"Brand Body", ${FONTS.body}`;
+const DEFAULT_FONTS = { ...FONTS };
+const registered = new Map();
+
+async function registerFont(family, src) {
+  const prev = registered.get(family);
+  if (prev?.src === src) return;
+  const face = new FontFace(family, `url(${src})`);
+  await face.load();
+  if (prev) document.fonts.delete(prev.face);   // replacing a font file swaps the face, not adds a second
+  document.fonts.add(face);
+  registered.set(family, { src, face });
+}
+
+/**
+ * Uses brand font files supplied with the project ({ display, body } as data URLs) for headlines
+ * and body text, or restores the defaults when none are given.
+ */
+export async function applyBrandFonts(fonts = {}) {
+  FONTS.display = DEFAULT_FONTS.display;
+  FONTS.body = DEFAULT_FONTS.body;
+  try {
+    if (fonts?.display) { await registerFont('Brand Display', fonts.display); FONTS.display = `"Brand Display", ${DEFAULT_FONTS.display}`; }
+    if (fonts?.body) { await registerFont('Brand Body', fonts.body); FONTS.body = `"Brand Body", ${DEFAULT_FONTS.body}`; }
+  } catch (e) { /* an unreadable font file falls back to the default faces */ }
 }
 
 export const LOGO_SVGS = {

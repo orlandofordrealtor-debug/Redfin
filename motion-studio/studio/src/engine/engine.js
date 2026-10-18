@@ -29,7 +29,7 @@ export class MotionEngine {
   async load(rawProject, { scale } = {}) {
     const project = normalizeProject(rawProject);
     this.project = project;
-    if (project.brand?.fonts) applyBrandFonts(project.brand.fonts);
+    await applyBrandFonts(project.brand?.fonts);
     await this.loadFonts();
     this.logos = await loadAllLogos();
     this.stage.setFormat(project.format, scale ?? this.stage.scale);
@@ -44,9 +44,7 @@ export class MotionEngine {
     const specs = ['800 100px "Plus Jakarta Sans"', '700 100px "Plus Jakarta Sans"', '500 100px "Plus Jakarta Sans"', '400 100px "Plus Jakarta Sans"',
       'italic 600 100px "Plus Jakarta Sans"', '500 100px "JetBrains Mono"', '700 100px "JetBrains Mono"', '600 100px "Cormorant Garamond"', 'italic 500 100px "Cormorant Garamond"'];
     try { await Promise.all(specs.map(s => document.fonts.load(s))); } catch (e) { /* fall back to system fonts */ }
-    if (this.project?.brand?.fonts) {
-      try { await Promise.all(['700 100px "Brand Display"', '400 100px "Brand Body"'].map(s => document.fonts.load(s))); } catch (e) { /* optional */ }
-    }
+
   }
 
   /** Turns project media references into drawable images, filling gaps with labelled placeholders. */
