@@ -1,0 +1,36 @@
+{
+  "name": "Heidi Ludwig 11 Years at Redfin",
+  "id": "heidi-ludwig-11",
+  "story": "anniversary",
+  "look": "brand-glass",
+  "format": "9x16",
+  "formats": ["9x16", "4x5", "16x9"],
+  "duration": 29,
+  "fps": 60,
+  "fields": {
+    "agentName": "Heidi Ludwig",
+    "years": 11,
+    "company": "Redfin",
+    "date": "Oct 19",
+    "agentTitle": "Redfin Principal Agent",
+    "specialty": "South Bay Specialist",
+    "areas": ["Manhattan Beach", "Redondo Beach", "Hermosa Beach", "Torrance"],
+    "headshot": "headshot.jpg",
+    "stats": [
+      { "value": "484", "label": "Total deals" },
+      { "value": "$519M", "label": "Sales volume" },
+      { "value": "$9.0M", "label": "Highest sales price" }
+    ],
+    "photos": [
+      "graphic-01.jpg", "graphic-02.jpg", "graphic-03.jpg", "graphic-04.jpg",
+      "graphic-05.jpg", "graphic-06.jpg", "graphic-07.jpg", "graphic-08.jpg"
+    ],
+    "galleryEyebrow": "Cheers to 11 years",
+    "galleryTitle": "11 years strong",
+    "message": "Thank you for your amazing service.",
+    "qrLink": "https://www.redfin.com/agent/heidi-ludwig",
+    "qrLabel": "Scan to view Heidi's Redfin profile"
+  },
+  "audio": { "sfx": true, "sfxVolume": 0.6 },
+  "exports": { "mp4": true, "poster": true, "gif": false, "storyboard": true, "overlay": false }
+}

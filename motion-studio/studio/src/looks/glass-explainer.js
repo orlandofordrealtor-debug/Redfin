@@ -167,8 +167,8 @@ class ExplainerWorld extends BaseWorld {
     return {
       frame: () => this.glassMat({ tint: '#ffffff', roughness: 0.28, thickness: 0.6, transmission: 1, env: 1.0 }),
       panel: () => this.glassMat({ tint: p.panelTint, roughness: 0.4, thickness: 0.7, transmission: 1, ior: 1.42, env: 0.85 }),
-      accent: () => satin(p.accent, { emissive: p.accent, emissiveIntensity: 0.12 }),
-      glyph: () => satin(p.accent, { roughness: 0.2, rim: 0.22, rimColor: '#FFE2D2', emissive: p.accent, emissiveIntensity: 0.05 }),
+      accent: () => satin(p.accent, { roughness: 0.26, clearcoat: 0.7, env: 0.65, emissive: p.accent, emissiveIntensity: 0.1 }),
+      glyph: () => satin(p.accent, { roughness: 0.3, clearcoat: 0.55, env: 0.55, rim: 0.2, rimColor: '#FFE2D2', emissive: p.accent, emissiveIntensity: 0.07 }),
       decor: i => {
         if (i % 3 === 0) return this.glassMat({ tint: '#ffffff', roughness: 0.04, thickness: 1.2, ior: 1.5, env: 1.2, dispersion: 0.3 });
         return satin(p.decor[i % p.decor.length], { roughness: 0.18 });
@@ -438,6 +438,12 @@ class ExplainerWorld extends BaseWorld {
     pts.frustumCulled = false;
     this.root.add(pts);
     this.dust = pts;
+  }
+
+  dispose() {
+    super.dispose();
+    this.dome?.geometry.dispose();
+    this.dome?.material.dispose();
   }
 
   update(t) {

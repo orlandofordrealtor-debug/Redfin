@@ -261,8 +261,8 @@ class CelebrationWorld extends BaseWorld {
       }
       // the burst that greets every scene, launched from behind the content
       const burst = this.confetti({
-        count: 150, colors: p.confetti, seed: 500 + si * 13, spread: portrait ? 5 : 8, size: 0.14,
-        origin: new THREE.Vector3(a.x, a.y + 3.4, a.z - 3.6),
+        count: 210, colors: p.confetti, seed: 500 + si * 13, spread: portrait ? 4.5 : 7.5, size: 0.15,
+        origin: new THREE.Vector3(a.x, a.y - 0.8, a.z - 3.4),
       });
       burst.mesh.visible = false;
       this.root.add(burst.mesh);
@@ -337,7 +337,7 @@ export default {
   native: 'native',
   post: {
     bloom: { strength: 0.75, radius: 0.65, threshold: 1.15 },
-    grain: 0.024, vignette: 0.38, ca: 0.002, tone: 'neutral', exposure: 1.0, vignetteColor: '#100208',
+    grain: 0.024, vignette: 0.38, ca: 0.002, tone: 'neutral', exposure: 1.0, vignetteColor: '#100208', scanlines: 0, band: 0,
   },
   transition: { style: 'whip', duration: 0.85 },
   drift: 1.15,
@@ -345,6 +345,7 @@ export default {
   overlayTheme: p => ({
     text: p.text, sub: p.sub, accent: p.accent, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
     chipBg: p.accent, chipText: '#FFFFFF', panel: 'rgba(30,8,16,0.82)', panelStroke: 'rgba(240,181,62,0.4)', dark: true,
+    displayFamily: null, displayWeight: null, displayStyle: null,
   }),
   create: ctx => new CelebrationWorld(ctx, ctx.project?.brand?.mode === 'native' ? 'native' : 'brand'),
 };

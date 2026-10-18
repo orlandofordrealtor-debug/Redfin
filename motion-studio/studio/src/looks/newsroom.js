@@ -2,7 +2,7 @@
 // a glossy floor with a line grid, dark high-contrast panels with lit edges, bold saturated color,
 // and a scrolling news ticker with a LIVE bug on the 2D layer.
 import * as THREE from 'three';
-import { BaseWorld, setMatOpacity } from '../engine/world.js';
+import { BaseWorld } from '../engine/world.js';
 import * as M from '../engine/materials.js';
 import { BRAND } from '../engine/brand.js';
 import { slab } from '../engine/geo.js';
@@ -338,7 +338,7 @@ export default {
   native: 'native',
   post: {
     bloom: { strength: 0.7, radius: 0.5, threshold: 1.2 },
-    grain: 0.02, vignette: 0.34, ca: 0.0022, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000', scanlines: 0.22,
+    grain: 0.02, vignette: 0.34, ca: 0.0022, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000', scanlines: 0.22, band: 0,
   },
   transition: { style: 'whip', duration: 0.75 },
   drift: 0.8,
@@ -346,6 +346,7 @@ export default {
   overlayTheme: p => ({
     text: p.text, sub: p.sub, accent: p.accent, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
     chipBg: p.accent, chipText: '#FFFFFF', panel: rgba(p.body, 0.9), panelStroke: 'rgba(255,255,255,0.16)', dark: true,
+    displayFamily: null, displayWeight: null, displayStyle: null,
   }),
   create: ctx => new NewsroomWorld(ctx, ctx.project?.brand?.mode === 'native' ? 'native' : 'brand'),
 };

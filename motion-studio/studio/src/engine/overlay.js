@@ -70,7 +70,7 @@ export class Overlay {
     return lines.flatMap(l => l.split('\n'));
   }
 
-  /** Shrinks the size until the text fits in maxLines within maxWidth. */
+  /** Shrinks the size until the text fits in maxLines within maxWidth, then balances the lines. */
   fit(str, maxWidth, o = {}, maxLines = 2, minSize = 18) {
     let size = o.size || 80;
     let lines = this.wrap(str, maxWidth, { ...o, size });
@@ -78,7 +78,19 @@ export class Overlay {
       size *= 0.94;
       lines = this.wrap(str, maxWidth, { ...o, size });
     }
-    return { size, lines };
+    return { size, lines: this.balance(str, lines, maxWidth, { ...o, size }) };
+  }
+
+  /** Like CSS text-wrap: balance. Narrows the wrap width while the line count holds. */
+  balance(str, lines, maxWidth, o) {
+    if (lines.length < 2 || String(str).includes('\n')) return lines;
+    let lo = maxWidth * 0.4, hi = maxWidth, best = lines;
+    for (let i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2;
+      const l = this.wrap(str, mid, o);
+      if (l.length === lines.length && !l.some(x => this.measure(x, o) > mid + 0.5)) { best = l; hi = mid; } else lo = mid;
+    }
+    return best;
   }
 
   text(str, x, y, o = {}) {

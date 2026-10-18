@@ -16,7 +16,7 @@ const GRID_ROT = 28 * DEG;        // street grid rotation inside the map
 const BA = 3.4, BB = 1.9;         // block pitch along the two grid axes
 const STREET = 0.42, AVENUE = 0.82;
 const V_NEAR = 14, V_FAR = -48;   // map extent toward / away from the camera (map units)
-const HAZE = [-13, -40];          // map depth where haze starts / is complete
+const HAZE = [-16, -44];          // map depth where haze starts / is complete
 const CHUNK = 40;
 
 /** Coastline: map v of the shore at map u. Mirrored exactly in the ground shader. */
@@ -46,9 +46,9 @@ function mapPalette(mode) {
       muted: '#D9D1C4', glow: '#14B3A6', line: 'rgba(20,32,44,0.14)', floorLine: '#B9AFA6', shadow: 0.2,
       scrim: '#FFFFFF', scrimAlpha: 0.55, fade: '#F3F1EC', logo: 'tagline',
       // map colors
-      haze: '#ECE9E2', lot: '#E9E2D5', street: '#FBFAF7', avenue: '#FFFFFF', lane: '#E3D9C6', curb: '#F4EFE6',
-      park: '#C3D5AF', parkPath: '#E3E6D2', plaza: '#E4DED3', water: '#A8CDE4', waterDeep: '#93BEDB', sand: '#EEE3C9', foam: '#F4F8FA',
-      building: ['#F8F4EC', '#F3EEE4', '#FBF8F3', '#EEE7DB', '#F5EFE3'], tree: ['#9CB986', '#A9C394', '#8EAE7B'],
+      haze: '#ECE9E2', lot: '#E3D9C8', street: '#FDFCFA', avenue: '#FFFFFF', lane: '#E6DCCB', curb: '#F1EBE0',
+      park: '#BBD2A2', parkPath: '#E3E6D2', plaza: '#E4DED3', water: '#A8CDE4', waterDeep: '#93BEDB', sand: '#EEE3C9', foam: '#F4F8FA',
+      building: ['#FBF8F2', '#F6F1E8', '#FDFBF7', '#F2ECE1', '#F8F3EA'], tree: ['#8DAE74', '#9BBB82', '#7FA268'],
       pin: '#0B8A80', pinDeep: '#08706A', route: '#0FA396', chip: '#0B8A80', label: '#14202C',
     };
   }
@@ -59,9 +59,9 @@ function mapPalette(mode) {
     ink: BRAND.ink, glassTint: '#ffffff', decor: [BRAND.red, '#FFFFFF', '#B9C4AE', '#1C1D21'],
     muted: '#DAD3CA', glow: BRAND.redGlow, line: 'rgba(17,17,17,0.14)', floorLine: '#B9AFA6', shadow: 0.2,
     scrim: '#FFFFFF', scrimAlpha: 0.55, fade: '#F5F3F0', logo: 'tagline',
-    haze: '#EFECE7', lot: '#E8E2DA', street: '#FCFBF9', avenue: '#FFFFFF', lane: '#E2DAD0', curb: '#F3EFEA',
-    park: '#C9D3BC', parkPath: '#E5E6DB', plaza: '#E3DED7', water: '#B7CFDF', waterDeep: '#A6C3D7', sand: '#ECE4D4', foam: '#F6F8F9',
-    building: ['#F8F6F2', '#F2EEE8', '#FBFAF7', '#ECE7E0', '#F5F1EA'], tree: ['#A9B898', '#B4C2A3', '#9AAB89'],
+    haze: '#EFECE7', lot: '#E2DBD1', street: '#FDFCFB', avenue: '#FFFFFF', lane: '#E4DCD2', curb: '#F1ECE6',
+    park: '#C2CFB3', parkPath: '#E5E6DB', plaza: '#E3DED7', water: '#B7CFDF', waterDeep: '#A6C3D7', sand: '#ECE4D4', foam: '#F6F8F9',
+    building: ['#FBFAF7', '#F6F3EE', '#FDFCFA', '#F1EDE7', '#F8F5F0'], tree: ['#98AB85', '#A6B793', '#8A9E77'],
     pin: BRAND.red, pinDeep: BRAND.redDeep, route: BRAND.red, chip: BRAND.red, label: BRAND.ink,
   };
 }
@@ -208,16 +208,16 @@ function labelTexture(text, p) {
   x.fillStyle = '#FFFFFF';
   x.beginPath(); x.roundRect(10, 8, 300, 92, r); x.fill();
   x.shadowColor = 'transparent';
-  // car glyph: a small accent disc with a white dot
-  x.fillStyle = p.pin;
-  x.beginPath(); x.arc(58, 54, 26, 0, Math.PI * 2); x.fill();
-  x.fillStyle = '#FFFFFF';
-  x.beginPath(); x.roundRect(44, 46, 28, 12, 5); x.fill();
-  x.beginPath(); x.roundRect(49, 39, 18, 10, 4); x.fill();
+  // clock glyph: an accent ring with two hands
+  x.strokeStyle = p.pin; x.lineWidth = 7; x.lineCap = 'round';
+  x.beginPath(); x.arc(60, 54, 22, 0, Math.PI * 2); x.stroke();
+  x.lineWidth = 6;
+  x.beginPath(); x.moveTo(60, 54); x.lineTo(60, 41); x.moveTo(60, 54); x.lineTo(70, 59); x.stroke();
   x.fillStyle = p.label;
-  x.font = `800 44px ${FONTS.display}`;
+  x.font = `800 46px ${FONTS.display}`;
   x.textBaseline = 'middle';
-  x.fillText(text, 98, 57);
+  x.textAlign = 'center';
+  x.fillText(text, 196, 57);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
@@ -238,7 +238,7 @@ class MapWorld extends BaseWorld {
 
   materials() {
     const p = this.palette;
-    const card = () => M.satin('#FFFFFF', { roughness: 0.42, clearcoat: 0.35, env: 0.5, rim: 0.08 });
+    const card = () => M.satin('#F4F1EC', { roughness: 0.36, clearcoat: 0.5, env: 0.55, rim: 0.1 });
     return {
       frame: card,
       panel: () => M.satin('#FFFFFF', { roughness: 0.5, clearcoat: 0.25, env: 0.45, rim: 0.06 }),
@@ -262,9 +262,9 @@ class MapWorld extends BaseWorld {
     this.stage.scene.add(this.dome);
 
     // Soft daylight: a warm sun raking across the map from the upper left, cool sky fill
-    const hemi = new THREE.HemisphereLight('#ffffff', '#cfc6b8', 0.42);
-    const key = new THREE.DirectionalLight('#fff4e6', 1.15);
-    key.position.set(-14, 22, 12);
+    const hemi = new THREE.HemisphereLight('#ffffff', '#cfc6b8', 0.34);
+    const key = new THREE.DirectionalLight('#fff4e6', 1.4);
+    key.position.set(-22.5, 16.5, 10.8);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
     key.shadow.radius = 6;
@@ -275,7 +275,7 @@ class MapWorld extends BaseWorld {
     const fill = new THREE.DirectionalLight('#dfe9ff', 0.15);
     fill.position.set(10, 6, 8);
     this.env.add(hemi, key, key.target, fill);
-    key.target.position.set(0, -2, -6);
+    key.target.position.set(0, -1.5, -6);
     this.keyLight = key;
     this.lights = { hemi, key, fill };
 
@@ -364,7 +364,9 @@ class MapWorld extends BaseWorld {
             if (wide === 2) i++;
             const [u, v] = toMap(ba + fa / 2, bb + fb / 2);
             let ht = 0.16 + 0.3 * Math.pow(r(), 2.2);
-            if (r() < 0.05) ht = r.range(0.55, 0.95);
+            const roll = r();
+            if (roll < 0.08) ht = r.range(0.6, 1.05);
+            else if (roll < 0.22) ht = r.range(0.4, 0.6);
             for (const tw of towns) {
               const d = Math.hypot(u - tw.u, (v - tw.v) * 1.4);
               if (d < 9) ht = Math.max(ht, (1 - d / 9) * r.range(1.1, 2.4));
@@ -472,11 +474,11 @@ class MapWorld extends BaseWorld {
     const p = this.palette;
     const r = rng((this.ctx.seed || 3) + 101);
     const portrait = this.stage.aspect < 0.95;
-    const headGeo = new THREE.SphereGeometry(0.26, 32, 20);
-    const tipGeo = new THREE.ConeGeometry(0.2, 0.46, 32, 1);
+    const headGeo = new THREE.SphereGeometry(0.44, 36, 24);
+    const tipGeo = new THREE.ConeGeometry(0.34, 0.8, 36, 1);
     tipGeo.rotateX(Math.PI);
-    tipGeo.translate(0, -0.2, 0);
-    const dotGeo = new THREE.SphereGeometry(0.1, 20, 12);
+    tipGeo.translate(0, -0.34, 0);
+    const dotGeo = new THREE.SphereGeometry(0.17, 24, 14);
     const ringGeo = new THREE.PlaneGeometry(1, 1);
     ringGeo.rotateX(-Math.PI / 2);
     const pinMat = M.satin(p.pin, { clearcoat: 1, roughness: 0.22, emissive: p.pin, emissiveIntensity: 0.18, env: 0.6 });
@@ -486,13 +488,17 @@ class MapWorld extends BaseWorld {
     scenes.forEach((s, si) => {
       if (s.inst.noDecor) return;
       const au = s.anchor.x;
-      const nRoutes = s.type === 'endcard' || s.type === 'intro' ? 1 : 2;
+      const busy = ['timeline', 'chart', 'endcard', 'intro', 'quote', 'message'].includes(s.type);
+      const nRoutes = busy ? 1 : 2;
+      const split = !portrait && s.inst.shot?.layout === 'split';
       for (let ri = 0; ri < nRoutes; ri++) {
-        // pick two intersections behind the content, one on each side of the anchor
-        const side = (ri + si) % 2 ? 1 : -1;
-        const spreadU = portrait ? r.range(2.5, 4.5) : r.range(4.5, 8.5);
-        const fromUV = [au - side * spreadU * r.range(0.2, 0.6), r.range(-5.5, -3.5)];
-        const toUV = [au + side * spreadU, r.range(-11, -6.5)];
+        // destinations sit wide of the content (right side only when text owns the left);
+        // origins start behind the content so routes emerge from under the scene
+        const side = split ? 1 : (ri + si) % 2 ? 1 : -1;
+        const wideU = portrait ? r.range(2.6, 3.6) : r.range(6.6, 9.4);
+        const back = busy ? 3 : 0;
+        const toUV = [au + side * wideU, (ri ? r.range(-10.5, -8.5) : r.range(-6.5, -4.2)) - back];
+        const fromUV = split ? [au + r.range(-0.5, 2.5), r.range(-4.2, -2.6) - back] : [au - side * r.range(0.5, 2.5), r.range(-4.5, -2.6) - back];
         // keep the destination on dry land
         toUV[1] = Math.max(toUV[1], coast(toUV[0]) + 3);
         fromUV[1] = Math.max(fromUV[1], coast(fromUV[0]) + 3);
@@ -501,29 +507,30 @@ class MapWorld extends BaseWorld {
         const k2 = Math.round(g2[0] / BA), m2 = Math.round(g2[1] / BB);
         const jog = Math.round(lerp(m1, m2, r.range(0.3, 0.7)));
         const pts2 = this.routePoints(k1, m1, k2, m2, jog);
-        const pts = pts2.map(v => new THREE.Vector3(v.x, 0.07, v.y));
+        const pts = pts2.map(v => new THREE.Vector3(v.x, 0.1, v.y));
         const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
         const len = curve.getLength();
         const mat = M.flowMaterial({ color: p.route, head: '#ffffff', dash: Math.max(6, len * 1.4), speed: 0.8, intensity: 1.0 });
         mat.transparent = true;
-        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(40, Math.round(len * 10)), 0.075, 8, false), mat);
-        tube.castShadow = false;
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(40, Math.round(len * 10)), 0.08, 8, false), mat);
+        tube.renderOrder = 3;
         this.mapScroll.add(tube);
         // casing under the route line, like a map app
-        const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(40, Math.round(len * 10)), 0.11, 8, false),
-          new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0 }));
-        casing.position.y = -0.03;
+        const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(40, Math.round(len * 10)), 0.15, 8, false),
+          new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false }));
+        casing.scale.y = 0.4;
+        casing.renderOrder = 2;
         this.mapScroll.add(casing);
 
         const end = pts[pts.length - 1], start = pts[0];
         // destination pin
         const pin = new THREE.Group();
         const head = new THREE.Mesh(headGeo, pinMat);
-        head.position.y = 0.72;
+        head.position.y = 1.22;
         const tip = new THREE.Mesh(tipGeo, pinMat);
-        tip.position.y = 0.72;
+        tip.position.y = 1.22;
         const dot = new THREE.Mesh(dotGeo, whiteMat);
-        dot.position.set(0, 0.74, 0.2);
+        dot.position.set(0, 1.25, 0.34);
         pin.add(head, tip, dot);
         pin.traverse(o => { o.castShadow = true; });
         pin.position.copy(end);
@@ -531,18 +538,18 @@ class MapWorld extends BaseWorld {
         const ringMat = pinRingMaterial(p.pin);
         ringMat.uniforms.uPhase.value = r();
         const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.scale.setScalar(1.6);
+        ring.scale.setScalar(2.6);
         ring.position.copy(end).setY(0.02);
         this.mapScroll.add(ring);
         // origin: a white puck with an accent ring
-        const origin = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.08, 28), originMat);
+        const origin = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.1, 32), originMat);
         origin.position.copy(start).setY(0.06);
         origin.castShadow = true;
         this.mapScroll.add(origin);
         const oRingMat = pinRingMaterial(p.route);
         oRingMat.uniforms.uPhase.value = r();
         const oRing = new THREE.Mesh(ringGeo, oRingMat);
-        oRing.scale.setScalar(1.0);
+        oRing.scale.setScalar(1.7);
         oRing.position.copy(start).setY(0.025);
         this.mapScroll.add(oRing);
         // drive-time callout above the middle of the route (illustrative, from route length)
@@ -550,9 +557,9 @@ class MapWorld extends BaseWorld {
         const labelTex = labelTexture(`${mins} min`, p);
         this.track(labelTex);
         const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthWrite: false, opacity: 0 }));
-        const mid = curve.getPointAt(0.55);
-        label.position.set(mid.x, 0.95, mid.z);
-        label.scale.set(1.5, 1.5 * (112 / 320), 1);
+        // callout bubble riding just above the destination pin
+        label.position.set(end.x, 2.0, end.z);
+        label.scale.set(2.3, 2.3 * (112 / 320), 1);
         label.center.set(0.5, 0);
         this.mapScroll.add(label);
 
@@ -629,8 +636,8 @@ export default {
   swatch: ['#F3F1EC', '#C3D5AF', '#0B8A80', '#14202C'],
   native: 'native',
   post: {
-    bloom: { strength: 0.3, radius: 0.4, threshold: 1.6 },
-    grain: 0.016, vignette: 0.3, ca: 0.0007, tone: 'neutral', exposure: 1.0, vignetteColor: '#F2EEE7',
+    bloom: { strength: 0.22, radius: 0.3, threshold: 2.4 },
+    grain: 0.016, vignette: 0.2, ca: 0.0007, tone: 'neutral', exposure: 1.0, vignetteColor: '#CDC4B7',
   },
   transition: { style: 'glide', duration: 1.1 },
   drift: 0.8,

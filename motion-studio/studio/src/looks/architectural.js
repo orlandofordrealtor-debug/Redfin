@@ -4,7 +4,7 @@
 // Cards and panels are white architectural model board with thin drafted borders.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { BaseWorld, setMatOpacity } from '../engine/world.js';
+import { BaseWorld } from '../engine/world.js';
 import * as M from '../engine/materials.js';
 import { BRAND } from '../engine/brand.js';
 import { clamp, ease, seg, rng, rgba } from '../engine/util.js';
@@ -18,7 +18,7 @@ export function blueprintPalette(mode = 'brand') {
       text: '#FFFFFF', sub: 'rgba(228,239,255,0.82)', accent: '#E2552C', accent2: '#FFFFFF', accentText: '#FFFFFF',
       ink: '#FFFFFF', glassTint: '#ffffff', decor: ['#F4F7FB', '#BCD4F0', '#E2552C', '#F4F7FB'],
       board: '#F3F6FA', boardLine: '#1C4F8E', muted: '#E9EEF5',
-      house: { line: '#E6F1FF', lineGlow: 2.4, head: '#FFFFFF', solid: '#E9EFF7', glass: '#FFC978', glassGlow: 3.2, edge: '#9CC8FF' },
+      house: { line: '#E6F1FF', lineGlow: 3.4, head: '#FFFFFF', solid: '#E9EFF7', glass: '#FFC978', glassGlow: 4.2, edge: '#9CC8FF' },
       grid: '#FFFFFF', gridOpacity: 0.16, gridMajor: 0.32,
       glow: '#FFFFFF', line: 'rgba(255,255,255,0.35)', floorLine: '#FFFFFF', sheet: 'rgba(255,255,255,0.5)',
       shadow: 0.3, scrim: '#0B2C58', scrimAlpha: 0.5, fade: '#0B2C58', logo: 'taglineReversed',
@@ -26,15 +26,15 @@ export function blueprintPalette(mode = 'brand') {
   }
   return {
     dark: false,
-    bgTop: '#FBF9F5', bgBottom: '#EDE7DD',
-    blobs: [{ dir: [0, 0.15, -1], color: '#F7F3EC', size: 0.5 }, { dir: [0.8, 0.5, -0.3], color: '#F3E6E2', size: 0.45 }],
+    bgTop: '#F7F3EC', bgBottom: '#E2D9CB',
+    blobs: [{ dir: [0, 0.15, -1], color: '#F5F0E8', size: 0.45 }, { dir: [0.8, 0.5, -0.3], color: '#F1E2DC', size: 0.45 }],
     text: BRAND.ink, sub: '#4A4E57', accent: BRAND.red, accent2: BRAND.ink, accentText: '#FFFFFF',
-    ink: BRAND.ink, glassTint: '#ffffff', decor: ['#FFFFFF', '#E7E1D8', BRAND.red, '#FFFFFF'],
-    board: '#FFFFFF', boardLine: BRAND.ink, muted: '#E4DED5',
-    house: { line: '#22252B', lineGlow: 1.0, head: BRAND.red, solid: '#FFFFFF', glass: '#3A4350', glassGlow: 1.0, edge: BRAND.red },
+    ink: BRAND.ink, glassTint: '#ffffff', decor: ['#FFFFFF', '#D6CDBF', BRAND.red, '#FFFFFF'],
+    board: '#FFFFFF', boardLine: BRAND.ink, muted: '#D6CDBF',
+    house: { line: '#22252B', lineGlow: 1.0, head: BRAND.red, solid: '#FBF8F3', glass: '#38414D', glassGlow: 1.0, edge: BRAND.red },
     grid: '#2A2D33', gridOpacity: 0.09, gridMajor: 0.16,
     glow: BRAND.red, line: 'rgba(17,17,17,0.18)', floorLine: '#2A2D33', sheet: 'rgba(17,17,17,0.38)',
-    shadow: 0.14, scrim: '#FFFFFF', scrimAlpha: 0.6, fade: '#F5F1EA', logo: 'tagline',
+    shadow: 0.24, scrim: '#FFFFFF', scrimAlpha: 0.6, fade: '#F3EEE6', logo: 'tagline',
   };
 }
 
@@ -270,7 +270,7 @@ class BlueprintWorld extends BaseWorld {
     this.stage.scene.add(this.dome);
     this.addLights(native
       ? { hemiSky: '#EAF3FF', hemiGround: '#1C3F70', hemi: 0.5, key: 1.25, keyColor: '#FFFFFF', fill: 0.3, fillColor: '#9CC4FF', shadowRadius: 7 }
-      : { hemiSky: '#FFFFFF', hemiGround: '#E6DED3', hemi: 0.65, key: 1.3, keyColor: '#FFF8F0', fill: 0.3, fillColor: '#DCE6F5', shadowRadius: 7 });
+      : { hemiSky: '#FFFFFF', hemiGround: '#CFC4B4', hemi: 0.45, key: 1.55, keyColor: '#FFF8F0', fill: 0.22, fillColor: '#DCE6F5', shadowRadius: 6 });
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(220, 220), M.shadowFloor(p.shadow));
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = this.floorY;
@@ -395,7 +395,7 @@ class BlueprintWorld extends BaseWorld {
       const fill = ease.inOutCubic(clamp((P - 0.3) / 0.5));
       const lit = ease.outCubic(clamp((P - 0.72) / 0.22));
       b.lineMat.uniforms.uDraw.value = draw * 1.06;
-      b.lineMat.uniforms.uAlpha.value = 1 - 0.55 * fill;
+      b.lineMat.uniforms.uAlpha.value = 1 - (this.mode === 'native' ? 0.55 : 0.35) * fill;
       b.solidMat.userData.u.uCut.value = fill <= 0 ? -1 : -0.2 + fill * (H.height + 0.4);
       b.glassMat.opacity = lit * 0.92;
     }
@@ -455,7 +455,7 @@ export default {
   swatch: ['#FBF9F5', '#EDE7DD', '#DE3341', '#22252B'],
   native: 'native',
   post: {
-    bloom: { strength: 0.5, radius: 0.5, threshold: 2.0 },
+    bloom: { strength: 0.5, radius: 0.45, threshold: 3.0 },
     grain: 0.02, vignette: 0.16, ca: 0.0012, tone: 'neutral', exposure: 1.0, vignetteColor: '#1A2A40', scanlines: 0, band: 0,
   },
   transition: { style: 'glide', duration: 1.0 },
@@ -465,6 +465,7 @@ export default {
     text: p.text, sub: p.sub, accent: p.accent, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
     chipBg: p.accent, chipText: '#FFFFFF', panel: p.dark ? rgba('#0B2C58', 0.88) : 'rgba(255,255,255,0.92)',
     panelStroke: p.dark ? 'rgba(255,255,255,0.35)' : 'rgba(17,17,17,0.18)', dark: p.dark,
+    displayFamily: null, displayWeight: null, displayStyle: null,
   }),
   create: ctx => new BlueprintWorld(ctx, ctx.project?.brand?.mode === 'native' ? 'native' : 'brand'),
 };

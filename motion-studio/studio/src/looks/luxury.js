@@ -6,7 +6,7 @@ import { BaseWorld, setMatOpacity } from '../engine/world.js';
 import * as M from '../engine/materials.js';
 import { BRAND } from '../engine/brand.js';
 import { slab } from '../engine/geo.js';
-import { rng, noise1, clamp, ease, seg } from '../engine/util.js';
+import { rng, noise1 } from '../engine/util.js';
 
 const GOLD = '#D9B57C';        // champagne gold (metals, glow)
 const GOLD_CHIP = '#9E7A44';   // deeper antique gold: carries white chip text on the native palette
@@ -352,7 +352,7 @@ export default {
   native: 'native',
   post: {
     bloom: { strength: 0.6, radius: 0.7, threshold: 1.0 },
-    grain: 0.034, vignette: 0.5, ca: 0.0014, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000',
+    grain: 0.034, vignette: 0.5, ca: 0.0014, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000', scanlines: 0, band: 0,
   },
   transition: { style: 'glide', duration: 1.3 },
   drift: 0.45,
@@ -360,7 +360,7 @@ export default {
   overlayTheme: p => ({
     text: p.text, sub: p.sub, accent: p.accent, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
     chipBg: p.accent, chipText: '#FFFFFF', panel: 'rgba(14,11,9,0.86)', panelStroke: 'rgba(217,181,124,0.45)', dark: true,
-    mono: 'rgba(243,238,231,0.6)', displayFamily: 'serif', displayWeight: 600,
+    mono: 'rgba(243,238,231,0.6)', displayFamily: 'serif', displayWeight: 600, displayStyle: null,
   }),
   create: ctx => new LuxuryWorld(ctx, ctx.project?.brand?.mode === 'native' ? 'native' : 'brand'),
 };

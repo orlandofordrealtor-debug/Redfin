@@ -332,7 +332,7 @@ class ClayWorld extends BaseWorld {
           ? new THREE.Vector3(side * r.range(3.5, 10.5), this.floorY - s.anchor.y + halfH, r.range(-9, 3))
           : new THREE.Vector3(side * r.range(2.5, 10.5), r.range(-1.6, 4.2), r.range(-9, 1.5));
         const bound = Math.max(size, halfH);
-        if (!propClear(view, s, rel, bound * 1.15, { avoidContent: true })) continue;
+        if (!propClear(view, s, rel, bound * 1.15)) continue;
         if (placed.some(q => q.rel.distanceTo(rel) < q.bound + bound + 0.5)) continue;
         placed.push({ rel, bound, kind, size, grounded });
         i++;
@@ -357,6 +357,12 @@ class ClayWorld extends BaseWorld {
       // studio set marks: thin corner brackets on the floor around the scene's footprint
       if (s.type !== 'endcard') this.root.add(floorMarks(s.anchor, this.floorY, p.floorLine));
     });
+  }
+
+  dispose() {
+    super.dispose();
+    this.dome?.geometry.dispose();
+    this.dome?.material.dispose();
   }
 
   update(t) {

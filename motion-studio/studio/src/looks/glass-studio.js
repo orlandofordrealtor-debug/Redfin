@@ -10,7 +10,7 @@ import { sceneView, propClear, bindEnv, roundBody, roundedSlab } from './clay.js
 
 const WALL_BACK = 13;     // distance of the virtual back wall behind the focus point
 // scenes whose main object is a pane or card: spheres can hide behind its corners
-const TUCK = new Set(['hero', 'portrait', 'property', 'stats', 'leaderboard', 'list', 'quote', 'screenshot']);
+const TUCK = new Set(['hero', 'portrait', 'property', 'leaderboard', 'list', 'quote', 'screenshot']);
 
 export function studioPalette(mode = 'brand') {
   const base = {
@@ -272,6 +272,12 @@ class StudioWorld extends BaseWorld {
     mesh.position.copy(pos);
     this.root.add(mesh);
     this.props.push(this.prop(mesh, s, i, r, { grounded, amp }));
+  }
+
+  dispose() {
+    super.dispose();
+    this.dome?.geometry.dispose();
+    this.dome?.material.dispose();
   }
 
   update(t) {

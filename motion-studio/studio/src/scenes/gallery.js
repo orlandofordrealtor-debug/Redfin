@@ -22,10 +22,15 @@ export default {
     const count = scene.data?.count ?? assets.photos.length;
     const photos = assets.photos.slice(from, from + count);
     const n = Math.max(1, photos.length);
-    const cw = portrait ? 3.6 : 3.8, ch = cw / 1.5;
+    // Tall images (posters, graphics, phone shots) get portrait cards at their own aspect ratio
+    const ratios = photos.map(p => (p.img?.height || 2) / (p.img?.width || 3)).sort((a, b) => a - b);
+    const median = ratios.length ? ratios[Math.floor(ratios.length / 2)] : 0.66;
+    const tall = median > 1.15;
+    const cw = tall ? (portrait ? 3.0 : 2.5) : (portrait ? 3.6 : 3.8);
+    const ch = tall ? cw * Math.min(1.85, median) : cw / 1.5;
     const flow = n > 3 || (portrait && n > 1);
     const cards = photos.map(p => {
-      const c = world.card({ w: cw, h: ch, image: p.img, depth: 0.1, radius: 0.16, bezel: 0.08 });
+      const c = world.card({ w: cw, h: ch, image: p.img, depth: 0.1, radius: 0.16, bezel: 0.08, focusY: tall ? 0.3 : 0.45 });
       c.userData.caption = p.caption;
       c.userData.sub = p.sub;
       group.add(c);
@@ -51,15 +56,15 @@ export default {
       }
       const d = i - f;
       const ad = Math.abs(d), sd = Math.sign(d);
-      const near = cw * (portrait ? 0.62 : 0.72);
+      const near = cw * (portrait ? 0.62 : tall ? 0.95 : 0.72);
       const x = ad < 1 ? d * near : sd * (near + (ad - 1) * cw * 0.3);
       const z = -Math.min(ad, 2.4) * 1.25;
       const rotY = -clamp(d, -1, 1) * 0.85;
       return { pos: new THREE.Vector3(x, 0, z), rotY, weight: clamp(1 - (ad - 2) * 0.8) };
     };
 
-    const frameW = flow ? (portrait ? cw * 1.18 : cw * 2.5) : n * (cw + 0.45);
-    const frameH = ch + (portrait ? 0.7 : 1.1);
+    const frameW = flow ? (portrait ? cw * 1.18 : cw * (tall ? 3.2 : 2.5)) : n * (cw + 0.45);
+    const frameH = ch + (portrait ? 0.7 : tall ? 0.5 : 1.1);
     const tmp = new THREE.Vector3();
     let featured = 0;
 

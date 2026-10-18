@@ -9,6 +9,7 @@ import { slab } from '../engine/geo.js';
 import { rng, clamp, ease } from '../engine/util.js';
 
 const INK = '#111111';
+const CUT = 0.6;   // transition seconds: the wipe and the slabs are timed to it
 
 /**
  * Two tones per palette alternate by scene index. Text color never changes within a palette
@@ -40,7 +41,7 @@ export function kineticPalette(mode = 'brand') {
   return {
     dark: true,
     bgTop: T[0].field, bgBottom: T[0].field, blobs: [],
-    text: '#FFFFFF', sub: 'rgba(255,255,255,0.88)', accent: INK, accent2: '#FFFFFF', accentText: '#FFFFFF',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.88)', accent: BRAND.red, accent2: '#FFFFFF', accentText: '#FFFFFF',
     ink: '#FFFFFF', glassTint: '#ffffff', decor: T[0].decor, muted: '#FFFFFF', glow: '#FFFFFF', line: 'rgba(255,255,255,0.3)', floorLine: '#FFFFFF',
     shadow: 0, scrim: INK, scrimAlpha: 0, fade: T[0].field, logo: 'taglineReversed', tones: T,
   };
@@ -215,7 +216,7 @@ class KineticWorld extends BaseWorld {
     this.buildTone = this.tones[0];
     this.scenesRef = scenes;
     this.duration = duration;
-    this.T = 0.6;
+    this.T = CUT;
     const r = rng((this.ctx.seed || 3) + 7);
     const geo = new THREE.BoxGeometry(1, 1, 0.02);
     let last = -1;
@@ -255,7 +256,7 @@ class KineticWorld extends BaseWorld {
   /** Which tone the backdrop shows at t, and the wipe between neighbours. */
   fieldAt(t) {
     const sc = this.scenesRef || [];
-    const T = this.T || 0.6;
+    const T = this.T || CUT;
     let i = sc.findIndex(s => t < s.end);
     if (i < 0) i = sc.length - 1;
     const tone = k => this.tones[k % this.tones.length];
@@ -281,6 +282,7 @@ class KineticWorld extends BaseWorld {
     const cur = f.k >= 0.5 ? f.b : f.a;
     const th = this.ctx.overlay?.theme;
     if (th) { th.accent = cur.chip; th.chipBg = cur.chip; }
+    this.palette.fade = cur.field;   // the opening and closing fades land on the field on screen
 
     // camera-locked slab plane, a few units behind the scene in focus
     const D = cam.position.distanceTo(this.focusPoint) + 4.5;
@@ -325,7 +327,7 @@ export default {
     bloom: { strength: 0.25, radius: 0.4, threshold: 1.6 },
     grain: 0.012, vignette: 0.0, ca: 0.0, tone: 'neutral', exposure: 1.0, vignetteColor: '#000000', scanlines: 0, band: 0,
   },
-  transition: { style: 'whip', duration: 0.6 },
+  transition: { style: 'whip', duration: CUT },
   drift: 0.35,
   palette: mode => kineticPalette(mode === 'native' ? 'native' : 'brand'),
   overlayTheme: p => ({
