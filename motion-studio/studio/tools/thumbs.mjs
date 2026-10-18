@@ -26,7 +26,7 @@ async function grab(project, pick) {
   return page.evaluate(async ([p, pick]) => {
     const info = await window.MS.load(p, { scale: 0.34, quality: 'final' });
     const tl = info.timeline;
-    const s = tl.find(x => pick.includes(x.type)) || tl[0];
+    const s = pick.map(type => tl.find(x => x.type === type)).find(Boolean) || tl[0];   // first match in priority order
     window.MS.frame(s.start + Math.min(s.dur * 0.68, s.dur - 0.35));
     const src = document.getElementById('stage');
     const c = document.createElement('canvas');
@@ -40,7 +40,7 @@ if (!only || only === 'stories') {
   for (const s of lists.stories) {
     const look = lists.looks.find(l => l.id === s.defaultLook && !l.placeholder) ? s.defaultLook : 'brand-glass';
     const project = { id: `thumb-${s.id}`, story: s.id, look, format: '16x9', fields: { ...s.defaults, ...s.sample } };
-    existing.stories[s.id] = await grab(project, s.thumbScenes || ['hero', 'property', 'portrait', 'list', 'screenshot', 'intro']);
+    existing.stories[s.id] = await grab(project, s.thumbScenes || ['hero', 'property', 'chart', 'stats', 'leaderboard', 'portrait', 'quote', 'timeline', 'list', 'screenshot', 'intro']);
     console.log(`  story ${s.id} (${look}) ${Math.round(existing.stories[s.id].length / 1024)} KB`);
   }
 }

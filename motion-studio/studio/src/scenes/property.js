@@ -40,10 +40,13 @@ export default {
     const card = world.card({ w: cw, h: ch, image: img, depth: 0.14, radius: 0.2, bezel: 0.1 });
     group.add(card);
     const word = (d.word || STATUS[d.status]?.word || '').toUpperCase().slice(0, 10);
-    let glyph = null;
+    let glyph = null, glyphFit = 1;
     if (word) {
       glyph = world.glyphs(word, { size: word.length > 6 ? 0.55 : 0.75, depth: 0.22, bevel: 0.03 });
-      glyph.position.set(portrait ? 0 : cw * 0.18, ch / 2 + 0.05, 0.6);
+      // Long words shrink to the card width, and the word never hangs past the card's right edge
+      glyphFit = Math.min(1, (cw * 0.88) / glyph.userData.width);
+      const gw = glyph.userData.width * glyphFit;
+      glyph.position.set(portrait ? 0 : Math.min(cw * 0.12, cw / 2 - 0.35 - gw / 2), ch / 2 + 0.05, 0.6);
       group.add(glyph);
     }
     const mats = [];
@@ -64,7 +67,7 @@ export default {
         card.userData.setOpacity(clamp(seg(lt, 0.05, 0.3)) * (1 - out));
         if (glyph) {
           const gk = ease.outBack(seg(lt, 0.9, 0.8));
-          glyph.scale.setScalar(Math.max(0.001, gk * (1 - out)));
+          glyph.scale.setScalar(Math.max(0.001, gk * (1 - out)) * glyphFit);
           glyph.rotation.x = (1 - gk) * -1.2;
           glyph.rotation.z = portrait ? 0 : -0.06;
           glyph.position.y = ch / 2 + 0.1 + Math.sin(lt * 1.1) * 0.04;

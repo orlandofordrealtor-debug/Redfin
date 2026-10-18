@@ -91,14 +91,20 @@ export class GlassWorld extends BaseWorld {
   onTimeline(scenes, duration) {
     const r = rng(this.ctx.seed || 5);
     this.decor = [];
+    const wide = this.ctx.stage.aspect >= 0.95;
     scenes.forEach((s, si) => {
       if (s.inst.noDecor) return;
       const n = s.inst.decorCount ?? 5;
+      // Split layouts keep text on the left, so their orbs gather on the content side and behind it
+      const split = wide && s.inst.shot?.layout === 'split';
       for (let i = 0; i < n; i++) {
         const side = i % 2 ? 1 : -1;
         const rad = r.range(0.28, 0.75) * (i === 0 ? 1.5 : 1);
         const mesh = this.orb(rad, i + si);
-        const base = new THREE.Vector3(side * r.range(4.2, 8.5), r.range(-1.6, 3.4), r.range(-7, -1.5)).add(s.anchor);
+        const x = r.range(4.2, 8.5), y = r.range(-1.6, 3.4), z = r.range(-7, -1.5);
+        const base = (split
+          ? new THREE.Vector3(side > 0 ? x - 1 : (x - 4.2) * 0.9, y, side > 0 ? z : z - 3)
+          : new THREE.Vector3(side * x, y, z)).add(s.anchor);
         mesh.position.copy(base);
         this.root.add(mesh);
         this.decor.push({ mesh, base, phase: r() * 10, amp: r.range(0.15, 0.4), scene: s });

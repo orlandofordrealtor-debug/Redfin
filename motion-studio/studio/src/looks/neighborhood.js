@@ -2,7 +2,7 @@
 // A procedural street grid of low off-white blocks, parks with model trees, and a coastline sit on
 // a map plane tilted toward the camera, below and behind the scene content, so cards and panels
 // float above the map like a UI layer. Each scene gets glowing map pins and route lines (tubes
-// along street-following curves with the flow material) with small drive-time callouts.
+// along street-following curves with the flow material) with small home callouts.
 // The geography is invented: no real streets, places or distances are implied.
 import * as THREE from 'three';
 import { BaseWorld } from '../engine/world.js';
@@ -204,25 +204,22 @@ function pinRingMaterial(color) {
   });
 }
 
-function labelTexture(text, p) {
+// Callout bubble with a home glyph. Deliberately carries no numbers: the city is invented,
+// so drive times or distances would read as facts that are not true.
+function labelTexture(p) {
   const c = document.createElement('canvas');
-  c.width = 320; c.height = 112;
+  c.width = 128; c.height = 128;
   const x = c.getContext('2d');
-  const r = 46;
   x.shadowColor = 'rgba(30,25,20,0.22)'; x.shadowBlur = 14; x.shadowOffsetY = 5;
   x.fillStyle = '#FFFFFF';
-  x.beginPath(); x.roundRect(10, 8, 300, 92, r); x.fill();
+  x.beginPath(); x.arc(64, 60, 46, 0, Math.PI * 2); x.fill();
   x.shadowColor = 'transparent';
-  // clock glyph: an accent ring with two hands
-  x.strokeStyle = p.pin; x.lineWidth = 7; x.lineCap = 'round';
-  x.beginPath(); x.arc(60, 54, 22, 0, Math.PI * 2); x.stroke();
-  x.lineWidth = 6;
-  x.beginPath(); x.moveTo(60, 54); x.lineTo(60, 41); x.moveTo(60, 54); x.lineTo(70, 59); x.stroke();
-  x.fillStyle = p.label;
-  x.font = `800 46px ${FONTS.display}`;
-  x.textBaseline = 'middle';
-  x.textAlign = 'center';
-  x.fillText(text, 196, 57);
+  x.fillStyle = p.pin;
+  x.beginPath();
+  x.moveTo(64, 34); x.lineTo(90, 56); x.lineTo(84, 56); x.lineTo(84, 82); x.lineTo(44, 82); x.lineTo(44, 56); x.lineTo(38, 56);
+  x.closePath(); x.fill();
+  x.fillStyle = '#FFFFFF';
+  x.beginPath(); x.roundRect(58, 64, 12, 18, 3); x.fill();
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
@@ -615,15 +612,14 @@ class MapWorld extends BaseWorld {
         oRing.scale.setScalar(1.7);
         oRing.position.copy(start).setY(0.025);
         this.mapScroll.add(oRing);
-        // drive-time callout above the middle of the route (illustrative, from route length)
-        const mins = Math.max(3, Math.round(len * 0.9 + 2));
-        const labelTex = labelTexture(`${mins} min`, p);
+        // home callout above the destination
+        const labelTex = labelTexture(p);
         this.track(labelTex);
         const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthWrite: false, opacity: 0 }));
         // callout bubble riding just above the destination pin
         label.position.set(end.x, 2.0, end.z);
-        label.scale.set(2.3, 2.3 * (112 / 320), 1);
-        label.center.set(side > 0 ? 0.78 : 0.22, 0);   // the bubble leans inward so it stays in frame
+        label.scale.set(0.95, 0.95, 1);
+        label.center.set(0.5, 0);
         this.mapScroll.add(label);
 
         const t0 = s.start - 0.3 + ri * 0.45;
@@ -769,7 +765,7 @@ export default {
   id: 'neighborhood',
   name: 'Neighborhood Map',
   family: 'Map',
-  description: 'An aerial architectural-model city with pins, routes and drive times. Your story floats above the map.',
+  description: 'An aerial architectural-model city with pins and routes. Your story floats above the map.',
   bestFor: 'Listings, neighborhood guides, relocation, open houses, market areas',
   swatch: ['#F3F1EC', '#C3D5AF', '#0B8A80', '#14202C'],
   native: 'native',
