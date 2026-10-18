@@ -44,7 +44,7 @@ export function drawHeader(o, zone, text = {}, lt, { inAt = 0.15, dur, out = 0.4
   const outK = seg(lt, dur - out, out);
   if (eyebrow) {
     const a = clamp(ease.outCubic(seg(lt, inAt, 0.5)) * (1 - ease.inCubic(outK)));
-    if (eyebrowStyle === 'chip') o.chip(eyebrow.toUpperCase(), zone.x, y, { align: zone.align, size: 24 * o.U, alpha: a, bg: o.theme.accent, color: '#ffffff' });
+    if (eyebrowStyle === 'chip') o.chip(eyebrow.toUpperCase(), zone.x, y, { align: zone.align, size: 24 * o.U, alpha: a, bg: o.theme.accent, color: o.theme.accentText || '#ffffff' });
     else o.text(eyebrow.toUpperCase(), zone.x, y + 26 * o.U, { size: 26 * o.U, family: 'mono', weight: 700, color: o.theme.accent, tracking: 0.14, align: zone.align, alpha: a });
     y += eyebrowH;
   }

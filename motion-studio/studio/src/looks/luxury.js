@@ -142,7 +142,7 @@ class LuxuryWorld extends BaseWorld {
     return {
       frame: () => blackGlass(),
       panel: () => blackGlass({ color: '#0E0C0A', roughness: 0.16, env: 0.85 }),
-      accent: () => (brand ? M.satin(BRAND.red, { clearcoat: 1, roughness: 0.2, rim: 0.15, rimColor: '#FFD9C4', edgeColor: '#FFD27F' }) : goldMat({ color: '#E6C48C', roughness: 0.18 })),
+      accent: () => (brand ? M.satin('#C92637', { clearcoat: 1, roughness: 0.26, rim: 0.15, rimColor: '#FFD9C4', edgeColor: '#FFD27F' }) : goldMat({ color: '#E6C48C', roughness: 0.18 })),
       glyph: () => goldMat(),
       decor: i => (i % 3 === 1 ? blackGlass() : i % 3 === 2 ? M.satin(PUTTY, { roughness: 0.28, clearcoat: 1 }) : goldMat()),
       ink: () => M.satin(PUTTY, { roughness: 0.3, clearcoat: 0.8 }),

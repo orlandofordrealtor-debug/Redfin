@@ -125,7 +125,7 @@ class CelebrationWorld extends BaseWorld {
 
   /** Continuous confetti, falling behind and beside the action. Every piece is a pure function of t. */
   buildConfettiRain() {
-    const N = 560;
+    const N = 460;
     const r = rng((this.ctx.seed || 9) + 33);
     const geo = new THREE.PlaneGeometry(0.15, 0.085);
     const mat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.4, metalness: 0.35, envMapIntensity: 1.1 });
@@ -283,10 +283,11 @@ class CelebrationWorld extends BaseWorld {
         d.mesh.rotation.set(Math.sin(t * 0.5 + d.phase) * 0.35, t * d.spin + d.phase, Math.sin(t * 0.4 + d.phase) * 0.2);
       }
     }
+    // bursts run 1.4x fast: a punchy pop that has cleared the text zones about 3s in
     for (const b of this.bursts || []) {
-      const live = t > b.t0 - 0.05 && t < b.t0 + 4.6;
+      const live = t > b.t0 - 0.05 && t < b.t0 + 3.3;
       b.mesh.visible = live;
-      if (live) b.update(t, b.t0);
+      if (live) b.update(b.t0 + (t - b.t0) * 1.4, b.t0);
     }
     if (this.rain) {
       const { mesh, parts, H } = this.rain;

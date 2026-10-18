@@ -280,7 +280,7 @@ export class BaseWorld {
 
   dispose() {
     this.stage.scene.remove(this.root);
-    if (this.dome) this.stage.scene.remove(this.dome);
+    if (this.dome) { this.stage.scene.remove(this.dome); this.dome.geometry.dispose(); this.dome.material.dispose(); }
     this.root.traverse(o => {
       if (o.geometry) o.geometry.dispose();
       if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.dispose());

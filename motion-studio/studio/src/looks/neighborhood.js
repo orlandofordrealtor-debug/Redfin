@@ -224,6 +224,26 @@ function labelTexture(text, p) {
   return tex;
 }
 
+/** Soft rounded-rect drop shadow (signed distance), so floating cards separate from the map. */
+function dropShadowMaterial(w, h, r, blur, color) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uHalf: { value: new THREE.Vector2(w / 2, h / 2) }, uR: { value: r }, uBlur: { value: blur }, uColor: { value: lin(color) }, uOpacity: { value: 0.22 } },
+    vertexShader: /* glsl */`
+      varying vec2 vP;
+      void main() { vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */`
+      uniform vec2 uHalf; uniform float uR, uBlur, uOpacity; uniform vec3 uColor;
+      varying vec2 vP;
+      void main() {
+        vec2 q = abs(vP) - uHalf + uR;
+        float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uR;
+        float a = 1.0 - smoothstep(-uBlur * 0.6, uBlur, d);
+        gl_FragColor = vec4(uColor, a * a * uOpacity);
+      }`,
+    transparent: true, depthWrite: false,
+  });
+}
+
 // ---------------------------------------------------------------------------------------------
 
 class MapWorld extends BaseWorld {
@@ -286,6 +306,36 @@ class MapWorld extends BaseWorld {
     this.mapScroll = new THREE.Group();
     this.mapPivot.add(this.mapScroll);
     this.env.add(this.mapPivot);
+  }
+
+  /** Cards and panels float above the map like UI sheets: a soft drop shadow rides behind each. */
+  attachShadow(g, w, h, depth, radius) {
+    const blur = 0.32;
+    const mat = dropShadowMaterial(w, h, radius, blur, '#3a2f25');
+    const pad = blur * 2.2;
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(w + pad * 2, h + pad * 2), mat);
+    sh.position.set(0.1, -0.16, -depth / 2 - 0.05);
+    sh.renderOrder = -1;
+    g.add(sh);
+    const setOpacity = g.userData.setOpacity;
+    g.userData.setOpacity = a => { setOpacity(a); mat.uniforms.uOpacity.value = 0.22 * a; sh.visible = a > 0.01; };
+    if (g.userData.setDissolve) {
+      const setDissolve = g.userData.setDissolve;
+      g.userData.setDissolve = d => { setDissolve(d); mat.uniforms.uOpacity.value = 0.22 * (1 - clamp(d * 1.5)); };
+    }
+    return g;
+  }
+
+  card(opts = {}) {
+    const g = super.card(opts);
+    const { w = 3, h = 2, depth = 0.12, radius = 0.14 } = opts;
+    return this.attachShadow(g, w, h, depth, radius);
+  }
+
+  panel(opts = {}) {
+    const g = super.panel(opts);
+    const { w = 4, h = 2.4, depth = 0.1, radius = 0.16 } = opts;
+    return this.attachShadow(g, w, h, depth, radius);
   }
 
   focus(point) {
@@ -488,17 +538,20 @@ class MapWorld extends BaseWorld {
     scenes.forEach((s, si) => {
       if (s.inst.noDecor) return;
       const au = s.anchor.x;
-      const busy = ['timeline', 'chart', 'endcard', 'intro', 'quote', 'message'].includes(s.type);
-      const nRoutes = busy ? 1 : 2;
+      const busy = ['chart', 'endcard', 'intro', 'quote', 'message'].includes(s.type);
+      // the timeline scene draws its own route, so the map only adds one quiet pin far out
+      const nRoutes = s.type === 'timeline' ? 1 : busy ? 1 : 2;
+      const solo = s.type === 'timeline' || s.type === 'chart';
       const split = !portrait && s.inst.shot?.layout === 'split';
       for (let ri = 0; ri < nRoutes; ri++) {
         // destinations sit wide of the content (right side only when text owns the left);
         // origins start behind the content so routes emerge from under the scene
         const side = split ? 1 : (ri + si) % 2 ? 1 : -1;
-        const wideU = portrait ? r.range(2.6, 3.6) : r.range(6.6, 9.4);
-        const back = busy ? 3 : 0;
+        const wideU = portrait ? r.range(1.9, 2.6) : split ? r.range(5.2, 6.8) : r.range(6.0, 7.8);
+        const back = 0;
         const toUV = [au + side * wideU, (ri ? r.range(-10.5, -8.5) : r.range(-6.5, -4.2)) - back];
-        const fromUV = split ? [au + r.range(-0.5, 2.5), r.range(-4.2, -2.6) - back] : [au - side * r.range(0.5, 2.5), r.range(-4.5, -2.6) - back];
+        let fromUV = split ? [au + r.range(-0.5, 2.5), r.range(-4.2, -2.6) - back] : [au - side * r.range(0.5, 2.5), r.range(-4.5, -2.6) - back];
+        if (solo) fromUV = [au + side * (wideU + (portrait ? 1.2 : 3.0)), toUV[1] + r.range(2.0, 3.0)];
         // keep the destination on dry land
         toUV[1] = Math.max(toUV[1], coast(toUV[0]) + 3);
         fromUV[1] = Math.max(fromUV[1], coast(fromUV[0]) + 3);
@@ -560,7 +613,7 @@ class MapWorld extends BaseWorld {
         // callout bubble riding just above the destination pin
         label.position.set(end.x, 2.0, end.z);
         label.scale.set(2.3, 2.3 * (112 / 320), 1);
-        label.center.set(0.5, 0);
+        label.center.set(side > 0 ? 0.78 : 0.22, 0);   // the bubble leans inward so it stays in frame
         this.mapScroll.add(label);
 
         const t0 = s.start - 0.3 + ri * 0.45;

@@ -1,4 +1,7 @@
-// Material recipes shared by every look. Clay and satin materials are extended through
+// Material recipes shared by every look.
+// Note: with three r169, a material without its own envMap uses scene.environmentIntensity and
+// ignores envMapIntensity. Looks that need per-material reflection strength bind the stage's
+// environment texture onto the material (see bindEnv in looks/clay.js). Clay and satin materials are extended through
 // onBeforeCompile with a soft rim light and a noise dissolve whose edge glows (bloom picks it up).
 import * as THREE from 'three';
 
