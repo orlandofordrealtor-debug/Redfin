@@ -19,6 +19,10 @@ const AMBER = '#ffb547';
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
 
+/** r169 ignores envMapIntensity for materials lit by scene.environment; binding the texture makes it count. */
+let ENV_TEX = null;
+function env(m, intensity) { if (ENV_TEX) { m.envMap = ENV_TEX; m.envMapIntensity = intensity; } return m; }
+
 // ---------------------------------------------------------------------------------------------
 // Palettes
 
@@ -37,12 +41,13 @@ function globePalette(mode) {
         { dir: [0.75, 0.15, -0.65], color: '#081a35', size: 0.6 },
         { dir: [0.1, -0.55, -0.8], color: '#03253a', size: 0.5 },
       ],
-      sub: 'rgba(206,240,255,0.80)', accent: AMBER, accent2: CYAN, accent3d: '#DB7A0C',
+      accentText: '#01040B',
+      sub: 'rgba(206,240,255,0.80)', accent: AMBER, accent2: CYAN, accent3d: '#EC8E17',
       ink: '#E6F8FF', glassTint: '#0a2236', decor: [AMBER, CYAN, '#E6FBFF', CYAN],
       muted: '#103049', glow: '#46cfe8', line: 'rgba(127,231,255,0.28)', floorLine: CYAN,
       // look-specific keys
       holo: CYAN, hot: '#dcfdff', hub: AMBER, atmo: '#22b8ff', ocean: '#010509', grid: '#3fdcff',
-      hud: '#86ecff', hudDim: 'rgba(134,236,255,0.38)', rec: AMBER, textGlow: '#17c8ff', chip: '#0A7A93',
+      hud: '#86ecff', hudDim: 'rgba(134,236,255,0.38)', rec: AMBER, textGlow: '#17c8ff', chip: '#46EBFF', chipText: '#01121C',
       edge: CYAN, star: ['#ffffff', '#bff6ff', '#ffe2b0'], dotGain: 0.55,
     };
   }
@@ -55,11 +60,11 @@ function globePalette(mode) {
       { dir: [0.75, 0.15, -0.65], color: '#1a0d18', size: 0.55 },
       { dir: [0.1, -0.55, -0.8], color: '#071b2c', size: 0.5 },
     ],
-    sub: 'rgba(255,240,234,0.80)', accent: BRAND.red, accent2: '#FFE6DA', accent3d: '#C41D2E',
+    sub: 'rgba(255,240,234,0.80)', accent: BRAND.red, accent2: '#FFE6DA', accent3d: BRAND.red,
     ink: '#FFF4EE', glassTint: '#0c1828', decor: [BRAND.red, '#FFE6DA', '#FFFFFF', '#CFE0F2'],
     muted: '#1a2a3d', glow: BRAND.redGlow, line: 'rgba(255,230,220,0.26)', floorLine: '#FFE6DA',
     holo: '#eef3fb', hot: '#fff3ec', hub: BRAND.red, atmo: '#6f9fd0', ocean: '#010409', grid: '#a8c0dc',
-    hud: '#FFEDE5', hudDim: 'rgba(255,237,229,0.34)', rec: BRAND.red, textGlow: '#ffb4a6', chip: BRAND.red,
+    hud: '#FFEDE5', hudDim: 'rgba(255,237,229,0.34)', rec: BRAND.red, textGlow: '#ffb4a6', chip: BRAND.red, chipText: '#FFFFFF',
     edge: '#f2f5fb', star: ['#ffffff', '#e8f0ff', '#ffe4d8'], dotGain: 0.78,
   };
 }
@@ -243,13 +248,13 @@ function oceanMaterial(p) {
         float grid = max(lonLine * (1.0 - smoothstep(70.0, 89.0, abs(lat))), latLine);
         float revealed = smoothstep(0.0, 0.35, uReveal - mod(lon - uStart, TAU));
         float behind = mod(uFront - lon, TAU);
-        float bx = min(behind, TAU - behind) * 90.0;
+        float bx = min(behind, TAU - behind) * 160.0;
         float beam = exp(-bx * bx);
         float trail = exp(-behind * 2.6);
         vec3 col = uCore * (0.6 + 0.4 * ndv);
         float rim = pow(clamp(1.0 - ndv, 0.0, 1.0), 4.5);
         col += uGrid * grid * (0.035 + 0.14 * fres + 0.22 * trail) * revealed;
-        col += uHot * beam * 0.22 * (0.2 + 0.8 * ndv) * revealed;
+        col += uHot * beam * 0.12 * ndv * ndv * revealed;
         col += uRim * rim * 0.9;
         gl_FragColor = vec4(col * uOpacity, 1.0);
       }`,
@@ -397,8 +402,9 @@ class GlobeWorld extends BaseWorld {
     const p = this.palette;
     const m = new THREE.MeshPhysicalMaterial({
       color: p.glassTint, roughness: 0.16, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.06,
-      transparent: true, opacity, envMapIntensity: 0.45, emissive: p.glassTint, emissiveIntensity: 0.35,
+      transparent: true, opacity, emissive: p.glassTint, emissiveIntensity: 0.35,
     });
+    env(m, 0.5);
     M.enhance(m, { rim: 0.9, rimColor: p.edge, rimPower: 2.4, edgeColor: p.hot });
     m.userData.alwaysTransparent = true;
     m.userData.baseOpacity = opacity;
@@ -407,20 +413,21 @@ class GlobeWorld extends BaseWorld {
 
   materials() {
     const p = this.palette;
+    ENV_TEX = this.stage.envTexture;
     return {
       frame: () => this.holoGlass(0.88),
       panel: () => this.holoGlass(0.74),
-      accent: () => M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.14, roughness: 0.24, clearcoat: 1, rim: 0.35, rimColor: p.hot, rimPower: 3, edgeColor: p.hot, env: 0.28 }),
-      glyph: () => M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.16, roughness: 0.24, clearcoat: 1, rim: 0.4, rimColor: p.hot, rimPower: 3, edgeColor: '#ffffff', env: 0.28 }),
+      accent: () => env(M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.14, roughness: 0.24, clearcoat: 1, rim: 0.35, rimColor: p.hot, rimPower: 3, edgeColor: p.hot }), 0.28),
+      glyph: () => env(M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.16, roughness: 0.24, clearcoat: 1, rim: 0.4, rimColor: p.hot, rimPower: 3, edgeColor: '#ffffff' }), 0.28),
       decor: i => {
         const k = i % 4;
         if (k === 1) return M.fresnel({ color: p.holo, power: 2.0, intensity: 1.6, inner: 0.06 });
         if (k === 3) return M.fresnel({ color: p.accent, power: 1.8, intensity: 1.8, inner: 0.1 });
         if (k === 2) return M.fresnel({ color: p.hot, power: 2.4, intensity: 1.2, inner: 0.04 });
-        return M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.55, roughness: 0.3, rim: 0.6, rimColor: p.hot, env: 0.3 });
+        return env(M.satin(p.accent3d, { emissive: p.accent, emissiveIntensity: 0.55, roughness: 0.3, rim: 0.6, rimColor: p.hot }), 0.3);
       },
-      ink: () => M.satin(p.ink, { roughness: 0.3, clearcoat: 0.8, emissive: p.ink, emissiveIntensity: 0.12, env: 0.5 }),
-      muted: () => M.satin(p.muted, { roughness: 0.22, clearcoat: 1, rim: 0.35, rimColor: p.holo, rimPower: 2.6, emissive: p.holo, emissiveIntensity: 0.03, env: 0.35 }),
+      ink: () => env(M.satin(p.ink, { roughness: 0.3, clearcoat: 0.8, emissive: p.ink, emissiveIntensity: 0.12 }), 0.5),
+      muted: () => env(M.satin(p.muted, { roughness: 0.22, clearcoat: 1, rim: 0.35, rimColor: p.holo, rimPower: 2.6, emissive: p.holo, emissiveIntensity: 0.03 }), 0.35),
       glow: () => M.glow(p.glow, 2.6),
       line: () => M.flowMaterial({ color: p.hub, head: '#ffffff' }),
     };
@@ -574,7 +581,7 @@ class GlobeWorld extends BaseWorld {
     const portrait = this.stage.aspect < 0.95;
     scenes.forEach((s, si) => {
       if (s.inst.noDecor) return;
-      const n = Math.min(4, s.inst.decorCount ?? 3);
+      const n = portrait ? 2 : Math.min(4, s.inst.decorCount ?? 3);
       for (let i = 0; i < n; i++) {
         const split = !portrait && s.inst.shot?.layout === 'split';
         const side = split ? 1 : (i + si) % 2 ? 1 : -1;
@@ -585,8 +592,10 @@ class GlobeWorld extends BaseWorld {
         } else {
           mesh = this.orb(r.range(0.1, 0.22) * (i === 0 ? 1.4 : 1), i + si);
         }
-        const wide = portrait ? r.range(3.2, 5.0) : r.range(7.5, 11);
-        const base = new THREE.Vector3(side * wide, r.range(0.4, 4.4), r.range(-13, -7)).add(s.anchor);
+        const wide = portrait ? r.range(4.6, 6.4) : r.range(7.5, 11);
+        // vertical frames keep text up top, so props stay at mid-height in the side margins
+        const y = portrait ? r.range(-1.6, 1.2) : r.range(0.4, 3.4);
+        const base = new THREE.Vector3(side * wide, y, portrait ? r.range(-17, -11) : r.range(-13, -7)).add(s.anchor);
         mesh.position.copy(base);
         this.root.add(mesh);
         this.decor.push({ mesh, base, phase: r() * 10, amp: r.range(0.12, 0.3), spin: r.range(-0.6, 0.6) });
@@ -633,6 +642,12 @@ class GlobeWorld extends BaseWorld {
     const g = super.panel(opts);
     const { w = 4, h = 2.4, depth = 0.1, radius = 0.16 } = opts;
     return this.attachEdge(g, w, h, depth, radius, 0.74);
+  }
+
+  dispose() {
+    // the star field rides on the dome (it follows the camera), outside root
+    if (this.stars) { this.stars.geometry.dispose(); this.stars.material.dispose(); }
+    super.dispose();
   }
 
   // ---- motion ----
@@ -735,7 +750,15 @@ class GlobeWorld extends BaseWorld {
     const ff = f % 60, ss = Math.floor(f / 60) % 60, mm = Math.floor(f / 3600) % 60;
     const tc = `TC 00:${pad2(mm)}:${pad2(ss)}:${pad2(ff)}`;
     const size = (o.portrait ? 21 : 17) * U;
-    const y = o.portrait ? y0 + 36 * U : y1 - 14 * U;
+    let y = y1 - 14 * U;
+    if (o.portrait) {
+      // sit below the top-center logo, measured the way the engine draws it
+      const img = this.ctx.logos?.taglineReversed;
+      const lw = 250 * U;
+      const lh = img?.naturalWidth ? lw * (img.naturalHeight / img.naturalWidth) : lw * 0.31;
+      const logoBottom = s.top * 0.55 - 10 * U + lh;
+      y = Math.max(y0 + 36 * U, logoBottom + 34 * U);
+    }
     const tx = x0 + 22 * U;
     c.save();
     c.globalAlpha = railA;
@@ -745,12 +768,13 @@ class GlobeWorld extends BaseWorld {
     c.globalAlpha = railA * blink;
     c.beginPath(); c.arc(tx + 5 * U, y - size * 0.34, 5 * U, 0, TAU); c.fill();
     c.globalAlpha = railA;
-    o.text(tc, tx + 20 * U, y, { size, family: 'mono', weight: 700, color: p.hud, tracking: 0.12, alpha: railA });
+    const halo = { shadow: 'rgba(1,4,11,0.95)', shadowBlur: 10 * U, shadowY: 0 };
+    o.text(tc, tx + 20 * U, y, { size, family: 'mono', weight: 700, color: p.hud, tracking: 0.12, alpha: railA, ...halo });
     const tcW = o.measure(tc, { size, family: 'mono', weight: 700, tracking: 0.12 });
     const idx = scenes.indexOf(current) + 1;
     const right = o.portrait ? `${pad2(idx)}/${pad2(scenes.length)}` : `SCN ${pad2(idx)}/${pad2(scenes.length)}  ·  ${String(this.dotCount).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} NODES`;
     const rw = o.measure(right, { size, family: 'mono', weight: 500, tracking: 0.12 });
-    o.text(right, x1 - 22 * U, y, { size, family: 'mono', weight: 500, color: p.hudDim, tracking: 0.12, align: 'right', alpha: railA });
+    o.text(right, x1 - 22 * U, y, { size, family: 'mono', weight: 500, color: p.hudDim, tracking: 0.12, align: 'right', alpha: railA, ...halo });
     // the rail itself: a hairline with ticks and a playhead
     const lx0 = tx + 20 * U + tcW + 24 * U, lx1 = x1 - 22 * U - rw - 24 * U;
     if (lx1 - lx0 > 60 * U) {
@@ -841,8 +865,8 @@ export default {
   drift: 0.9,
   palette: mode => globePalette(mode === 'native' ? 'native' : 'brand'),
   overlayTheme: p => ({
-    text: p.text, sub: p.sub, accent: p.chip, accentText: '#FFFFFF', scrim: p.scrim, scrimAlpha: p.scrimAlpha,
-    chipBg: p.chip, chipText: '#FFFFFF', panel: 'rgba(4,14,28,0.82)', panelStroke: 'rgba(160,230,255,0.28)', mono: p.hud, dark: true,
+    text: p.text, sub: p.sub, accent: p.chip, accentText: p.chipText, scrim: p.scrim, scrimAlpha: p.scrimAlpha,
+    chipBg: p.chip, chipText: p.chipText, panel: 'rgba(4,14,28,0.82)', panelStroke: 'rgba(160,230,255,0.28)', mono: p.hud, dark: true,
   }),
   create: ctx => new GlobeWorld(ctx),
 };

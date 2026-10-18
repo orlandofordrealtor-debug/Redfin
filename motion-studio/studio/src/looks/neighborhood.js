@@ -8,15 +8,16 @@ import * as THREE from 'three';
 import { BaseWorld } from '../engine/world.js';
 import * as M from '../engine/materials.js';
 import { BRAND, FONTS } from '../engine/brand.js';
-import { rng, clamp, ease, seg, lerp } from '../engine/util.js';
+import { rng, clamp, ease, seg, lerp, rgba } from '../engine/util.js';
 
 const DEG = Math.PI / 180;
+const _v = new THREE.Vector3();
 const TILT = 24 * DEG;            // map plane tilt toward the camera (aerial 3/4 feel)
 const GRID_ROT = 28 * DEG;        // street grid rotation inside the map
 const BA = 3.4, BB = 1.9;         // block pitch along the two grid axes
 const STREET = 0.42, AVENUE = 0.82;
 const V_NEAR = 14, V_FAR = -48;   // map extent toward / away from the camera (map units)
-const HAZE = [-16, -44];          // map depth where haze starts / is complete
+const HAZE = [-11, -34];          // map depth where haze starts / is complete
 const CHUNK = 40;
 
 /** Coastline: map v of the shore at map u. Mirrored exactly in the ground shader. */
@@ -46,7 +47,7 @@ function mapPalette(mode) {
       muted: '#D9D1C4', glow: '#14B3A6', line: 'rgba(20,32,44,0.14)', floorLine: '#B9AFA6', shadow: 0.2,
       scrim: '#FFFFFF', scrimAlpha: 0.55, fade: '#F3F1EC', logo: 'tagline',
       // map colors
-      haze: '#ECE9E2', lot: '#E3D9C8', street: '#FDFCFA', avenue: '#FFFFFF', lane: '#E6DCCB', curb: '#F1EBE0',
+      haze: '#ECE9E2', lot: '#DED4C3', street: '#FDFCFA', avenue: '#FFFFFF', lane: '#E6DCCB', curb: '#F1EBE0',
       park: '#BBD2A2', parkPath: '#E3E6D2', plaza: '#E4DED3', water: '#A8CDE4', waterDeep: '#93BEDB', sand: '#EEE3C9', foam: '#F4F8FA',
       building: ['#FBF8F2', '#F6F1E8', '#FDFBF7', '#F2ECE1', '#F8F3EA'], tree: ['#8DAE74', '#9BBB82', '#7FA268'],
       pin: '#0B8A80', pinDeep: '#08706A', route: '#0FA396', chip: '#0B8A80', label: '#14202C',
@@ -59,7 +60,7 @@ function mapPalette(mode) {
     ink: BRAND.ink, glassTint: '#ffffff', decor: [BRAND.red, '#FFFFFF', '#B9C4AE', '#1C1D21'],
     muted: '#DAD3CA', glow: BRAND.redGlow, line: 'rgba(17,17,17,0.14)', floorLine: '#B9AFA6', shadow: 0.2,
     scrim: '#FFFFFF', scrimAlpha: 0.55, fade: '#F5F3F0', logo: 'tagline',
-    haze: '#EFECE7', lot: '#E2DBD1', street: '#FDFCFB', avenue: '#FFFFFF', lane: '#E4DCD2', curb: '#F1ECE6',
+    haze: '#EFECE7', lot: '#DDD4C7', street: '#FDFCFB', avenue: '#FFFFFF', lane: '#E4DCD2', curb: '#F1ECE6',
     park: '#C2CFB3', parkPath: '#E5E6DB', plaza: '#E3DED7', water: '#B7CFDF', waterDeep: '#A6C3D7', sand: '#ECE4D4', foam: '#F6F8F9',
     building: ['#FBFAF7', '#F6F3EE', '#FDFCFA', '#F1EDE7', '#F8F5F0'], tree: ['#98AB85', '#A6B793', '#8A9E77'],
     pin: BRAND.red, pinDeep: BRAND.redDeep, route: BRAND.red, chip: BRAND.red, label: BRAND.ink,
@@ -70,6 +71,10 @@ function mapPalette(mode) {
 // Shader helpers
 
 const lin = c => new THREE.Color(c);
+
+/** r169 ignores envMapIntensity for materials lit by scene.environment; binding the texture makes it count. */
+let ENV_TEX = null;
+function env(m, intensity) { if (ENV_TEX) { m.envMap = ENV_TEX; m.envMapIntensity = intensity; } return m; }
 
 /** Adds map-depth haze (and a horizon fade) to a standard material; vMapV is map depth. */
 function addHaze(shader, u) {
@@ -96,7 +101,7 @@ function hazeUniforms(p) {
 }
 
 function groundMaterial(p, blocks) {
-  const m = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, metalness: 0, envMapIntensity: 0.18 });
+  const m = env(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, metalness: 0 }), 0.42);
   const u = {
     ...hazeUniforms(p),
     uBlocks: { value: blocks.tex }, uBlockMin: { value: new THREE.Vector2(blocks.iaMin, blocks.ibMin) },
@@ -170,7 +175,7 @@ function groundMaterial(p, blocks) {
 }
 
 function hazyStandard(p, o = {}) {
-  const m = new THREE.MeshStandardMaterial({ color: o.color || '#ffffff', roughness: o.roughness ?? 0.82, metalness: 0, envMapIntensity: o.env ?? 0.18 });
+  const m = env(new THREE.MeshStandardMaterial({ color: o.color || '#ffffff', roughness: o.roughness ?? 0.82, metalness: 0 }), o.env ?? 0.42);
   const u = hazeUniforms(p);
   m.onBeforeCompile = shader => addHaze(shader, u);
   m.customProgramCacheKey = () => 'nbhd-haze-v1';
@@ -258,18 +263,19 @@ class MapWorld extends BaseWorld {
 
   materials() {
     const p = this.palette;
-    const card = () => M.satin('#F4F1EC', { roughness: 0.36, clearcoat: 0.5, env: 0.55, rim: 0.1 });
+    ENV_TEX = this.stage.envTexture;
+    const card = () => env(M.satin('#F4F1EC', { roughness: 0.36, clearcoat: 0.5, rim: 0.1 }), 0.6);
     return {
       frame: card,
-      panel: () => M.satin('#FFFFFF', { roughness: 0.5, clearcoat: 0.25, env: 0.45, rim: 0.06 }),
-      accent: () => M.satin(p.accent, { clearcoat: 1, roughness: 0.25, edgeColor: '#ffffff', env: 0.6 }),
-      glyph: () => M.satin(p.accent, { clearcoat: 1, roughness: 0.2, edgeColor: '#ffffff', rim: 0.2, env: 0.6 }),
+      panel: () => env(M.satin('#FFFFFF', { roughness: 0.5, clearcoat: 0.25, rim: 0.06 }), 0.62),
+      accent: () => env(M.satin(p.accent, { clearcoat: 1, roughness: 0.25, edgeColor: '#ffffff' }), 0.55),
+      glyph: () => env(M.satin(p.accent, { clearcoat: 1, roughness: 0.2, edgeColor: '#ffffff', rim: 0.2 }), 0.55),
       decor: i => {
         const c = p.decor[i % p.decor.length];
-        return M.satin(c, { clearcoat: 0.8, roughness: 0.3, env: 0.55 });
+        return env(M.satin(c, { clearcoat: 0.8, roughness: 0.3 }), 0.55);
       },
-      ink: () => M.satin(p.ink, { roughness: 0.35, clearcoat: 0.7 }),
-      muted: () => M.satin(p.muted, { roughness: 0.55, clearcoat: 0.3 }),
+      ink: () => env(M.satin(p.ink, { roughness: 0.35, clearcoat: 0.7 }), 0.5),
+      muted: () => env(M.satin(p.muted, { roughness: 0.55, clearcoat: 0.3 }), 0.5),
       glow: () => M.glow(p.glow, 2.2),
       line: () => M.flowMaterial({ color: p.route, head: '#ffffff' }),
     };
@@ -282,8 +288,8 @@ class MapWorld extends BaseWorld {
     this.stage.scene.add(this.dome);
 
     // Soft daylight: a warm sun raking across the map from the upper left, cool sky fill
-    const hemi = new THREE.HemisphereLight('#ffffff', '#cfc6b8', 0.34);
-    const key = new THREE.DirectionalLight('#fff4e6', 1.4);
+    const hemi = new THREE.HemisphereLight('#fffaf2', '#d6cbbb', 0.85);
+    const key = new THREE.DirectionalLight('#fff1e0', 1.45);
     key.position.set(-22.5, 16.5, 10.8);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -344,6 +350,7 @@ class MapWorld extends BaseWorld {
   }
 
   onTimeline(scenes, duration) {
+    ENV_TEX = this.stage.envTexture;
     this.scenes = scenes;
     this.duration = duration;
     const xs = scenes.map(s => s.anchor.x);
@@ -381,8 +388,8 @@ class MapWorld extends BaseWorld {
         if (wet) continue;
         const h = r();
         let type = 0;
-        if (h < 0.075) type = 1;                 // park
-        else if (h < 0.1) type = 2;              // plaza
+        if (h < 0.11) type = 1;                  // park
+        else if (h < 0.135) type = 2;            // plaza
         types[idx] = type;
         types[idx + 3] = 255;
         if (cv < V_FAR + 3) continue;            // far edge stays empty, it is all haze
@@ -474,7 +481,7 @@ class MapWorld extends BaseWorld {
     // model trees: low-poly foam balls
     if (trees.length) {
       const tg = new THREE.IcosahedronGeometry(1, 1);
-      const tmat = hazyStandard(p, { roughness: 0.9, env: 0.15 });
+      const tmat = hazyStandard(p, { roughness: 0.9, env: 0.28 });
       const byChunk = new Map();
       trees.forEach(t => add(byChunk, t.chunk, t));
       for (const [, list] of byChunk) {
@@ -531,25 +538,29 @@ class MapWorld extends BaseWorld {
     const dotGeo = new THREE.SphereGeometry(0.17, 24, 14);
     const ringGeo = new THREE.PlaneGeometry(1, 1);
     ringGeo.rotateX(-Math.PI / 2);
-    const pinMat = M.satin(p.pin, { clearcoat: 1, roughness: 0.22, emissive: p.pin, emissiveIntensity: 0.18, env: 0.6 });
-    const whiteMat = M.satin('#ffffff', { roughness: 0.3, clearcoat: 0.6 });
-    const originMat = M.satin('#ffffff', { roughness: 0.3, clearcoat: 0.8, emissive: '#ffffff', emissiveIntensity: 0.1 });
+    const pinMat = env(M.satin(p.pin, { clearcoat: 1, roughness: 0.22, emissive: p.pin, emissiveIntensity: 0.18 }), 0.6);
+    const whiteMat = env(M.satin('#ffffff', { roughness: 0.3, clearcoat: 0.6 }), 0.5);
+    const originMat = env(M.satin('#ffffff', { roughness: 0.3, clearcoat: 0.8, emissive: '#ffffff', emissiveIntensity: 0.1 }), 0.5);
 
     scenes.forEach((s, si) => {
-      if (s.inst.noDecor) return;
+      // the timeline scene draws its own route, so the map stays quiet there
+      if (s.inst.noDecor || s.type === 'timeline') return;
+      // vertical frames are narrow: keep the brand intro and the big message clean
+      if (portrait && (s.type === 'intro' || s.type === 'message')) return;
       const au = s.anchor.x;
       const busy = ['chart', 'endcard', 'intro', 'quote', 'message'].includes(s.type);
-      // the timeline scene draws its own route, so the map only adds one quiet pin far out
-      const nRoutes = s.type === 'timeline' ? 1 : busy ? 1 : 2;
-      const solo = s.type === 'timeline' || s.type === 'chart';
+      const nRoutes = busy ? 1 : 2;
+      const solo = busy;   // busy scenes keep the whole route out to one side
       const split = !portrait && s.inst.shot?.layout === 'split';
       for (let ri = 0; ri < nRoutes; ri++) {
         // destinations sit wide of the content (right side only when text owns the left);
         // origins start behind the content so routes emerge from under the scene
         const side = split ? 1 : (ri + si) % 2 ? 1 : -1;
-        const wideU = portrait ? r.range(1.9, 2.6) : split ? r.range(5.2, 6.8) : r.range(6.0, 7.8);
+        const wideU = portrait ? r.range(1.9, 2.6) : split ? r.range(4.4, 5.6) : r.range(6.0, 7.6);
         const back = 0;
-        const toUV = [au + side * wideU, (ri ? r.range(-10.5, -8.5) : r.range(-6.5, -4.2)) - back];
+        // in split layouts the 3D sits right of center, so pins go deeper and peek out above it
+        const depth = split ? (ri ? r.range(-12.5, -10.5) : r.range(-9.5, -7.8)) : ri ? r.range(-10.5, -8.5) : r.range(-6.5, -4.2);
+        const toUV = [au + side * wideU, depth - back];
         let fromUV = split ? [au + r.range(-0.5, 2.5), r.range(-4.2, -2.6) - back] : [au - side * r.range(0.5, 2.5), r.range(-4.5, -2.6) - back];
         if (solo) fromUV = [au + side * (wideU + (portrait ? 1.2 : 3.0)), toUV[1] + r.range(2.0, 3.0)];
         // keep the destination on dry land
@@ -617,13 +628,33 @@ class MapWorld extends BaseWorld {
         this.mapScroll.add(label);
 
         const t0 = s.start - 0.3 + ri * 0.45;
-        this.routes.push({ mat, casing, t0, dur: 1.2 + len * 0.05, label, labelMat: label.material, ring: ringMat, oRing: oRingMat, pin, origin, end: s.end });
+        this.routes.push({ mat, casing, t0, dur: 1.2 + len * 0.05, label, labelMat: label.material, ring: ringMat, oRing: oRingMat, pin, origin, end: s.end, side, wash: this.washOf(s, portrait) });
       }
     });
   }
 
+  /**
+   * 1 when a callout bubble sits fully inside the frame and clear of the scene's text zone,
+   * fading to 0 as it would be clipped or crowd the type.
+   */
+  inFrame(R) {
+    const v = _v.setFromMatrixPosition(R.label.matrixWorld);
+    v.project(this.stage.camera);
+    if (v.z > 1 || v.z < -1) return 0;
+    // the bubble extends mostly toward the frame center; allow for its width in NDC
+    const half = 0.2 * (this.stage.aspect < 0.95 ? 1.8 : 1);
+    const outer = R.side > 0 ? v.x + half * 0.45 : -v.x + half * 0.45;
+    let k = 1 - clamp((outer - 0.9) / 0.08);
+    const top = v.y + 0.12;   // the bubble sits above its anchor point
+    if (R.wash.top) k *= 1 - clamp((top - 0.3) / 0.1);
+    if (R.wash.bottom) k *= 1 - clamp((-0.3 - v.y) / 0.1);
+    if (R.wash.left) k *= 1 - clamp((-0.05 - v.x) / 0.1);
+    return k;
+  }
+
   update(t) {
     super.update(t);
+    this.env.updateMatrixWorld(true);   // labels are projected below, after focus() moved the map
     if (this.groundMat?.userData.u) this.groundMat.userData.u.uTime.value = t;
     for (const R of this.routes) {
       const k = ease.inOutCubic(seg(t, R.t0, R.dur));
@@ -640,13 +671,68 @@ class MapWorld extends BaseWorld {
       R.ring.uniforms.uOpacity.value = clamp(seg(t, R.t0 + R.dur, 0.4));
       R.oRing.uniforms.uTime.value = t + 0.3;
       R.oRing.uniforms.uOpacity.value = 0.7 * clamp(seg(t, R.t0, 0.4));
-      R.labelMat.opacity = clamp(seg(t, R.t0 + R.dur * 0.6, 0.5));
+      R.labelMat.opacity = clamp(seg(t, R.t0 + R.dur * 0.6, 0.5)) * this.inFrame(R);
     }
   }
 
-  drawOverlay(o) {
+  drawOverlay(o, t, { scenes }) {
     // Map-label halos: a soft white glow behind every line of scene type keeps it readable on the map
     this.haloLayer(o, '#FFFFFF', 11, 0.95);
+    // ...and a soft wash behind the scene's text zone, like a map app's sidebar
+    this.textWash(o, t, scenes);
+  }
+
+  /** Which side of the frame carries the scene's text: left (split), top (stack) or bottom. */
+  washOf(s, portrait) {
+    const layout = s.inst.shot?.layout;
+    if (s.type === 'endcard' || s.type === 'quote') return { left: 0, top: 0, bottom: 0 };
+    if (s.type === 'timeline' && portrait) return { left: 0, top: 0, bottom: 1 };
+    if (layout === 'split' && !portrait) return { left: 1, top: 0, bottom: 0 };
+    if (layout === 'stackBottom') return { left: 0, top: 0, bottom: 1 };
+    if (layout === 'stack' || (layout === 'split' && portrait)) return { left: 0, top: 1, bottom: 0 };
+    return { left: 0, top: 0, bottom: 0 };
+  }
+
+  textWash(o, t, scenes) {
+    if (!scenes?.length) return;
+    let i = scenes.findIndex(s => t < s.end);
+    if (i < 0) i = scenes.length - 1;
+    const s = scenes[i];
+    let w = this.washOf(s, o.portrait);
+    const mix = (a, b, k) => ({ left: lerp(a.left, b.left, k), top: lerp(a.top, b.top, k), bottom: lerp(a.bottom, b.bottom, k) });
+    if (i > 0 && t < s.start + 0.4) w = mix(this.washOf(scenes[i - 1], o.portrait), w, clamp((t - s.start + 0.4) / 0.8));
+    else if (i < scenes.length - 1 && t > s.end - 0.4) w = mix(w, this.washOf(scenes[i + 1], o.portrait), clamp((t - s.end + 0.4) / 0.8));
+    const col = this.palette.scrim || '#FFFFFF';
+    const c = o.ctx;
+    c.save();
+    c.globalCompositeOperation = 'destination-over';
+    if (w.left > 0.01) {
+      const g = c.createLinearGradient(0, 0, o.W * 0.6, 0);
+      g.addColorStop(0, rgba(col, 0.72 * w.left));
+      g.addColorStop(0.5, rgba(col, 0.5 * w.left));
+      g.addColorStop(1, rgba(col, 0));
+      c.fillStyle = g;
+      c.fillRect(0, 0, o.W * 0.6, o.H);
+    }
+    if (w.top > 0.01) {
+      const h = o.H * (o.portrait ? 0.34 : 0.42);
+      const g = c.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, rgba(col, 0.62 * w.top));
+      g.addColorStop(0.55, rgba(col, 0.42 * w.top));
+      g.addColorStop(1, rgba(col, 0));
+      c.fillStyle = g;
+      c.fillRect(0, 0, o.W, h);
+    }
+    if (w.bottom > 0.01) {
+      const h = o.H * 0.42;
+      const g = c.createLinearGradient(0, o.H, 0, o.H - h);
+      g.addColorStop(0, rgba(col, 0.66 * w.bottom));
+      g.addColorStop(0.55, rgba(col, 0.45 * w.bottom));
+      g.addColorStop(1, rgba(col, 0));
+      c.fillStyle = g;
+      c.fillRect(0, o.H - h, o.W, h);
+    }
+    c.restore();
   }
 
   haloLayer(o, color, blur, alpha) {
