@@ -76,7 +76,7 @@ export default {
       },
       {
         id: 'end', type: 'endcard', dur: 5.4, shot: 'static',
-        text: { headline: `Celebrating ${yearsText} at ${company}`, sub: `Thank you, ${first(name) || name}.` },
+        text: { headline: `Celebrating ${yearsText} with ${company}`, sub: `Thank you, ${first(name) || name}.` },
         data: { cta: f.qrLink ? (f.qrLabel || 'Scan to view my Redfin profile') : '', linkText: f.qrLink || '' },
       },
     ];

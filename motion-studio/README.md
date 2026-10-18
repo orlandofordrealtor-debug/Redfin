@@ -18,6 +18,7 @@ motion-studio/
 │   └── tools/                    ← build, thumbnails, glyph extraction
 ├── render/render.mjs             ← Claude Code renderer: Playwright + ffmpeg, frame-perfect MP4s
 ├── projects/                     ← project files (JSON) ready to render
+├── TEAM-ROLLOUT.md               ← Slack announcement, quick start, template guide, standards
 └── brief.html                    ← the original intake questionnaire
 ```
 
@@ -74,7 +75,7 @@ laptop the same export runs close to real time.
   aberration, optional scan lines) → 2D type layer composited after tone mapping so text stays crisp.
 - **Brand**: official logo SVGs from the Redfin asset kit; red `#DE3341` and ink `#111111` come from
   those files. Headlines use Plus Jakarta Sans as a free stand-in for the brand typeface; brand font
-  files can be added later through `applyBrandFonts`.
+  files can be uploaded in the Look step (or set in a project file under `brand.fonts`).
 - **Honest content**: placeholders are labelled `PLACEHOLDER`, sample content says `Sample`, data
   scenes carry a source line, and end cards only show details that were entered.
 
