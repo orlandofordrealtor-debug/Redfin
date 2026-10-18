@@ -44,7 +44,7 @@ Open `studio/dist/motion-studio.html` in **Chrome or Edge** (double-click it; no
 
 ### Share it with your team
 
-Send `studio/dist/motion-studio.html` (about 1.4 MB) by Slack, email or a shared drive. Everyone opens
+Send `studio/dist/motion-studio.html` (about 1.8 MB) by Slack, email or a shared drive. Everyone opens
 their own copy; projects stay in each person's browser. Team members can export a project file and
 send it to you or to Claude Code.
 
