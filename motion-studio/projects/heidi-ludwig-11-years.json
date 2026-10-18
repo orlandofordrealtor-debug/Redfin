@@ -1,0 +1,19 @@
+{
+  "name": "Heidi Ludwig 11 Years",
+  "id": "heidi-ludwig-11",
+  "story": "anniversary",
+  "look": "brand-glass",
+  "format": "9x16",
+  "formats": ["9x16", "1x1", "16x9"],
+  "fields": {
+    "agentName": "Heidi Ludwig",
+    "years": 11,
+    "company": "Redfin",
+    "agentTitle": "",
+    "message": "Thank you for your amazing service.",
+    "qrLink": "",
+    "photos": [],
+    "stats": []
+  },
+  "exports": { "mp4": true, "poster": true, "gif": false, "storyboard": true, "overlay": false }
+}
