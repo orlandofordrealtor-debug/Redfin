@@ -90,7 +90,16 @@ def main():
         doc = dict(r)
         rf = dict(doc.get("redfin") or {})
         thumbs = rf.pop("thumbs", []) or []
-        thumbs = [shrink(t, 480 if i == 0 else 200, 66 if i == 0 else 54) for i, t in enumerate(thumbs[:15])]
+        # Redfin refused or failed this week but we had a good pull before: carry it forward (sheet fields stay current)
+        carried = False
+        if not rf.get("ok") and old and (old.get("redfin") or {}).get("ok"):
+            prev_rf = dict(old["redfin"]); prev_rf["carriedFrom"] = old.get("asOf"); prev_rf["carryReason"] = rf.get("error") or "no fresh pull"
+            rf = prev_rf; carried = True
+            doc["dataIssues"] = [x for x in (doc.get("dataIssues") or []) if "Redfin" not in x]
+            pp = os.path.join(a.prev_db, "photos", f"{rid}.json") if a.prev_db else None
+            if pp and os.path.exists(pp):
+                thumbs = json.load(open(pp)).get("thumbs", [])
+        thumbs = thumbs if carried else [shrink(t, 480 if i == 0 else 200, 66 if i == 0 else 54) for i, t in enumerate(thumbs[:15])]
         rf["thumbCount"] = len(thumbs)
         doc["redfin"] = rf
         doc["history"] = hist
@@ -129,6 +138,7 @@ def main():
             "prevCount": len(prev) or None, "prevTiers": tier_counts(list(prev.values())) if prev else None,
             "changes": changes, "enrichment": "complete",
             "enriched": sum(1 for r in recs if (r.get("redfin") or {}).get("ok")),
+            "carried": sum(1 for d in os.listdir(os.path.join(out, "listings")) if json.load(open(os.path.join(out, "listings", d))).get("redfin", {}).get("carriedFrom")),
             "unresolved": [r["dealId"] for r in recs if not (r.get("redfin") or {}).get("ok")]}
     json.dump(meta, open(os.path.join(out, "meta.json"), "w"), indent=1)
     manifest.append({"collection": "meta", "doc_id": "current", "file": "meta.json"})

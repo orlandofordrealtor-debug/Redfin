@@ -268,9 +268,12 @@ def enrich(row, asof, want_photos=True, cache_days=6, refresh_core=False):
     cache_path = os.path.join(RAW_DIR, f"{deal_id}.json")
     raw = None
     keep = {}
+    old = None  # the previous cache, kept if Redfin refuses the refresh so a block never erases good data
     if os.path.exists(cache_path):
         try:
             raw = json.load(open(cache_path))
+            if raw.get("url"):
+                old = raw
             fetched = dt.date.fromisoformat(raw.get("fetchedAt", "2000-01-01"))
             if (dt.date.fromisoformat(asof) - fetched).days > cache_days:
                 raw = None
@@ -330,6 +333,9 @@ def enrich(row, asof, want_photos=True, cache_days=6, refresh_core=False):
                 raw["error"] = f"{type(e).__name__}: {e}"
         for k, v in keep.items():
             raw.setdefault(k, v)
+        if raw.get("error") and old is not None:
+            old = dict(old); old["staleFetch"] = asof; old["staleError"] = raw["error"]; raw = old
+
         json.dump(raw, open(cache_path, "w"))
     # stage 2: radius search + full photo set (incremental, so cached rows get it too)
     changed = False
@@ -579,6 +585,7 @@ def main():
     ap.add_argument("--no-photos", action="store_true")
     ap.add_argument("--out", default=None)
     ap.add_argument("--refresh-core", action="store_true", help="re-pull listing page/facts/history for cached rows, keep comps and photos")
+    ap.add_argument("--cache-days", type=int, default=6, help="reuse cached Redfin data this many days old (raise it when Redfin is blocking requests)")
     a = ap.parse_args()
     rows = list(csv.DictReader(open(a.csv, newline="", encoding="utf-8-sig")))
     if a.limit:
@@ -588,7 +595,7 @@ def main():
     records = []
     t0 = time.time()
     for i, row in enumerate(rows, 1):
-        raw = enrich(row, a.asof, want_photos=not a.no_photos, refresh_core=a.refresh_core)
+        raw = enrich(row, a.asof, want_photos=not a.no_photos, cache_days=a.cache_days, refresh_core=a.refresh_core)
         rec = shape(row, raw, a.asof)
         records.append(rec)
         ok = "ok" if rec["redfin"].get("ok") else ("skip" if raw.get("error") else "??")
