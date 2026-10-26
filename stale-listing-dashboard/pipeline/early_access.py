@@ -263,10 +263,12 @@ def main():
     # 2. exclusives from the sheet
     docs = {}
     with open(a.exclusives, newline="", encoding="utf-8-sig") as f:
-        rows = list(csv.DictReader(f))
+        rows = [{(k or "").strip().upper(): v for k, v in row.items()} for row in csv.DictReader(f)]  # header case varies week to week
     print(f"{len(rows)} private exclusives in the sheet")
     for r in rows:
         url = (r.get("URL") or "").strip()
+        if url.startswith("/"):
+            url = "https://www.redfin.com" + url
         m = re.search(r"/home/(\d+)", url)
         pid = m.group(1) if m else "x" + re.sub(r"[^0-9]", "", r.get("ADDRESS", ""))[:12]
         addr = (r.get("ADDRESS") or "").strip()
@@ -288,7 +290,7 @@ def main():
                 doc[k] = chk[k]
         if chk.get("zip") and not zc:
             doc["zip"] = chk["zip"]
-        live_match = listings.get(norm_addr(street))
+        live_match = listings.get(norm_addr(street)) if street else None
         if live_match:
             doc["stage"] = "live"; doc["dealId"] = live_match["dealId"]; doc["listingAgent"] = live_match.get("agent"); doc["dom"] = live_match.get("dom"); doc["tier"] = live_match.get("tier")
             doc["graduated"] = {"to": "MLS active", "dealId": live_match["dealId"], "dom": live_match.get("dom")}
@@ -405,6 +407,16 @@ def main():
         cur.append(w); cur_bytes += b
     if cur:
         batches.append(cur)
+    # delete last week's docs that are gone (the page shows every earlyaccess doc, so stale ones must leave the database)
+    dels = []
+    for pid in gone:
+        key = f"earlyaccess/{pid}"
+        if key in vers:
+            dels.append({"op": "delete", "collection": "earlyaccess", "doc_id": pid, "if_version": vers[key]})
+            if a.bump:
+                del vers[key]
+    for i in range(0, len(dels), 50):
+        batches.append(dels[i:i + 50])
     bdir = os.path.join(a.db, "batches"); os.makedirs(bdir, exist_ok=True)
     for f in glob.glob(os.path.join(bdir, "batch-ea*.json")):
         os.remove(f)

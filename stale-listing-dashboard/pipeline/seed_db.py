@@ -139,7 +139,7 @@ def main():
             "changes": changes, "enrichment": "complete",
             "enriched": sum(1 for r in recs if (r.get("redfin") or {}).get("ok")),
             "carried": sum(1 for d in os.listdir(os.path.join(out, "listings")) if json.load(open(os.path.join(out, "listings", d))).get("redfin", {}).get("carriedFrom")),
-            "unresolved": [r["dealId"] for r in recs if not (r.get("redfin") or {}).get("ok")]}
+            "unresolved": [d["dealId"] for d in (json.load(open(os.path.join(out, "listings", f))) for f in sorted(os.listdir(os.path.join(out, "listings")))) if not (d.get("redfin") or {}).get("ok")]}
     json.dump(meta, open(os.path.join(out, "meta.json"), "w"), indent=1)
     manifest.append({"collection": "meta", "doc_id": "current", "file": "meta.json"})
     for name in ("playbook", "market"):

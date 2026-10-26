@@ -19,12 +19,19 @@ def main():
     a = ap.parse_args()
     vers = json.load(open(a.versions)) if os.path.exists(a.versions) else {}
     bdir = os.path.join(a.db, "batches")
-    files = sorted(glob.glob(os.path.join(bdir, "batch*.json")))
+    # batch-ea*.json is pinned and bumped by early_access.py itself
+    files = sorted(f for f in glob.glob(os.path.join(bdir, "batch*.json")) if not os.path.basename(f).startswith("batch-ea"))
     pinned = new = 0
     for f in files:
         b = json.load(open(f))
         for w in b:
             key = f'{w["collection"]}/{w["doc_id"]}'
+            if w.get("op") == "delete":
+                if key in vers:
+                    w["if_version"] = vers[key]; pinned += 1
+                    if a.bump:
+                        del vers[key]
+                continue
             if key in vers:
                 w["if_version"] = vers[key]; pinned += 1
             else:
