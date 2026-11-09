@@ -1,0 +1,224 @@
+<title>Finish Strong Manager View</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+/* Layout: a working desk for the sales manager. Coaching lists first, verification table second, all copy-ready. */
+:root {
+  color-scheme: dark;
+  --ink: #0f0c0e; --panel: #191316; --panel-2: #221a1e; --line: #36282e;
+  --text: #f7f1ee; --muted: #b5a5ab; --dim: #85737b;
+  --red: #e8343b; --gold: #f7b93e; --gold-hi: #ffde87; --up: #4fd890; --down: #ff7d7d; --warn: #f7b93e;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: radial-gradient(900px 500px at 0% -10%, rgba(232,52,59,.22), transparent 60%), var(--ink); background-repeat: no-repeat; color: var(--text); font-family: var(--body); font-size: 14.5px; line-height: 1.5; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+a { color: var(--gold-hi); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 56px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; }
+.wrap > * { min-width: 0; }
+.eyebrow { font-family: var(--mono); font-weight: 800; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin: 0; }
+h1 { font-family: var(--display); font-stretch: 118%; font-weight: 900; font-size: clamp(28px, 5vw, 44px); line-height: 1; margin: 8px 0 0; letter-spacing: -.015em; }
+h2 { font-family: var(--display); font-stretch: 110%; font-weight: 900; font-size: 22px; line-height: 1.1; margin: 4px 0 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 8px 0 0; max-width: 70ch; }
+.private { display: inline-flex; gap: 8px; align-items: center; margin-top: 12px; font-family: var(--mono); font-size: 11.5px; font-weight: 800; letter-spacing: .08em; padding: 7px 12px; border-radius: 999px; background: rgba(232,52,59,.16); border: 1px solid rgba(232,52,59,.6); color: #ffd6d7; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.stat b { display: block; font-family: var(--display); font-stretch: 110%; font-weight: 900; font-size: 28px; line-height: 1.05; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+.head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.head > div { min-width: 0; }
+.btn { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); white-space: nowrap; }
+.btn:hover { border-color: var(--gold); }
+.btn.done { border-color: var(--up); color: var(--up); }
+.coach { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.cc { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.cc .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.cc .nm { font-weight: 800; font-size: 15.5px; }
+.cc .rate { font-family: var(--mono); font-size: 11.5px; color: var(--down); font-weight: 800; }
+.cc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.cc li { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; }
+.cc li span { font-family: var(--mono); font-size: 11px; color: var(--dim); white-space: nowrap; }
+.msg { font-size: 12.5px; color: var(--muted); background: rgba(255,255,255,.03); border: 1px dashed var(--line); border-radius: 10px; padding: 10px; white-space: pre-wrap; }
+.tablebox { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 13px; }
+th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 800; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.04); white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+.chip { display: inline-block; font-family: var(--mono); font-size: 10.5px; font-weight: 800; padding: 3px 7px; border-radius: 6px; }
+.chip.ok { background: rgba(79,216,144,.14); color: var(--up); }
+.chip.no { background: rgba(255,125,125,.14); color: var(--down); }
+.chip.q { background: rgba(247,185,62,.14); color: var(--gold-hi); }
+.chip.dim { background: rgba(255,255,255,.06); color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid2 > * { min-width: 0; }
+.list { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px; }
+.li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 8px 10px; align-items: center; }
+.li + .li { border-top: 1px solid rgba(255,255,255,.04); }
+.li .a { font-weight: 700; min-width: 0; }
+.li .a small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--dim); font-weight: 500; }
+.li .v { font-family: var(--mono); font-size: 12px; text-align: right; }
+.post { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.55; }
+.foot { color: var(--dim); font-size: 12px; font-family: var(--mono); }
+@media (max-width: 720px) { .stats { grid-template-columns: 1fr 1fr; } .grid2 { grid-template-columns: 1fr; } }
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Finish Strong · Start Strong · manager view</p>
+    <h1 id="title">Week coaching desk</h1>
+    <p class="lede" id="lede"></p>
+    <span class="private">PRIVATE · contains client names · do not share this link</span>
+  </header>
+
+  <section class="stats" id="stats" aria-label="This week at a glance"></section>
+
+  <section aria-labelledby="miss-title">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Rocket intro gaps</p>
+        <h2 id="miss-title">New customers still waiting on a Rocket intro</h2>
+        <p class="lede">These customers were created this week with no Rocket referral on file. This week's points are locked, but the clients still need the intro. Each card has a copy-ready coaching message.</p>
+      </div>
+    </div>
+    <div class="coach" id="coach"></div>
+  </section>
+
+  <section aria-labelledby="verify-title">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Verify Rocket on every offer</p>
+        <h2 id="verify-title">Contest offers and their Rocket status</h2>
+        <p class="lede">“Unverified” means the client became a customer before the 45-day referral export window, so this report can't confirm an intro. Check the deal and confirm a 3-way text happened.</p>
+      </div>
+    </div>
+    <div class="tablebox"><table id="offers"></table></div>
+  </section>
+
+  <section class="grid2" aria-label="Ava watch and launch pad">
+    <div>
+      <div class="head"><div><p class="eyebrow">Ava watch</p><h2>Down vs the prior 30 days, or not started</h2></div></div>
+      <div class="list" id="ava"></div>
+    </div>
+    <div>
+      <div class="head"><div><p class="eyebrow">1:1 list</p><h2 id="pad-title">No contest offers yet</h2></div></div>
+      <div class="list" id="pad"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="post-title">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Team announcement</p>
+        <h2 id="post-title">Slack post for the board</h2>
+        <p class="lede">Ready to paste into Slack. Attach the Slack card PNG or the reel.</p>
+      </div>
+      <button class="btn" type="button" id="copy-post">Copy post</button>
+    </div>
+    <div class="post" id="post"></div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</main>
+
+<script id="mgr-data" type="application/json">__MANAGER_DATA__</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("mgr-data").textContent);
+  const M = D.manager, S = D.season, w = S.weeks[String(M.week)], t = w.totals, A = S.agents;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = (n) => Number(n).toLocaleString("en-US");
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const md = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${MONTHS[m - 1]} ${d}`; };
+  const range = `${md(M.start)}–${M.end.split("-")[2].replace(/^0/, "")}`;
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const first = (n) => (A[n] ? A[n].first : n.split(" ")[0]);
+
+  async function copy(text, btn) {
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; btn.classList.add("done"); }
+    catch (e) {
+      const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); btn.textContent = "Copied"; btn.classList.add("done"); } catch (_) { btn.textContent = "Select and copy"; }
+      ta.remove();
+    }
+    setTimeout(() => { btn.textContent = btn.dataset.label; btn.classList.remove("done"); }, 2200);
+  }
+
+  $("title").textContent = `Week ${M.week} coaching desk`;
+  $("lede").textContent = `Week ${M.week} · ${range} · exports pulled ${md(M.export_date)}. Use this page for 1:1s and follow-up. Share the team board instead.`;
+
+  const unver = M.offers.filter((o) => o.rocket === "unverified").length;
+  $("stats").innerHTML = [
+    [`${t.ref_done}/${t.ref_new}`, `new customers introduced to Rocket (${pct(t.ref_done, t.ref_new)}%)`],
+    [M.missed_intros.length, "customers still need a Rocket intro"],
+    [`${unver}/${M.offers.length}`, "contest offers with Rocket unverified"],
+    [M.launch_pad.length, "agents with no contest offer yet"],
+  ].map(([b, s]) => `<div class="stat"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join("");
+
+  // coaching cards
+  const byAgent = {};
+  M.missed_intros.forEach((m) => (byAgent[m.agent] = byAgent[m.agent] || []).push(m));
+  $("coach").innerHTML = Object.entries(byAgent).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0])).map(([agent, list], i) => {
+    const wa = w.agents[agent] || { ref_done: 0, ref_new: list.length };
+    const names = list.map((m) => m.customer).join(", ");
+    const msg = `Hi ${first(agent)}, quick Rocket check from Week ${M.week}: ${list.length === 1 ? "this new customer hasn't" : `these ${list.length} new customers haven't`} been introduced to Rocket yet: ${names}. A 3-way text with your Rocket LO today gets them a lender conversation early, and a buydown flyer gives them a reason to write. For Week ${M.week + 1}, introduce every new customer the day you meet them and the 1,000 points are yours. Want help drafting the first text?`;
+    return `<div class="cc"><div class="top"><span class="nm">${esc(agent)}</span><span class="rate">${wa.ref_done}/${wa.ref_new} introduced</span></div>
+      <ul>${list.map((m) => `<li><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.customer)}</a><span>${md(m.date)}</span></li>`).join("")}</ul>
+      <div class="msg" id="msg-${i}">${esc(msg)}</div>
+      <div><button class="btn" type="button" data-label="Copy message" data-msg="msg-${i}">Copy message</button></div></div>`;
+  }).join("") || `<div class="cc">Every new customer this week was introduced to Rocket.</div>`;
+  document.querySelectorAll("[data-msg]").forEach((b) => b.addEventListener("click", () => copy($(b.dataset.msg).textContent, b)));
+
+  // offers table
+  const chip = (r) => r.startsWith("referred") ? `<span class="chip ok">${esc(r)}</span>` : r === "not referred" ? `<span class="chip no">not referred</span>` : `<span class="chip q">unverified</span>`;
+  const status = (s) => s.replace(/^OFFER_/, "").replace(/_/g, " ").toLowerCase();
+  $("offers").innerHTML = `<thead><tr><th>Wk</th><th>Submitted</th><th>Agent</th><th>Client</th><th style="text-align:right">Offer</th><th>Status</th><th>Fast Offer</th><th>Rocket</th><th>Deal</th></tr></thead><tbody>` +
+    M.offers.map((o) => `<tr><td>W${o.week}</td><td>${md(o.date)}</td><td>${esc(o.agent)}</td><td>${esc(o.client)}</td><td class="num">$${fmt(o.price)}</td>
+      <td><span class="chip ${o.mutual ? "ok" : "dim"}">${esc(status(o.status))}</span></td><td>${o.fast ? "Yes" : "<span style='color:var(--down)'>No</span>"}</td><td>${chip(o.rocket)}</td>
+      <td><a href="${esc(o.link)}" target="_blank" rel="noopener">Open</a></td></tr>`).join("") + "</tbody>";
+
+  // ava watch
+  $("ava").innerHTML = M.ava_watch.map((x) => `<div class="li"><div class="a">${esc(x.agent)}<small>${esc(x.action)} · last active ${x.last_active ? md(x.last_active) : "never"}</small></div>
+    <div class="v">${x.prior} → <b>${x.prompts}</b> ${x.prompts < x.prior ? `<span style="color:var(--down)">▼${x.prior - x.prompts}</span>` : `<span style="color:var(--dim)">not started</span>`}</div></div>`).join("");
+
+  // launch pad
+  const ava = w.ava ? w.ava.agents : {};
+  $("pad-title").textContent = `${M.launch_pad.length} agents with no contest offer yet`;
+  $("pad").innerHTML = M.launch_pad.map((n) => `<div class="li"><div class="a">${esc(n)}<small>${esc(A[n].team)} · Week ${M.week} Rocket ${w.agents[n].ref_done}/${w.agents[n].ref_new}</small></div><div class="v">Ava ${ava[n] ? ava[n].prompts : "–"}</div></div>`).join("");
+
+  // slack post
+  const ws = Object.keys(w.agents);
+  const writers = ws.filter((n) => w.agents[n].offers > 0).sort((a, b) => w.agents[b].offers - w.agents[a].offers || w.agents[b].pts - w.agents[a].pts);
+  const club = ws.filter((n) => w.agents[n].pts_ref > 0);
+  const B = w.ava && w.ava.badges;
+  const prev = S.weeks[String(M.week - 1)];
+  const road = w.road;
+  const leader = ws.slice().sort((a, b) => road[b] - road[a])[0];
+  const left = S.calendar.length - M.week;
+  const post = [
+    `🚀 *FINISH STRONG. START STRONG. Week ${M.week} board is live* (${range})`,
+    ``,
+    `*${t.offers} offers submitted · $${(t.volume / 1e6).toFixed(2)}M written · ${t.mutual} already at mutual*${prev ? ` (Week ${M.week - 1}: ${prev.totals.offers})` : ""}`,
+    `${fmt(t.pts)} Amaze points awarded this week.`,
+    ``,
+    `🏆 *Command Crew:* ${writers.map((n) => `${n} (${w.agents[n].offers})`).join(", ")}`,
+    `✅ *100% Rocket Club, +1,000 each:* ${club.map(first).join(", ")}`,
+    B ? `✨ *Ava badges:* Champion ${B.champion.agent} (${B.champion.value}) · Biggest Jump ${B.jump.agent} (+${B.jump.value}) · Outreach Pro ${B.outreach.agent} · Research Pro ${B.research.agent}` : ``,
+    `🎯 *Road to 10:* ${first(leader)} leads with ${road[leader]}. ${left} weeks left, so 2 offers a week gets anyone into the 10,000-point drawing.`,
+    ``,
+    `This week: introduce every new customer to Rocket the day you meet them, write with Fast Offers, and mark every offer “Submitted to Listing Agent” in Agent Tools the same day.`,
+    ``,
+    `Full board, every agent: ${S.board_url || "[BOARD LINK]"}`,
+  ].filter((x, i, arr) => !(x === "" && arr[i - 1] === "")).join("\n");
+  $("post").textContent = post;
+  const pb = $("copy-post"); pb.dataset.label = "Copy post";
+  pb.addEventListener("click", () => copy(post, pb));
+
+  $("foot").textContent = `Sources: offers export, Rocket referral export (45 days) and Ava usage export (30 days), pulled ${md(M.export_date)}. Client names come from those exports.`;
+})();
+</script>

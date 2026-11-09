@@ -1,0 +1,1631 @@
+{
+ "weeks": {
+  "1": {
+   "n": 1,
+   "start": "2026-10-26",
+   "end": "2026-10-31",
+   "agents": {
+    "Abdiel Hernandez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Alex Lumukanda": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Amy Black": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Anabella Ertel": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Aubrey Myers Jr": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Brian Layne": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Craig Shapiro": {
+     "offers": 1,
+     "volume": 1800000,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Dj Bonner": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Gregory Eubanks": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Heidi Ludwig": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Joe Royds": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Justin Vold": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Lisbeth Bitar": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Marianna Smith": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Melanie Gonzalez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michael Berlin": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michael Henderson": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michele Lopez": {
+     "offers": 1,
+     "volume": 575000,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michelle Zabukovec": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Paul Vieyra": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 5,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Peter Lim": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Rachel Adkins": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Renata Fallon": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Reza Marashi": {
+     "offers": 1,
+     "volume": 1050000,
+     "mutual": 0,
+     "fast": 1,
+     "ref_new": 2,
+     "ref_done": 2,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Rick Wilkinson": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Rob Sterling": {
+     "offers": 1,
+     "volume": 550000,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Ruben Martinez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Sheila Terrell": {
+     "offers": 2,
+     "volume": 1155000,
+     "mutual": 0,
+     "fast": 2,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 500,
+     "pts_ref": 0,
+     "pts": 500
+    },
+    "Thomas Royds": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Tonya Williams": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Vanessa Neiberg": {
+     "offers": 1,
+     "volume": 1100000,
+     "mutual": 1,
+     "fast": 1,
+     "ref_new": 3,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Venus Martinez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    }
+   },
+   "totals": {
+    "offers": 7,
+    "volume": 6230000,
+    "mutual": 1,
+    "fast": 4,
+    "writers": 6,
+    "ref_new": 27,
+    "ref_done": 7,
+    "club": 3,
+    "pts": 3500
+   },
+   "published": false,
+   "locked": "2026-11-08",
+   "road": {
+    "Abdiel Hernandez": 0,
+    "Alex Lumukanda": 0,
+    "Amy Black": 0,
+    "Anabella Ertel": 0,
+    "Aubrey Myers Jr": 0,
+    "Brian Layne": 0,
+    "Craig Shapiro": 1,
+    "Dj Bonner": 0,
+    "Gregory Eubanks": 0,
+    "Heidi Ludwig": 0,
+    "Joe Royds": 0,
+    "Justin Vold": 0,
+    "Lisbeth Bitar": 0,
+    "Marianna Smith": 0,
+    "Melanie Gonzalez": 0,
+    "Michael Berlin": 0,
+    "Michael Henderson": 0,
+    "Michele Lopez": 1,
+    "Michelle Zabukovec": 0,
+    "Paul Vieyra": 0,
+    "Peter Lim": 0,
+    "Rachel Adkins": 0,
+    "Renata Fallon": 0,
+    "Reza Marashi": 1,
+    "Rick Wilkinson": 0,
+    "Rob Sterling": 1,
+    "Ruben Martinez": 0,
+    "Sheila Terrell": 2,
+    "Thomas Royds": 0,
+    "Tonya Williams": 0,
+    "Vanessa Neiberg": 1,
+    "Venus Martinez": 0
+   },
+   "ava": null
+  },
+  "2": {
+   "n": 2,
+   "start": "2026-11-01",
+   "end": "2026-11-07",
+   "agents": {
+    "Abdiel Hernandez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Alex Lumukanda": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Amy Black": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Anabella Ertel": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Aubrey Myers Jr": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 2,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Brian Layne": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Craig Shapiro": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Dj Bonner": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Gregory Eubanks": {
+     "offers": 1,
+     "volume": 1750000,
+     "mutual": 1,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Heidi Ludwig": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Joe Royds": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Justin Vold": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Lisbeth Bitar": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Marianna Smith": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Melanie Gonzalez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michael Berlin": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Michael Henderson": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michele Lopez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Michelle Zabukovec": {
+     "offers": 1,
+     "volume": 910000,
+     "mutual": 1,
+     "fast": 1,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Paul Vieyra": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Peter Lim": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 2,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Rachel Adkins": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Renata Fallon": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Reza Marashi": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Rick Wilkinson": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Rob Sterling": {
+     "offers": 2,
+     "volume": 1400000,
+     "mutual": 0,
+     "fast": 2,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 500,
+     "pts_ref": 1000,
+     "pts": 1500
+    },
+    "Ruben Martinez": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Sheila Terrell": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 1,
+     "ref_done": 1,
+     "pts_offers": 0,
+     "pts_ref": 1000,
+     "pts": 1000
+    },
+    "Thomas Royds": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Tonya Williams": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Vanessa Neiberg": {
+     "offers": 0,
+     "volume": 0,
+     "mutual": 0,
+     "fast": 0,
+     "ref_new": 0,
+     "ref_done": 0,
+     "pts_offers": 0,
+     "pts_ref": 0,
+     "pts": 0
+    },
+    "Venus Martinez": {
+     "offers": 2,
+     "volume": 1310000,
+     "mutual": 0,
+     "fast": 2,
+     "ref_new": 2,
+     "ref_done": 0,
+     "pts_offers": 500,
+     "pts_ref": 0,
+     "pts": 500
+    }
+   },
+   "totals": {
+    "offers": 6,
+    "volume": 5370000,
+    "mutual": 2,
+    "fast": 5,
+    "writers": 4,
+    "ref_new": 25,
+    "ref_done": 9,
+    "club": 6,
+    "pts": 7000
+   },
+   "published": true,
+   "locked": "2026-11-08",
+   "road": {
+    "Abdiel Hernandez": 0,
+    "Alex Lumukanda": 0,
+    "Amy Black": 0,
+    "Anabella Ertel": 0,
+    "Aubrey Myers Jr": 0,
+    "Brian Layne": 0,
+    "Craig Shapiro": 1,
+    "Dj Bonner": 0,
+    "Gregory Eubanks": 1,
+    "Heidi Ludwig": 0,
+    "Joe Royds": 0,
+    "Justin Vold": 0,
+    "Lisbeth Bitar": 0,
+    "Marianna Smith": 0,
+    "Melanie Gonzalez": 0,
+    "Michael Berlin": 0,
+    "Michael Henderson": 0,
+    "Michele Lopez": 1,
+    "Michelle Zabukovec": 1,
+    "Paul Vieyra": 0,
+    "Peter Lim": 0,
+    "Rachel Adkins": 0,
+    "Renata Fallon": 0,
+    "Reza Marashi": 1,
+    "Rick Wilkinson": 0,
+    "Rob Sterling": 3,
+    "Ruben Martinez": 0,
+    "Sheila Terrell": 2,
+    "Thomas Royds": 0,
+    "Tonya Williams": 0,
+    "Vanessa Neiberg": 1,
+    "Venus Martinez": 2
+   },
+   "ava": {
+    "agents": {
+     "Abdiel Hernandez": {
+      "team": "Southeast Los Angeles",
+      "prompts": 88,
+      "prior": 37,
+      "sessions": 21,
+      "prior_sessions": 21,
+      "days": 17,
+      "prior_days": 14,
+      "score": 86,
+      "last_active": "2026-11-06",
+      "customers": 349,
+      "outreach": 61,
+      "properties": 139,
+      "delta": 51
+     },
+     "Rob Sterling": {
+      "team": "West Los Angeles",
+      "prompts": 70,
+      "prior": 37,
+      "sessions": 9,
+      "prior_sessions": 5,
+      "days": 14,
+      "prior_days": 4,
+      "score": 79,
+      "last_active": "2026-11-08",
+      "customers": 143,
+      "outreach": 18,
+      "properties": 60,
+      "delta": 33
+     },
+     "Tonya Williams": {
+      "team": "South Los Angeles",
+      "prompts": 170,
+      "prior": 105,
+      "sessions": 37,
+      "prior_sessions": 28,
+      "days": 12,
+      "prior_days": 11,
+      "score": 78,
+      "last_active": "2026-11-08",
+      "customers": 96,
+      "outreach": 71,
+      "properties": 13,
+      "delta": 65
+     },
+     "Peter Lim": {
+      "team": "South Bay Los Angeles",
+      "prompts": 91,
+      "prior": 1,
+      "sessions": 15,
+      "prior_sessions": 1,
+      "days": 11,
+      "prior_days": 1,
+      "score": 76,
+      "last_active": "2026-11-06",
+      "customers": 350,
+      "outreach": 28,
+      "properties": 300,
+      "delta": 90
+     },
+     "Justin Vold": {
+      "team": "West Los Angeles",
+      "prompts": 65,
+      "prior": 11,
+      "sessions": 8,
+      "prior_sessions": 3,
+      "days": 10,
+      "prior_days": 3,
+      "score": 73,
+      "last_active": "2026-11-03",
+      "customers": 784,
+      "outreach": 20,
+      "properties": 53,
+      "delta": 54
+     },
+     "Melanie Gonzalez": {
+      "team": "South Bay Los Angeles",
+      "prompts": 88,
+      "prior": 181,
+      "sessions": 19,
+      "prior_sessions": 50,
+      "days": 11,
+      "prior_days": 16,
+      "score": 72,
+      "last_active": "2026-11-03",
+      "customers": 327,
+      "outreach": 51,
+      "properties": 57,
+      "delta": -93
+     },
+     "Venus Martinez": {
+      "team": "South Los Angeles",
+      "prompts": 99,
+      "prior": 12,
+      "sessions": 3,
+      "prior_sessions": 2,
+      "days": 8,
+      "prior_days": 2,
+      "score": 69,
+      "last_active": "2026-10-30",
+      "customers": 373,
+      "outreach": 74,
+      "properties": 139,
+      "delta": 87
+     },
+     "Michael Henderson": {
+      "team": "West Los Angeles",
+      "prompts": 59,
+      "prior": 48,
+      "sessions": 5,
+      "prior_sessions": 8,
+      "days": 8,
+      "prior_days": 10,
+      "score": 68,
+      "last_active": "2026-10-31",
+      "customers": 118,
+      "outreach": 27,
+      "properties": 47,
+      "delta": 11
+     },
+     "Marianna Smith": {
+      "team": "South Bay Los Angeles",
+      "prompts": 45,
+      "prior": 31,
+      "sessions": 11,
+      "prior_sessions": 7,
+      "days": 11,
+      "prior_days": 5,
+      "score": 64,
+      "last_active": "2026-11-07",
+      "customers": 156,
+      "outreach": 8,
+      "properties": 49,
+      "delta": 14
+     },
+     "Dj Bonner": {
+      "team": "Southeast Los Angeles",
+      "prompts": 46,
+      "prior": 0,
+      "sessions": 5,
+      "prior_sessions": 0,
+      "days": 10,
+      "prior_days": 0,
+      "score": 62,
+      "last_active": "2026-10-31",
+      "customers": 224,
+      "outreach": 61,
+      "properties": 137,
+      "delta": 46
+     },
+     "Brian Layne": {
+      "team": "West Los Angeles",
+      "prompts": 28,
+      "prior": 0,
+      "sessions": 10,
+      "prior_sessions": 0,
+      "days": 14,
+      "prior_days": 0,
+      "score": 59,
+      "last_active": "2026-11-08",
+      "customers": 183,
+      "outreach": 0,
+      "properties": 148,
+      "delta": 28
+     },
+     "Michele Lopez": {
+      "team": "South Los Angeles",
+      "prompts": 43,
+      "prior": 1,
+      "sessions": 18,
+      "prior_sessions": 1,
+      "days": 9,
+      "prior_days": 1,
+      "score": 59,
+      "last_active": "2026-11-04",
+      "customers": 172,
+      "outreach": 52,
+      "properties": 244,
+      "delta": 42
+     },
+     "Anabella Ertel": {
+      "team": "South Bay Los Angeles",
+      "prompts": 45,
+      "prior": 27,
+      "sessions": 3,
+      "prior_sessions": 2,
+      "days": 8,
+      "prior_days": 7,
+      "score": 57,
+      "last_active": "2026-11-05",
+      "customers": 112,
+      "outreach": 31,
+      "properties": 21,
+      "delta": 18
+     },
+     "Gregory Eubanks": {
+      "team": "West Los Angeles",
+      "prompts": 19,
+      "prior": 0,
+      "sessions": 7,
+      "prior_sessions": 0,
+      "days": 13,
+      "prior_days": 0,
+      "score": 56,
+      "last_active": "2026-11-02",
+      "customers": 250,
+      "outreach": 5,
+      "properties": 293,
+      "delta": 19
+     },
+     "Paul Vieyra": {
+      "team": "South Los Angeles",
+      "prompts": 39,
+      "prior": 27,
+      "sessions": 7,
+      "prior_sessions": 8,
+      "days": 5,
+      "prior_days": 6,
+      "score": 47,
+      "last_active": "2026-11-04",
+      "customers": 207,
+      "outreach": 17,
+      "properties": 138,
+      "delta": 12
+     },
+     "Aubrey Myers Jr": {
+      "team": "South Los Angeles",
+      "prompts": 18,
+      "prior": 0,
+      "sessions": 11,
+      "prior_sessions": 0,
+      "days": 10,
+      "prior_days": 0,
+      "score": 44,
+      "last_active": "2026-11-05",
+      "customers": 223,
+      "outreach": 0,
+      "properties": 310,
+      "delta": 18
+     },
+     "Craig Shapiro": {
+      "team": "West Los Angeles",
+      "prompts": 25,
+      "prior": 21,
+      "sessions": 9,
+      "prior_sessions": 3,
+      "days": 8,
+      "prior_days": 3,
+      "score": 43,
+      "last_active": "2026-11-04",
+      "customers": 112,
+      "outreach": 1,
+      "properties": 46,
+      "delta": 4
+     },
+     "Renata Fallon": {
+      "team": "Long Beach",
+      "prompts": 29,
+      "prior": 25,
+      "sessions": 10,
+      "prior_sessions": 9,
+      "days": 5,
+      "prior_days": 5,
+      "score": 42,
+      "last_active": "2026-11-05",
+      "customers": 145,
+      "outreach": 8,
+      "properties": 190,
+      "delta": 4
+     },
+     "Sheila Terrell": {
+      "team": "South Bay Los Angeles",
+      "prompts": 24,
+      "prior": 0,
+      "sessions": 6,
+      "prior_sessions": 0,
+      "days": 6,
+      "prior_days": 0,
+      "score": 42,
+      "last_active": "2026-11-05",
+      "customers": 89,
+      "outreach": 0,
+      "properties": 19,
+      "delta": 24
+     },
+     "Rachel Adkins": {
+      "team": "Long Beach",
+      "prompts": 17,
+      "prior": 2,
+      "sessions": 5,
+      "prior_sessions": 1,
+      "days": 4,
+      "prior_days": 1,
+      "score": 38,
+      "last_active": "2026-11-03",
+      "customers": 223,
+      "outreach": 1,
+      "properties": 31,
+      "delta": 15
+     },
+     "Reza Marashi": {
+      "team": "West Los Angeles",
+      "prompts": 17,
+      "prior": 4,
+      "sessions": 11,
+      "prior_sessions": 1,
+      "days": 6,
+      "prior_days": 1,
+      "score": 35,
+      "last_active": "2026-10-30",
+      "customers": 87,
+      "outreach": 6,
+      "properties": 16,
+      "delta": 13
+     },
+     "Alex Lumukanda": {
+      "team": "West Los Angeles",
+      "prompts": 13,
+      "prior": 52,
+      "sessions": 7,
+      "prior_sessions": 19,
+      "days": 6,
+      "prior_days": 9,
+      "score": 33,
+      "last_active": "2026-10-27",
+      "customers": 23,
+      "outreach": 0,
+      "properties": 3,
+      "delta": -39
+     },
+     "Lisbeth Bitar": {
+      "team": "South Bay Los Angeles",
+      "prompts": 34,
+      "prior": 0,
+      "sessions": 3,
+      "prior_sessions": 0,
+      "days": 3,
+      "prior_days": 0,
+      "score": 32,
+      "last_active": "2026-10-31",
+      "customers": 107,
+      "outreach": 89,
+      "properties": 0,
+      "delta": 34
+     },
+     "Michael Berlin": {
+      "team": "West Los Angeles",
+      "prompts": 10,
+      "prior": 37,
+      "sessions": 4,
+      "prior_sessions": 11,
+      "days": 5,
+      "prior_days": 8,
+      "score": 29,
+      "last_active": "2026-10-20",
+      "customers": 3,
+      "outreach": 2,
+      "properties": 3,
+      "delta": -27
+     },
+     "Vanessa Neiberg": {
+      "team": "South Bay Los Angeles",
+      "prompts": 10,
+      "prior": 0,
+      "sessions": 3,
+      "prior_sessions": 0,
+      "days": 3,
+      "prior_days": 0,
+      "score": 28,
+      "last_active": "2026-11-02",
+      "customers": 29,
+      "outreach": 1,
+      "properties": 12,
+      "delta": 10
+     },
+     "Joe Royds": {
+      "team": "South Bay Los Angeles",
+      "prompts": 16,
+      "prior": 25,
+      "sessions": 7,
+      "prior_sessions": 16,
+      "days": 2,
+      "prior_days": 5,
+      "score": 25,
+      "last_active": "2026-11-05",
+      "customers": 7,
+      "outreach": 8,
+      "properties": 11,
+      "delta": -9
+     },
+     "Amy Black": {
+      "team": "West Los Angeles",
+      "prompts": 13,
+      "prior": 0,
+      "sessions": 2,
+      "prior_sessions": 0,
+      "days": 1,
+      "prior_days": 0,
+      "score": 21,
+      "last_active": "2026-10-26",
+      "customers": 77,
+      "outreach": 0,
+      "properties": 15,
+      "delta": 13
+     },
+     "Ruben Martinez": {
+      "team": "Southeast Los Angeles",
+      "prompts": 6,
+      "prior": 49,
+      "sessions": 2,
+      "prior_sessions": 12,
+      "days": 2,
+      "prior_days": 10,
+      "score": 20,
+      "last_active": "2026-10-13",
+      "customers": 36,
+      "outreach": 0,
+      "properties": 1,
+      "delta": -43
+     },
+     "Michelle Zabukovec": {
+      "team": "South Bay Los Angeles",
+      "prompts": 3,
+      "prior": 3,
+      "sessions": 2,
+      "prior_sessions": 2,
+      "days": 2,
+      "prior_days": 2,
+      "score": 18,
+      "last_active": "2026-10-21",
+      "customers": 88,
+      "outreach": 0,
+      "properties": 4,
+      "delta": 0
+     },
+     "Rick Wilkinson": {
+      "team": "South Bay Los Angeles",
+      "prompts": 1,
+      "prior": 2,
+      "sessions": 1,
+      "prior_sessions": 1,
+      "days": 1,
+      "prior_days": 1,
+      "score": 7,
+      "last_active": "2026-10-17",
+      "customers": 0,
+      "outreach": 0,
+      "properties": 13,
+      "delta": -1
+     },
+     "Heidi Ludwig": {
+      "team": "South Bay Los Angeles",
+      "prompts": 0,
+      "prior": 0,
+      "sessions": 0,
+      "prior_sessions": 0,
+      "days": 0,
+      "prior_days": 0,
+      "score": 0,
+      "last_active": "",
+      "customers": 0,
+      "outreach": 0,
+      "properties": 0,
+      "delta": 0
+     },
+     "Thomas Royds": {
+      "team": "South Bay Los Angeles",
+      "prompts": 0,
+      "prior": 3,
+      "sessions": 0,
+      "prior_sessions": 1,
+      "days": 0,
+      "prior_days": 1,
+      "score": 0,
+      "last_active": "2026-09-14",
+      "customers": 0,
+      "outreach": 0,
+      "properties": 0,
+      "delta": -3
+     }
+    },
+    "badges": {
+     "champion": {
+      "agent": "Abdiel Hernandez",
+      "label": "Ava Champion",
+      "value": 86,
+      "unit": "usage score"
+     },
+     "jump": {
+      "agent": "Peter Lim",
+      "label": "Biggest Jump",
+      "value": 90,
+      "unit": "more prompts",
+      "from": 1,
+      "to": 91
+     },
+     "outreach": {
+      "agent": "Lisbeth Bitar",
+      "label": "Outreach Pro",
+      "value": 89,
+      "unit": "outreach drafts"
+     },
+     "research": {
+      "agent": "Justin Vold",
+      "label": "Research Pro",
+      "value": 784,
+      "unit": "customers researched"
+     }
+    },
+    "totals": {
+     "prompts": 1231,
+     "prior": 741,
+     "active": 30,
+     "roster": 32,
+     "median_score": 44
+    }
+   }
+  }
+ },
+ "contest": {
+  "name": "Finish Strong. Start Strong.",
+  "start": "2026-10-26",
+  "end": "2026-12-13",
+  "tiers": [
+   {
+    "offers": 2,
+    "points": 500
+   },
+   {
+    "offers": 3,
+    "points": 1000
+   },
+   {
+    "offers": 4,
+    "points": 1500
+   }
+  ],
+  "referral_award": 1000,
+  "grand_prize": {
+   "offers": 10,
+   "points": 10000
+  },
+  "referral_goal": 0.45
+ },
+ "calendar": [
+  {
+   "n": 1,
+   "start": "2026-10-26",
+   "end": "2026-10-31"
+  },
+  {
+   "n": 2,
+   "start": "2026-11-01",
+   "end": "2026-11-07"
+  },
+  {
+   "n": 3,
+   "start": "2026-11-08",
+   "end": "2026-11-14"
+  },
+  {
+   "n": 4,
+   "start": "2026-11-15",
+   "end": "2026-11-21"
+  },
+  {
+   "n": 5,
+   "start": "2026-11-22",
+   "end": "2026-11-28"
+  },
+  {
+   "n": 6,
+   "start": "2026-11-29",
+   "end": "2026-12-05"
+  },
+  {
+   "n": 7,
+   "start": "2026-12-06",
+   "end": "2026-12-13"
+  }
+ ],
+ "current_week": 2,
+ "export_date": "2026-11-08",
+ "agents": {
+  "Abdiel Hernandez": {
+   "name": "Abdiel Hernandez",
+   "first": "Abdiel",
+   "initials": "AH",
+   "team": "Southeast LA",
+   "contest_offers": 0
+  },
+  "Alex Lumukanda": {
+   "name": "Alex Lumukanda",
+   "first": "Alex",
+   "initials": "AL",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Amy Black": {
+   "name": "Amy Black",
+   "first": "Amy",
+   "initials": "AB",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Anabella Ertel": {
+   "name": "Anabella Ertel",
+   "first": "Anabella",
+   "initials": "AE",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Aubrey Myers Jr": {
+   "name": "Aubrey Myers Jr",
+   "first": "Aubrey",
+   "initials": "AM",
+   "team": "South LA",
+   "contest_offers": 0
+  },
+  "Brian Layne": {
+   "name": "Brian Layne",
+   "first": "Brian",
+   "initials": "BL",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Craig Shapiro": {
+   "name": "Craig Shapiro",
+   "first": "Craig",
+   "initials": "CS",
+   "team": "West LA",
+   "contest_offers": 1
+  },
+  "Dj Bonner": {
+   "name": "Dj Bonner",
+   "first": "Dj",
+   "initials": "DB",
+   "team": "Southeast LA",
+   "contest_offers": 0
+  },
+  "Gregory Eubanks": {
+   "name": "Gregory Eubanks",
+   "first": "Gregory",
+   "initials": "GE",
+   "team": "West LA",
+   "contest_offers": 1
+  },
+  "Heidi Ludwig": {
+   "name": "Heidi Ludwig",
+   "first": "Heidi",
+   "initials": "HL",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Joe Royds": {
+   "name": "Joe Royds",
+   "first": "Joe",
+   "initials": "JR",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Justin Vold": {
+   "name": "Justin Vold",
+   "first": "Justin",
+   "initials": "JV",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Lisbeth Bitar": {
+   "name": "Lisbeth Bitar",
+   "first": "Lisbeth",
+   "initials": "LB",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Marianna Smith": {
+   "name": "Marianna Smith",
+   "first": "Marianna",
+   "initials": "MS",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Melanie Gonzalez": {
+   "name": "Melanie Gonzalez",
+   "first": "Melanie",
+   "initials": "MG",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Michael Berlin": {
+   "name": "Michael Berlin",
+   "first": "Michael B.",
+   "initials": "MB",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Michael Henderson": {
+   "name": "Michael Henderson",
+   "first": "Michael H.",
+   "initials": "MH",
+   "team": "West LA",
+   "contest_offers": 0
+  },
+  "Michele Lopez": {
+   "name": "Michele Lopez",
+   "first": "Michele",
+   "initials": "ML",
+   "team": "South LA",
+   "contest_offers": 1
+  },
+  "Michelle Zabukovec": {
+   "name": "Michelle Zabukovec",
+   "first": "Michelle",
+   "initials": "MZ",
+   "team": "South Bay",
+   "contest_offers": 1
+  },
+  "Paul Vieyra": {
+   "name": "Paul Vieyra",
+   "first": "Paul",
+   "initials": "PV",
+   "team": "South LA",
+   "contest_offers": 0
+  },
+  "Peter Lim": {
+   "name": "Peter Lim",
+   "first": "Peter",
+   "initials": "PL",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Rachel Adkins": {
+   "name": "Rachel Adkins",
+   "first": "Rachel",
+   "initials": "RA",
+   "team": "Long Beach",
+   "contest_offers": 0
+  },
+  "Renata Fallon": {
+   "name": "Renata Fallon",
+   "first": "Renata",
+   "initials": "RF",
+   "team": "Long Beach",
+   "contest_offers": 0
+  },
+  "Reza Marashi": {
+   "name": "Reza Marashi",
+   "first": "Reza",
+   "initials": "RM",
+   "team": "West LA",
+   "contest_offers": 1
+  },
+  "Rick Wilkinson": {
+   "name": "Rick Wilkinson",
+   "first": "Rick",
+   "initials": "RW",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Rob Sterling": {
+   "name": "Rob Sterling",
+   "first": "Rob",
+   "initials": "RS",
+   "team": "West LA",
+   "contest_offers": 3
+  },
+  "Ruben Martinez": {
+   "name": "Ruben Martinez",
+   "first": "Ruben",
+   "initials": "RM",
+   "team": "Southeast LA",
+   "contest_offers": 0
+  },
+  "Sheila Terrell": {
+   "name": "Sheila Terrell",
+   "first": "Sheila",
+   "initials": "ST",
+   "team": "South Bay",
+   "contest_offers": 2
+  },
+  "Thomas Royds": {
+   "name": "Thomas Royds",
+   "first": "Thomas",
+   "initials": "TR",
+   "team": "South Bay",
+   "contest_offers": 0
+  },
+  "Tonya Williams": {
+   "name": "Tonya Williams",
+   "first": "Tonya",
+   "initials": "TW",
+   "team": "South LA",
+   "contest_offers": 0
+  },
+  "Vanessa Neiberg": {
+   "name": "Vanessa Neiberg",
+   "first": "Vanessa",
+   "initials": "VN",
+   "team": "South Bay",
+   "contest_offers": 1
+  },
+  "Venus Martinez": {
+   "name": "Venus Martinez",
+   "first": "Venus",
+   "initials": "VM",
+   "team": "South LA",
+   "contest_offers": 2
+  }
+ },
+ "t45_referral": {
+  "done": 72,
+  "total": 190
+ },
+ "board_url": "https://claude.ai/artifact/EJ2dTLhzhqUAjHWts7FR8Z"
+}

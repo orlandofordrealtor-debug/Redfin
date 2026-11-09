@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finish Strong Reel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+/* Layout: a 1080x1350 portrait stage driven by one deterministic timeline (seek(t)), so every frame can be captured exactly. */
+:root {
+  color-scheme: dark;
+  --ink: #0f0c0e; --panel: #1b1418; --line: #3a2a31; --text: #f7f1ee; --muted: #b5a5ab;
+  --red: #e8343b; --red-deep: #8f121b; --gold: #f7b93e; --gold-hi: #ffde87; --silver: #d5d9e0; --bronze: #e5875a; --up: #4fd890;
+  --display: "Archivo", "Arial Black", Arial, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+.stage {
+  position: absolute; left: 50%; top: 50%; width: 1080px; height: 1350px; transform-origin: center;
+  transform: translate(-50%, -50%) scale(var(--k, 1)); overflow: hidden; color: var(--text); font-family: var(--display);
+  background: radial-gradient(900px 700px at 10% -5%, rgba(232,52,59,.42), transparent 60%), radial-gradient(800px 600px at 105% 105%, rgba(143,18,27,.5), transparent 60%), var(--ink);
+}
+canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
+.chrome { position: absolute; left: 64px; right: 64px; top: 56px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand .rf { color: var(--red); font-weight: 900; font-size: 40px; letter-spacing: -.02em; }
+.brand .pb { color: var(--muted); font-size: 20px; font-weight: 500; }
+.brand .rk { font-weight: 900; font-size: 40px; letter-spacing: -.02em; }
+.wkpill { font-family: var(--mono); font-weight: 800; font-size: 20px; letter-spacing: .12em; padding: 12px 20px; border-radius: 999px; border: 2px solid var(--red); background: rgba(232,52,59,.2); color: #ffd6d7; }
+.progress { position: absolute; left: 0; bottom: 0; height: 8px; background: linear-gradient(90deg, var(--red), var(--gold)); z-index: 6; }
+.scene { position: absolute; inset: 0; padding: 170px 64px 80px; display: flex; flex-direction: column; }
+.eyebrow { font-family: var(--mono); font-weight: 800; font-size: 24px; letter-spacing: .2em; color: var(--gold); text-transform: uppercase; display: flex; gap: 14px; align-items: center; }
+.eyebrow::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--red); box-shadow: 0 0 16px var(--red); }
+.h { font-weight: 900; font-stretch: 112%; font-size: 76px; line-height: 1; letter-spacing: -.015em; margin-top: 18px; }
+.title { font-weight: 900; font-stretch: 125%; font-size: 150px; line-height: .88; letter-spacing: -.03em; text-transform: uppercase; margin-top: 150px; }
+.title .l2 { color: var(--red); }
+.sub { font-size: 34px; color: var(--muted); margin-top: 40px; line-height: 1.3; }
+.sub b { color: var(--gold); }
+.kgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; margin-top: 56px; }
+.k { min-width: 0; background: linear-gradient(180deg, #241b20, var(--panel)); border: 2px solid var(--line); border-radius: 26px; padding: 34px 32px; }
+.k .v { font-weight: 900; font-stretch: 108%; font-size: 104px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.k.gold .v { color: var(--gold); }
+.k .l { font-size: 30px; font-weight: 700; margin-top: 12px; }
+.k .s { font-family: var(--mono); font-size: 21px; color: var(--muted); margin-top: 8px; }
+.podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 22px; align-items: end; margin-top: auto; margin-bottom: 30px; }
+.step { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.who { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-bottom: 22px; }
+.av { width: 128px; height: 128px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 44px; color: var(--c); background: color-mix(in srgb, var(--c) 18%, #1b1418); border: 5px solid var(--c); }
+.avs { display: flex; } .avs .av + .av { margin-left: -34px; }
+.av.sm { width: 84px; height: 84px; font-size: 30px; border-width: 4px; }
+.av.xs { width: 64px; height: 64px; font-size: 22px; border-width: 3px; }
+.p1 .av { box-shadow: 0 0 0 8px rgba(247,185,62,.25), 0 0 60px rgba(247,185,62,.55); }
+.nm { font-weight: 900; font-size: 40px; line-height: 1.05; }
+.p1 .nm { font-size: 48px; }
+.mt { font-family: var(--mono); font-size: 22px; color: var(--muted); }
+.ea { font-family: var(--mono); font-size: 24px; font-weight: 800; color: var(--gold-hi); }
+.block { width: 100%; border-radius: 22px 22px 6px 6px; display: grid; place-items: center; font-weight: 900; font-size: 110px; color: rgba(0,0,0,.5); transform-origin: bottom; }
+.p1 .block { height: 330px; background: linear-gradient(180deg, var(--gold-hi), var(--gold) 55%, #c98a17); }
+.p2 .block { height: 240px; background: linear-gradient(180deg, #f4f6f9, var(--silver) 60%, #9aa1ab); }
+.p3 .block { height: 180px; background: linear-gradient(180deg, #f6b28f, var(--bronze) 60%, #b4552d); }
+.crown { width: 92px; height: 56px; color: var(--gold); }
+.list { display: grid; gap: 20px; margin-top: 56px; }
+.row { display: flex; align-items: center; gap: 26px; padding: 22px 28px; border-radius: 22px; background: rgba(255,255,255,.05); border: 2px solid rgba(79,216,144,.25); }
+.row .n { font-weight: 900; font-size: 42px; line-height: 1.05; }
+.row .s { font-family: var(--mono); font-size: 22px; color: var(--muted); }
+.row .p { margin-left: auto; font-weight: 900; font-size: 44px; color: var(--up); }
+.bgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 56px; }
+.badge { border-radius: 26px; padding: 34px 30px; border: 2px solid rgba(247,185,62,.45); background: radial-gradient(120% 100% at 0% 0%, rgba(247,185,62,.2), transparent 60%), #1d161a; }
+.badge .i { width: 76px; height: 76px; border-radius: 20px; background: rgba(247,185,62,.18); color: var(--gold); display: grid; place-items: center; }
+.badge .i svg { width: 42px; height: 42px; }
+.badge .bl { font-family: var(--mono); font-weight: 800; font-size: 20px; letter-spacing: .16em; color: var(--gold); margin-top: 22px; text-transform: uppercase; }
+.badge .bn { font-weight: 900; font-size: 42px; line-height: 1.05; margin-top: 8px; }
+.badge .bv { font-family: var(--mono); font-size: 22px; color: var(--muted); margin-top: 8px; }
+.badge .bv b { color: var(--text); font-size: 28px; }
+.road { margin-top: auto; margin-bottom: 40px; }
+.stops { display: grid; grid-template-columns: repeat(11, 1fr); align-items: end; gap: 6px; height: 470px; }
+.stop { display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; }
+.pad { font-family: var(--mono); font-weight: 800; font-size: 18px; color: var(--muted); text-align: center; border: 2px dashed var(--line); border-radius: 16px; padding: 12px 4px; width: 100%; }
+.pad b { display: block; font-family: var(--display); font-size: 40px; color: var(--text); }
+.rocket { width: 74px; height: 100px; color: var(--gold); filter: drop-shadow(0 0 24px rgba(247,185,62,.6)); }
+.railline { height: 16px; border-radius: 16px; margin-top: 14px; background: linear-gradient(90deg, rgba(232,52,59,.3), rgba(232,52,59,.7) 60%, var(--gold)); transform-origin: left; }
+.ticks { display: grid; grid-template-columns: repeat(11, 1fr); margin-top: 12px; font-family: var(--mono); font-size: 24px; font-weight: 800; color: var(--muted); text-align: center; }
+.ticks span:last-child { color: var(--gold); }
+.prize { font-weight: 900; font-stretch: 118%; font-size: 120px; color: var(--gold); line-height: .95; letter-spacing: -.03em; margin-top: 30px; }
+.prize small { display: block; font-family: var(--mono); font-size: 22px; letter-spacing: .08em; color: var(--muted); margin-top: 14px; }
+.end { align-items: flex-start; justify-content: center; }
+.end .big { font-weight: 900; font-stretch: 125%; font-size: 118px; line-height: .92; letter-spacing: -.03em; text-transform: uppercase; }
+.end .big span { display: block; }
+.end .big .r { color: var(--red); }
+.end .nb { margin-top: 70px; padding: 30px 36px; border-radius: 26px; background: linear-gradient(100deg, var(--red-deep), var(--red)); }
+.end .nb .a { font-family: var(--mono); font-weight: 800; font-size: 22px; letter-spacing: .16em; opacity: .9; }
+.end .nb .b { font-weight: 900; font-size: 56px; margin-top: 8px; }
+[data-fx] { will-change: transform, opacity; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="bg" width="1080" height="1350"></canvas>
+  <div class="chrome">
+    <div class="brand"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div>
+    <div class="wkpill" id="wkpill"></div>
+  </div>
+  <div id="scenes"></div>
+  <canvas id="fx" width="1080" height="1350"></canvas>
+  <div class="progress" id="progress"></div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-rocket" viewBox="0 0 24 32"><path fill="currentColor" d="M12 0c4.2 3.6 6.3 8.7 6.3 14.6V22H5.7v-7.4C5.7 8.7 7.8 3.6 12 0Z"/><circle cx="12" cy="11.5" r="2.6" fill="#0f0c0e"/><path fill="currentColor" d="M5.7 16.5 1 21.5V25l4.7-2.2zM18.3 16.5l4.7 5V25l-4.7-2.2z"/><path fill="#e8343b" d="M8.2 23.4h7.6c0 3.6-1.7 6.4-3.8 8.6-2.1-2.2-3.8-5-3.8-8.6Z"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 46 28"><path fill="currentColor" d="M3 8l9.5 8.5L23 2l10.5 14.5L43 8l-3.5 18h-33z"/><circle cx="3" cy="7" r="3" fill="currentColor"/><circle cx="23" cy="3" r="3" fill="currentColor"/><circle cx="43" cy="7" r="3" fill="currentColor"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.2 5.8 21l1.6-7L2 9.2l7.1-.6z"/></symbol>
+  <symbol id="i-jump" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M3 17 9.5 10.5 13.5 14.5 21 7M15 7h6v6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path fill="currentColor" d="M2.5 11.2 21 3.5l-4.6 17.3-5.1-5.5-4.7 3.4.6-6.2z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path stroke="currentColor" stroke-width="2.8" stroke-linecap="round" d="m15.5 15.5 5.5 5.5"/></symbol>
+</defs></svg>
+<script id="season-data" type="application/json">__SEASON_DATA__</script>
+<script>
+(() => {
+  const S = JSON.parse(document.getElementById("season-data").textContent);
+  const W = S.current_week, w = S.weeks[String(W)], t = w.totals, A = S.agents, names = Object.keys(A);
+  const ava = w.ava, B = ava && ava.badges;
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = (n) => Number(n).toLocaleString("en-US");
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dd = (iso) => { const [y, m, d] = iso.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const md = (iso) => { const x = dd(iso); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCDate()}`; };
+  const span = (a, b) => { const x = dd(a), y = dd(b); return x.getUTCMonth() === y.getUTCMonth() ? `${md(a)}–${y.getUTCDate()}` : `${md(a)} – ${md(b)}`; };
+  const TC = { "South LA": "#ff5a5f", "South Bay": "#f7b93e", "West LA": "#73adff", "Southeast LA": "#be8cf7", "Long Beach": "#45d3cb" };
+  const av = (n, cls = "") => `<span class="av ${cls}" style="--c:${TC[A[n].team] || "#b5a5ab"}">${esc(A[n].initials)}</span>`;
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const money = (n) => "$" + (n / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M";
+  document.getElementById("wkpill").textContent = `WEEK ${W} · ${span(w.start, w.end).toUpperCase()}`;
+
+  // ---- data for scenes
+  const writers = names.filter((n) => w.agents[n].offers > 0).sort((a, b) => w.agents[b].offers - w.agents[a].offers || w.agents[b].pts - w.agents[a].pts || w.agents[b].mutual - w.agents[a].mutual || a.localeCompare(b));
+  const key = (n) => `${w.agents[n].offers}|${w.agents[n].pts}`;
+  const third = writers[2] ? writers.slice(2).filter((n) => key(n) === key(writers[2])).slice(0, 2) : [];
+  const club = names.filter((n) => w.agents[n].pts_ref > 0).sort((a, b) => w.agents[b].ref_new - w.agents[a].ref_new || a.localeCompare(b));
+  const left = S.calendar.length - W;
+  const nxt = S.calendar.find((c) => c.n === W + 1);
+  let nextLabel = "Final results";
+  if (nxt) { const p = dd(nxt.end); p.setUTCDate(p.getUTCDate() + 1); nextLabel = `${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][p.getUTCDay()]}, ${MONTHS[p.getUTCMonth()]} ${p.getUTCDate()}`; }
+
+  const step = (list, place) => {
+    if (!list || !list.length) return `<div class="step p${place}"><div class="who" data-fx="drop" data-in="${7300 + place * 120}" data-dur="600"><span class="av" style="--c:#85737b;border-style:dashed">?</span><div class="nm">Open seat</div></div><div class="block" data-fx="grow" data-in="${6200 + (3 - place) * 150}" data-dur="800">${place}</div></div>`;
+    const a = w.agents[list[0]], shared = list.length > 1;
+    const nm = shared ? list.map((n) => esc(A[n].first)).join(" & ") : esc(list[0]);
+    const earn = [a.pts_offers ? `+${fmt(a.pts_offers)}` : "", !shared && a.pts_ref ? `+${fmt(a.pts_ref)} Rocket` : ""].filter(Boolean).join(" · ") || (list.every((n) => w.agents[n].mutual) ? "reached mutual" : "");
+    const whoIn = { 1: 7600, 2: 7200, 3: 7400 }[place], blockIn = { 1: 6500, 2: 6200, 3: 6350 }[place];
+    return `<div class="step p${place}"><div class="who" data-fx="drop" data-in="${whoIn}" data-dur="650">${place === 1 ? `<svg class="crown"><use href="#i-crown"/></svg>` : ""}<div class="avs">${list.map((n) => av(n, place === 1 ? "" : "sm")).join("")}</div><div class="nm">${nm}</div><div class="mt">${a.offers} offer${a.offers === 1 ? "" : "s"}${shared ? " each" : ""}</div><div class="ea">${earn}</div></div><div class="block" data-fx="grow" data-in="${blockIn}" data-dur="900">${place}</div></div>`;
+  };
+
+  const road = w.road || {};
+  const goalN = S.contest.grand_prize.offers;
+  const byCount = {}; names.forEach((n) => { const c = Math.min(road[n] || 0, goalN); (byCount[c] = byCount[c] || []).push(n); });
+  let ri = 0;
+  const stops = Array.from({ length: goalN + 1 }, (_, c) => {
+    const list = (byCount[c] || []).sort();
+    if (c === 0) return `<div class="stop"><div class="pad" data-fx="pop" data-in="15500" data-dur="500"><b>${list.length}</b>on pad</div></div>`;
+    if (c === goalN) return `<div class="stop">${list.map((n) => av(n, "xs")).join("")}<svg class="rocket" data-fx="float" data-in="15700" data-dur="900"><use href="#i-rocket"/></svg></div>`;
+    return `<div class="stop">${list.map((n) => `<span data-fx="launch" data-in="${15600 + ri++ * 90}" data-dur="650">${av(n, "xs")}</span>`).join("")}</div>`;
+  }).join("");
+  const roadTotal = names.reduce((s, n) => s + (road[n] || 0), 0);
+
+  const scenes = [
+    [0, 2800, `<div class="title"><div data-fx="slam" data-in="250" data-dur="650">Finish strong.</div><div class="l2" data-fx="slam" data-in="520" data-dur="650">Start strong.</div></div>
+      <div class="sub" data-fx="rise" data-in="1100" data-dur="600">Week ${W} results are in.<br>Offer writing + Rocket referral contest · <b>10,000 pt grand prize</b></div>`],
+    [2800, 6000, `<div class="eyebrow" data-fx="rise" data-in="2900" data-dur="500">Week ${W} by the numbers</div>
+      <div class="kgrid">
+        <div class="k" data-fx="pop" data-in="3050" data-dur="550"><div class="v" data-count="${t.offers}" data-in="3150" data-dur="1100">${t.offers}</div><div class="l">offers submitted</div><div class="s">${t.mutual} already reached mutual</div></div>
+        <div class="k" data-fx="pop" data-in="3250" data-dur="550"><div class="v" data-count="${t.volume}" data-fmt="money" data-in="3350" data-dur="1100">${money(t.volume)}</div><div class="l">in offers written</div><div class="s">${t.writers} agents writing</div></div>
+        <div class="k gold" data-fx="pop" data-in="3450" data-dur="550"><div class="v" data-count="${t.pts}" data-in="3550" data-dur="1200">${fmt(t.pts)}</div><div class="l">Amaze points awarded</div><div class="s">offers + Rocket 100%</div></div>
+        <div class="k" data-fx="pop" data-in="3650" data-dur="550"><div class="v" data-count="${pct(t.ref_done, t.ref_new)}" data-fmt="pct" data-in="3750" data-dur="1100">${pct(t.ref_done, t.ref_new)}%</div><div class="l">Rocket intro rate</div><div class="s">${t.ref_done} of ${t.ref_new} new customers · goal ${Math.round(S.contest.referral_goal * 100)}%</div></div>
+      </div>`],
+    [6000, 10600, `<div class="eyebrow" data-fx="rise" data-in="6050" data-dur="500">Command crew · top offer writers</div><div class="h" data-fx="rise" data-in="6150" data-dur="550">Offers win the week.</div>
+      <div class="podium">${step(writers[1] ? [writers[1]] : [], 2)}${step(writers[0] ? [writers[0]] : [], 1)}${step(third, 3)}</div>`],
+    [10600, 13000, `<div class="eyebrow" data-fx="rise" data-in="10650" data-dur="500">100% club · +1,000 each</div><div class="h" data-fx="rise" data-in="10750" data-dur="550">Every new customer introduced to Rocket.</div>
+      <div class="list">${club.slice(0, 6).map((n, i) => `<div class="row" data-fx="left" data-in="${11050 + i * 140}" data-dur="500">${av(n, "xs")}<div><div class="n">${esc(n)}</div><div class="s">${w.agents[n].ref_done} of ${w.agents[n].ref_new} introduced</div></div><div class="p">+1,000</div></div>`).join("")}</div>`],
+    [13000, 15300, B ? `<div class="eyebrow" data-fx="rise" data-in="13050" data-dur="500">Ava badges · last 30 days</div><div class="h" data-fx="rise" data-in="13150" data-dur="550">Working smarter shows up here first.</div>
+      <div class="bgrid">${[[B.champion, "i-star", `<b>${B.champion.value}</b> usage score`], [B.jump, "i-jump", `<b>+${B.jump.value}</b> prompts`], [B.outreach, "i-send", `<b>${fmt(B.outreach.value)}</b> outreach drafts`], [B.research, "i-search", `<b>${fmt(B.research.value)}</b> customers researched`]]
+        .map(([b, ic, v], i) => `<div class="badge" data-fx="flip" data-in="${13400 + i * 160}" data-dur="650"><div class="i"><svg><use href="#${ic}"/></svg></div><div class="bl">${esc(b.label)}</div><div class="bn">${esc(b.agent)}</div><div class="bv">${v}</div></div>`).join("")}</div>` : ""],
+    [15300, 18200, `<div class="eyebrow" data-fx="rise" data-in="15350" data-dur="500">Road to 10 · grand prize</div><div class="h" data-fx="rise" data-in="15450" data-dur="550">10 offers by Dec 13.</div>
+      <div class="prize" data-fx="rise" data-in="15650" data-dur="600">10,000 pts<small>DRAWING · ${left} WEEKS LEFT · ${Math.ceil(goalN / Math.max(left, 1))} OFFERS/WEEK GETS YOU THERE</small></div>
+      <div class="road"><div class="stops">${stops}</div><div class="railline" data-fx="grow-x" data-in="15400" data-dur="900"></div><div class="ticks">${Array.from({ length: goalN + 1 }, (_, i) => `<span>${i}</span>`).join("")}</div></div>`],
+    [18200, 20000, `<div class="end scene-inner" style="display:flex;flex-direction:column;justify-content:center;flex:1">
+      <div class="big"><span data-fx="slam" data-in="18250" data-dur="500">Submit.</span><span data-fx="slam" data-in="18450" data-dur="500">Log it.</span><span class="r" data-fx="slam" data-in="18650" data-dur="500">Introduce Rocket.</span></div>
+      <div class="nb" data-fx="rise" data-in="18950" data-dur="550"><div class="a">NEXT BOARD</div><div class="b">${esc(nextLabel)}</div></div></div>`],
+  ];
+  const DURATION = 20000;
+  document.getElementById("scenes").innerHTML = scenes.map(([a, b, html]) => `<div class="scene" data-a="${a}" data-b="${b}">${html}</div>`).join("");
+
+  // ---- timeline engine
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const outCubic = (p) => 1 - Math.pow(1 - p, 3);
+  const outBack = (p) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+  const FX = {
+    rise: (p) => [outCubic(p), `translateY(${(1 - outCubic(p)) * 40}px)`],
+    left: (p) => [outCubic(p), `translateX(${(1 - outCubic(p)) * -60}px)`],
+    drop: (p) => [clamp(p * 1.6), `translateY(${(1 - outBack(p)) * -70}px)`],
+    pop: (p) => [clamp(p * 1.8), `scale(${0.82 + 0.18 * outBack(p)})`],
+    slam: (p) => [clamp(p * 1.5), `translateY(${(1 - outBack(p)) * 30}px) scale(${1 + (1 - outCubic(p)) * 0.12})`],
+    grow: (p) => [1, `scaleY(${Math.max(0.001, outBack(p))})`],
+    "grow-x": (p) => [1, `scaleX(${Math.max(0.001, outCubic(p))})`],
+    launch: (p) => [clamp(p * 1.6), `translateY(${(1 - outBack(p)) * 120}px) scale(${0.6 + 0.4 * outBack(p)})`],
+    flip: (p) => [clamp(p * 1.6), `perspective(900px) rotateY(${(1 - outCubic(p)) * 80}deg)`],
+    float: (p, t) => [clamp(p * 1.5), `translateY(${(1 - outBack(p)) * 140 + Math.sin(t / 380) * 8}px)`],
+  };
+  const fxEls = [...document.querySelectorAll("[data-fx]")].map((el) => ({ el, fx: el.dataset.fx, a: +el.dataset.in, d: +el.dataset.dur }));
+  const countEls = [...document.querySelectorAll("[data-count]")].map((el) => ({ el, v: +el.dataset.count, a: +el.dataset.in, d: +el.dataset.dur, f: el.dataset.fmt }));
+  const sceneEls = [...document.querySelectorAll(".scene")].map((el) => ({ el, a: +el.dataset.a, b: +el.dataset.b }));
+
+  // seeded RNG so every capture is identical
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const stars = Array.from({ length: 140 }, () => ({ x: rnd() * 1080, y: rnd() * 1350, r: rnd() * 2 + .4, s: rnd() * 30 + 8, p: rnd() * 6.28 }));
+  const cols = ["#e8343b", "#f7b93e", "#ffde87", "#f7f1ee", "#ff8a5c"];
+  const confetti = Array.from({ length: 220 }, () => { const a = -Math.PI / 2 + (rnd() - .5) * 2.2, sp = 900 + rnd() * 1300; return { vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, w: 10 + rnd() * 12, h: 16 + rnd() * 16, r: rnd() * 6, vr: (rnd() - .5) * 14, c: cols[(rnd() * cols.length) | 0] }; });
+  const bg = document.getElementById("bg").getContext("2d"), fx = document.getElementById("fx").getContext("2d");
+  const CONF_T = 8100, CONF_X = 540, CONF_Y = 760;
+
+  function seek(ms) {
+    for (const s of sceneEls) {
+      const vis = ms >= s.a - 1 && ms < s.b + 1;
+      const fadeIn = clamp((ms - s.a) / 250), fadeOut = s.b >= DURATION ? 1 : clamp((s.b - ms) / 280);
+      s.el.style.display = vis ? "flex" : "none";
+      s.el.style.opacity = Math.min(fadeIn, fadeOut);
+      s.el.style.transform = `translateY(${(1 - fadeOut) * -30}px)`;
+    }
+    for (const e of fxEls) {
+      const p = clamp((ms - e.a) / e.d);
+      const [o, tr] = FX[e.fx](p, ms);
+      e.el.style.opacity = o; e.el.style.transform = tr;
+    }
+    for (const c of countEls) {
+      const p = outCubic(clamp((ms - c.a) / c.d)), v = c.v * p;
+      c.el.textContent = c.f === "money" ? money(v) : c.f === "pct" ? Math.round(v) + "%" : fmt(Math.round(v));
+    }
+    // background stars drift upward
+    bg.clearRect(0, 0, 1080, 1350);
+    for (const s of stars) {
+      const y = ((s.y - (ms / 1000) * s.s) % 1350 + 1350) % 1350;
+      bg.globalAlpha = .25 + .5 * (Math.sin(ms / 700 + s.p) + 1) / 2;
+      bg.fillStyle = s.r > 1.8 ? "#ffde87" : "#f7f1ee"; bg.beginPath(); bg.arc(s.x, y, s.r, 0, 6.283); bg.fill();
+    }
+    // confetti burst over the podium
+    fx.clearRect(0, 0, 1080, 1350);
+    const ct = (ms - CONF_T) / 1000;
+    if (ct > 0 && ct < 2.0) {
+      for (const p of confetti) {
+        const x = CONF_X + p.vx * ct * Math.exp(-ct * .9) / 1.2, y = CONF_Y + p.vy * ct * Math.exp(-ct * .9) / 1.2 + 900 * ct * ct;
+        fx.save(); fx.globalAlpha = clamp((2.0 - ct) / .7); fx.translate(x, y); fx.rotate(p.r + p.vr * ct);
+        fx.fillStyle = p.c; fx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos((p.r + p.vr * ct) * 1.7))); fx.restore();
+      }
+    }
+    document.getElementById("progress").style.width = (ms / DURATION) * 100 + "%";
+  }
+
+  function fitStage() {
+    const k = Math.min(window.innerWidth / 1080, window.innerHeight / 1350);
+    document.getElementById("stage").style.setProperty("--k", k);
+  }
+  fitStage(); window.addEventListener("resize", fitStage);
+  window.REEL = { seek, DURATION };
+  if (location.hash !== "#capture") {
+    let t0 = null;
+    const loop = (now) => { if (t0 === null) t0 = now; seek((now - t0) % DURATION); requestAnimationFrame(loop); };
+    document.fonts.ready.then(() => requestAnimationFrame(loop));
+  } else { seek(0); }
+})();
+</script>
+</body>
+</html>

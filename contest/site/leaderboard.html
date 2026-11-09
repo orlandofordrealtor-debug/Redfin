@@ -1,0 +1,1085 @@
+<title>Finish Strong Leaderboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+/* Layout: a launch-broadcast poster. One tall column of telemetry bands for phones and Slack;
+   present mode re-stages every band as its own 16:9 slide for the team meeting. */
+:root {
+  color-scheme: dark;
+  --ink: #0f0c0e;
+  --panel: #191316;
+  --panel-2: #221a1e;
+  --line: #36282e;
+  --text: #f7f1ee;
+  --muted: #b5a5ab;
+  --dim: #85737b;
+  --red: #e8343b;
+  --red-deep: #8f121b;
+  --gold: #f7b93e;
+  --gold-hi: #ffde87;
+  --silver: #d5d9e0;
+  --bronze: #e5875a;
+  --up: #4fd890;
+  --down: #ff7d7d;
+  --t-southla: #ff5a5f;
+  --t-southbay: #f7b93e;
+  --t-westla: #73adff;
+  --t-southeast: #be8cf7;
+  --t-longbeach: #45d3cb;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 14px;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-back: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--ink); }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1100px 620px at 12% -8%, rgba(232, 52, 59, .30), transparent 62%),
+    radial-gradient(900px 520px at 100% 6%, rgba(143, 18, 27, .32), transparent 60%),
+    var(--ink);
+  background-repeat: no-repeat;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--ink);
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+}
+.wrap > * { min-width: 0; }
+
+/* ---------- shared type ---------- */
+.eyebrow {
+  font-family: var(--mono); font-weight: 700; font-size: 11.5px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+  display: flex; align-items: center; gap: 8px; margin: 0;
+}
+.eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 10px var(--red); }
+h2 {
+  font-family: var(--display); font-stretch: 112%; font-weight: 900;
+  font-size: clamp(24px, 4.4vw, 34px); line-height: 1.04; letter-spacing: -.01em;
+  margin: 6px 0 0; text-wrap: balance;
+}
+.lede { color: var(--muted); margin: 6px 0 0; max-width: 62ch; }
+.num { font-variant-numeric: tabular-nums; }
+.band { position: relative; }
+.band-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.band-head > div { min-width: 0; }
+.panel {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+}
+.pill.hot { border-color: rgba(232,52,59,.7); background: rgba(232,52,59,.16); color: #ffd6d7; }
+.pill.gold { border-color: rgba(247,185,62,.6); background: rgba(247,185,62,.12); color: var(--gold-hi); }
+.up { color: var(--up); }
+.down { color: var(--down); }
+
+/* ---------- avatar ---------- */
+.av {
+  --c: var(--muted);
+  flex: none; width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--display); font-stretch: 100%; font-weight: 800; font-size: 13px; letter-spacing: .02em;
+  color: var(--c); background: color-mix(in srgb, var(--c) 16%, var(--panel));
+  border: 2px solid color-mix(in srgb, var(--c) 70%, transparent);
+}
+.av.lg { width: 66px; height: 66px; font-size: 22px; border-width: 3px; }
+.av.sm { width: 28px; height: 28px; font-size: 10.5px; border-width: 1.5px; }
+.team-southla { --c: var(--t-southla); }
+.team-southbay { --c: var(--t-southbay); }
+.team-westla { --c: var(--t-westla); }
+.team-southeast { --c: var(--t-southeast); }
+.team-longbeach { --c: var(--t-longbeach); }
+
+/* ---------- top bar & week rail ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; font-family: var(--display); white-space: nowrap; }
+.brand .rf { color: var(--red); font-weight: 900; font-size: 24px; font-stretch: 100%; letter-spacing: -.02em; }
+.brand .pb { color: var(--muted); font-size: 12px; font-weight: 500; }
+.brand .rk { color: var(--text); font-weight: 900; font-size: 24px; font-stretch: 100%; letter-spacing: -.02em; }
+.top-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel);
+  transition: border-color .2s, background .2s;
+}
+.btn:hover { border-color: var(--gold); background: var(--panel-2); }
+.btn svg { width: 14px; height: 14px; }
+
+.rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
+.wk {
+  position: relative; text-align: left; padding: 8px 9px 9px; border-radius: 10px;
+  border: 1px solid var(--line); background: rgba(25,19,22,.7); min-width: 0; cursor: default;
+}
+.wk b { display: block; font-family: var(--display); font-weight: 900; font-size: 15px; font-stretch: 110%; }
+.wk span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk i { display: block; font-style: normal; font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-top: 3px; color: var(--dim); }
+.wk.done { border-color: rgba(247,185,62,.35); }
+.wk.done i { color: var(--gold); }
+.wk.live { border-color: var(--red); background: linear-gradient(180deg, rgba(232,52,59,.28), rgba(143,18,27,.18)); }
+.wk.live i { color: #ffd6d7; }
+.wk.live::after {
+  content: ""; position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red); box-shadow: 0 0 0 0 rgba(232,52,59,.8); animation: ping 1.8s infinite;
+}
+.wk.pickable { cursor: pointer; }
+.wk.pickable:hover { border-color: var(--gold); }
+.wk.viewing { outline: 2px solid var(--gold); outline-offset: 2px; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(232,52,59,.7); } 80%, 100% { box-shadow: 0 0 0 9px rgba(232,52,59,0); } }
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; padding: 22px 22px 22px; }
+.hero canvas.stars { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .9; }
+.hero > *:not(canvas) { position: relative; }
+.title {
+  font-family: var(--display); font-weight: 900; font-stretch: 125%;
+  font-size: clamp(38px, 7.6vw, 80px); line-height: .9; letter-spacing: -.02em;
+  margin: 22px 0 0; text-transform: uppercase;
+}
+.title span { display: block; }
+.title .l2 {
+  color: var(--red);
+  background: linear-gradient(92deg, #ff4a50 0%, var(--red) 45%, #ff8a5c 70%, var(--red) 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: sheen 6s linear infinite;
+}
+@keyframes sheen { to { background-position: -220% 0; } }
+.in .title .l1 { animation: slam .7s var(--ease-back) both; }
+.in .title .l2 { animation: slam .7s .14s var(--ease-back) both, sheen 6s linear infinite; }
+@keyframes slam { from { opacity: 0; transform: translateY(18px) scale(1.08); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.subline { margin: 14px 0 0; color: var(--muted); font-size: 16px; }
+.subline b { color: var(--gold); font-weight: 800; }
+.rally {
+  margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  font-size: 15px; color: var(--text);
+}
+.rally strong { font-family: var(--display); font-stretch: 110%; font-weight: 900; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+.kpi { padding: 14px 14px 13px; min-width: 0; }
+.kpi .big {
+  font-family: var(--display); font-weight: 900; font-stretch: 112%;
+  font-size: clamp(30px, 5vw, 42px); line-height: 1; letter-spacing: -.02em;
+}
+.kpi .big small { font-size: .5em; color: var(--muted); font-weight: 800; }
+.kpi.gold .big { color: var(--gold); }
+.kpi .lab { margin-top: 6px; font-weight: 700; font-size: 13.5px; }
+.kpi .sub { margin-top: 4px; font-family: var(--mono); font-size: 11px; line-height: 1.45; color: var(--muted); }
+.kpi .meter { margin-top: 9px; height: 6px; border-radius: 6px; background: rgba(255,255,255,.07); position: relative; overflow: hidden; }
+.kpi .meter i { position: absolute; inset: 0 auto 0 0; border-radius: 6px; background: linear-gradient(90deg, var(--red), var(--gold)); transform-origin: left; }
+.kpi .meter b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); opacity: .75; }
+.in .kpi .meter i { animation: grow 1.3s .3s var(--ease-out) both; }
+@keyframes grow { from { transform: scaleX(0); } }
+
+/* ---------- podium ---------- */
+.podium-band { padding: 22px 18px 18px; overflow: hidden; }
+.podium-band canvas.confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+.podium {
+  display: grid; grid-template-columns: 1fr 1.12fr 1fr; align-items: end; gap: 12px;
+  max-width: 780px; margin: 8px auto 0;
+}
+.step { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.step .who { display: flex; flex-direction: column; align-items: center; gap: 6px; padding-bottom: 12px; min-width: 0; width: 100%; }
+.step .avs { display: flex; justify-content: center; }
+.step .avs .av + .av { margin-left: -14px; }
+.step .crown { width: 46px; height: 28px; color: var(--gold); filter: drop-shadow(0 4px 10px rgba(247,185,62,.45)); }
+.step .name { font-family: var(--display); font-weight: 800; font-stretch: 104%; font-size: 17px; line-height: 1.15; text-wrap: balance; }
+.step .meta { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.4; }
+.step .earn { font-family: var(--mono); font-weight: 800; font-size: 12px; color: var(--gold-hi); }
+.block {
+  width: 100%; border-radius: 12px 12px 4px 4px; display: grid; place-items: center;
+  font-family: var(--display); font-weight: 900; font-stretch: 112%; font-size: 54px; color: rgba(0,0,0,.55);
+  transform-origin: bottom; position: relative; overflow: hidden;
+}
+.block::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.38) 48%, transparent 62%);
+  transform: translateX(-120%);
+}
+.in .block::after { animation: glint 2.4s 1.2s ease-in-out both; }
+@keyframes glint { to { transform: translateX(120%); } }
+.p1 .block { height: 150px; background: linear-gradient(180deg, var(--gold-hi), var(--gold) 55%, #c98a17); box-shadow: 0 20px 60px -20px rgba(247,185,62,.7); }
+.p2 .block { height: 108px; background: linear-gradient(180deg, #f4f6f9, var(--silver) 60%, #9aa1ab); }
+.p3 .block { height: 82px; background: linear-gradient(180deg, #f6b28f, var(--bronze) 60%, #b4552d); }
+.p1 .name { font-size: 21px; }
+.in .block { animation: rise .9s var(--ease-back) both; }
+.in .p2 .block { animation-delay: .15s; }
+.in .p3 .block { animation-delay: .3s; }
+.in .p1 .block { animation-delay: .45s; }
+.in .step .who { animation: drop .7s var(--ease-back) both; }
+.in .p2 .who { animation-delay: .55s; }
+.in .p3 .who { animation-delay: .7s; }
+.in .p1 .who { animation-delay: .9s; }
+@keyframes rise { from { transform: scaleY(0); } }
+@keyframes drop { from { opacity: 0; transform: translateY(-26px); } }
+.p1 .av { box-shadow: 0 0 0 4px rgba(247,185,62,.25), 0 0 34px rgba(247,185,62,.45); }
+.floor { height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--red), transparent); max-width: 820px; margin: 0 auto; }
+.tiers { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.open-seat { opacity: .55; }
+.open-seat .av { border-style: dashed; }
+
+/* ---------- two-up: 100% club + badges ---------- */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.two > * { min-width: 0; }
+.card { padding: 18px; }
+.club-list { display: grid; gap: 8px; margin-top: 14px; }
+.club-row { display: flex; align-items: center; gap: 11px; padding: 8px 10px; border-radius: 11px; background: rgba(255,255,255,.03); }
+.club-row .n { font-weight: 800; }
+.club-row .s { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.club-row .chk { margin-left: auto; font-family: var(--mono); font-weight: 800; font-size: 12px; color: var(--up); white-space: nowrap; }
+.in .club-row { animation: slidein .55s var(--ease-out) both; }
+@keyframes slidein { from { opacity: 0; transform: translateX(-14px); } }
+.goalbar { margin-top: 14px; }
+.goalbar .track { height: 10px; border-radius: 10px; background: rgba(255,255,255,.07); position: relative; overflow: visible; }
+.goalbar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 10px; background: linear-gradient(90deg, var(--red-deep), var(--red)); transform-origin: left; }
+.in .goalbar .fill { animation: grow 1.3s .2s var(--ease-out) both; }
+.goalbar .mark { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--gold); }
+.goalbar .legend { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 6px; gap: 8px; }
+
+.badges { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.badge {
+  position: relative; overflow: hidden; padding: 13px 12px 12px; border-radius: 12px;
+  background: radial-gradient(120% 90% at 0% 0%, rgba(247,185,62,.13), transparent 60%), rgba(255,255,255,.03);
+  border: 1px solid rgba(247,185,62,.28); min-width: 0;
+}
+.badge::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,222,135,.22) 50%, transparent 65%);
+  transform: translateX(-130%); animation: shimmer 5.5s ease-in-out infinite;
+}
+.badge:nth-child(2)::before { animation-delay: 1.2s; }
+.badge:nth-child(3)::before { animation-delay: 2.4s; }
+.badge:nth-child(4)::before { animation-delay: 3.6s; }
+@keyframes shimmer { 0%, 55% { transform: translateX(-130%); } 85%, 100% { transform: translateX(130%); } }
+.badge .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(247,185,62,.16); color: var(--gold); }
+.badge .ic svg { width: 19px; height: 19px; }
+.badge .bl { margin-top: 9px; font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.badge .bn { font-family: var(--display); font-weight: 800; font-size: 16px; line-height: 1.2; margin-top: 2px; }
+.badge .bv { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+.badge .bv b { color: var(--text); font-size: 13px; }
+.climbers { margin-top: 12px; display: grid; gap: 6px; }
+.climbers .ch { font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.climb { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 10px; background: rgba(79,216,144,.06); }
+.climb .cn { font-weight: 700; font-size: 13.5px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.climb .cv { margin-left: auto; font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+.in .badge { animation: pop .6s var(--ease-back) both; }
+.in .badge:nth-child(2) { animation-delay: .1s; }
+.in .badge:nth-child(3) { animation-delay: .2s; }
+.in .badge:nth-child(4) { animation-delay: .3s; }
+@keyframes pop { from { opacity: 0; transform: scale(.86); } }
+
+/* ---------- road to 10 ---------- */
+.road { padding: 20px 18px 18px; }
+.road-hero { display: flex; gap: 18px; align-items: end; justify-content: space-between; flex-wrap: wrap; }
+.road-hero .prize { font-family: var(--display); font-weight: 900; font-stretch: 118%; font-size: clamp(30px, 6vw, 50px); line-height: .95; color: var(--gold); letter-spacing: -.02em; }
+.road-hero .prize small { display: block; font-size: 13px; letter-spacing: .14em; color: var(--muted); font-family: var(--mono); font-weight: 700; text-transform: uppercase; margin-top: 6px; }
+.track-wrap { overflow-x: auto; margin-top: 18px; padding-bottom: 4px; }
+.road-track { position: relative; min-width: 520px; padding: 0 6px; }
+.stops { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); align-items: end; gap: 2px; min-height: 120px; }
+.stop { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; min-width: 0; }
+.stop .av { width: 30px; height: 30px; font-size: 10.5px; border-width: 2px; }
+.in .stop .av { animation: launch .8s var(--ease-back) both; animation-delay: calc(var(--i, 0) * 70ms + .2s); }
+@keyframes launch { from { opacity: 0; transform: translateY(40px) scale(.6); } }
+.pad-count {
+  font-family: var(--mono); font-size: 10px; font-weight: 800; text-align: center; line-height: 1.25;
+  color: var(--muted); border: 1px dashed var(--line); border-radius: 9px; padding: 6px 4px; width: 100%;
+}
+.pad-count b { display: block; font-family: var(--display); font-size: 18px; color: var(--text); }
+.orbit { color: var(--gold); display: grid; justify-items: center; gap: 2px; }
+.orbit svg { width: 34px; height: 46px; filter: drop-shadow(0 0 14px rgba(247,185,62,.55)); }
+.in .orbit svg { animation: hover 2.6s ease-in-out infinite; }
+@keyframes hover { 50% { transform: translateY(-6px); } }
+.orbit span { font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .14em; }
+.rail-line { height: 8px; border-radius: 8px; margin-top: 8px; background: linear-gradient(90deg, rgba(232,52,59,.25), rgba(232,52,59,.65) 60%, var(--gold)); position: relative; }
+.ticks { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); margin-top: 6px; }
+.ticks span { text-align: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--muted); }
+.ticks span:last-child { color: var(--gold); }
+.pace { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.pace > div { padding: 12px; border-radius: 12px; background: rgba(255,255,255,.035); min-width: 0; }
+.pace .pv { font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 26px; line-height: 1; }
+.pace .pl { font-size: 13px; margin-top: 5px; color: var(--muted); }
+
+/* ---------- team race ---------- */
+.teams { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.team { padding: 13px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); min-width: 0; position: relative; }
+.team .tn { font-family: var(--mono); font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--c, var(--muted)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.team .tv { font-family: var(--display); font-weight: 900; font-stretch: 112%; font-size: 30px; line-height: 1.05; margin-top: 4px; }
+.team .ts { font-family: var(--mono); font-size: 10.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+.team.lead { border-color: var(--gold); background: linear-gradient(180deg, rgba(247,185,62,.16), var(--panel)); }
+.team.lead::after { content: "LEADS"; position: absolute; top: 10px; right: 10px; font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .12em; color: var(--gold); }
+
+/* ---------- the board ---------- */
+.board { padding: 8px; }
+.brow {
+  display: grid; grid-template-columns: 34px minmax(0, 1.7fr) 92px 86px minmax(0, 1.25fr) 104px 92px;
+  align-items: center; gap: 10px; padding: 10px 10px; border-radius: 11px;
+}
+.brow + .brow { border-top: 1px solid rgba(255,255,255,.04); }
+.brow.head { font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); padding-block: 6px; }
+.brow.top { background: linear-gradient(90deg, rgba(247,185,62,.12), transparent 70%); }
+.rank { font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 17px; color: var(--muted); }
+.brow.top .rank { color: var(--gold); }
+.agent { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.agent .nm { font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent .tm { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.agent .tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; background: rgba(247,185,62,.14); color: var(--gold-hi); white-space: nowrap; }
+.tag svg { width: 11px; height: 11px; }
+.pips { display: flex; gap: 4px; align-items: center; }
+.pips i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line); }
+.pips i.on { background: var(--red); border-color: var(--red); box-shadow: 0 0 8px rgba(232,52,59,.6); }
+.pips b { font-family: var(--mono); font-size: 11.5px; margin-left: 4px; }
+.rk { font-family: var(--mono); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.rk.full { color: var(--up); }
+.rk.none { color: var(--dim); }
+.ava-cell { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.ava-cell .d { font-weight: 800; margin-left: 4px; }
+.mini { display: grid; gap: 4px; }
+.mini .bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,.07); overflow: hidden; }
+.mini .bar i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--red), var(--gold)); transform-origin: left; }
+.in .mini .bar i { animation: grow 1.1s .25s var(--ease-out) both; }
+.mini span { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.pts { text-align: right; font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 21px; color: var(--gold); white-space: nowrap; }
+.pts small { display: block; font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.in .brow:not(.head) { animation: slidein .5s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms); }
+
+/* ---------- launch pad ---------- */
+.pad { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px; }
+.seat { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; border: 1px dashed var(--line); background: rgba(25,19,22,.6); min-width: 0; }
+.seat > div { min-width: 0; }
+.seat .nm { font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seat .ss { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.seat .ss .d { font-weight: 800; }
+.seat .sv { margin-left: auto; font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .1em; color: var(--gold); border: 1px solid rgba(247,185,62,.4); border-radius: 6px; padding: 3px 5px; white-space: nowrap; }
+
+/* ---------- ava pulse ---------- */
+.pulse { padding: 16px 16px 14px; }
+.pulse-stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.prow { display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 92px; align-items: center; gap: 10px; padding: 3px 0; break-inside: avoid; }
+.prow .pn { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .pz { position: relative; height: 14px; }
+.prow .pz::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line); }
+.prow .pz i { position: absolute; top: 2px; bottom: 2px; border-radius: 4px; }
+.prow .pz i.g { left: 50%; background: linear-gradient(90deg, rgba(79,216,144,.5), var(--up)); transform-origin: left; }
+.prow .pz i.r { right: 50%; background: linear-gradient(270deg, rgba(255,125,125,.5), var(--down)); transform-origin: right; }
+.in .prow .pz i { animation: grow 1s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 25ms + .2s); }
+.prow .pv { font-family: var(--mono); font-size: 11.5px; text-align: right; white-space: nowrap; }
+.prow .pv b { font-weight: 800; }
+.prow.zero .pn { color: var(--down); }
+.axis { display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 92px; gap: 10px; font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 6px; }
+.axis div { display: flex; justify-content: space-between; }
+
+/* ---------- playbook ---------- */
+.plays { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.play { padding: 15px 14px; min-width: 0; }
+.play .pi { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: rgba(232,52,59,.15); color: var(--red); }
+.play .pi svg { width: 19px; height: 19px; }
+.play h3 { font-family: var(--display); font-weight: 800; font-stretch: 104%; font-size: 16.5px; line-height: 1.2; margin: 11px 0 0; text-wrap: balance; }
+.play p { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+.play .stat { margin-top: 9px; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--gold-hi); }
+.flyers { margin-top: 12px; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr); gap: 16px; align-items: center; }
+.flyers h3 { font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 20px; line-height: 1.1; margin: 4px 0 0; }
+.flyers p { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.fly-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.fly { padding: 12px 10px; border-radius: 11px; background: linear-gradient(160deg, rgba(232,52,59,.2), rgba(143,18,27,.08)); border: 1px solid rgba(232,52,59,.35); min-width: 0; }
+.fly b { display: block; font-family: var(--display); font-weight: 900; font-stretch: 108%; font-size: 15px; line-height: 1.15; }
+.fly span { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); line-height: 1.35; }
+
+/* ---------- how to win ---------- */
+.ways { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.way { padding: 16px; min-width: 0; }
+.way .wl { font-family: var(--mono); font-size: 10.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.way h3 { font-family: var(--display); font-weight: 900; font-stretch: 108%; font-size: 19px; line-height: 1.12; margin: 6px 0 10px; }
+.ladder { display: grid; gap: 5px; }
+.ladder div { display: flex; justify-content: space-between; gap: 8px; padding: 7px 10px; border-radius: 9px; background: rgba(255,255,255,.04); font-family: var(--mono); font-size: 12px; }
+.ladder div b { color: var(--gold-hi); }
+.way p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.way .bigpts { font-family: var(--display); font-weight: 900; font-stretch: 112%; font-size: 34px; line-height: 1; color: var(--gold); margin-top: 10px; }
+
+/* ---------- footer ---------- */
+.foot { padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.foot h4 { margin: 0; font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.foot ul { margin: 8px 0 0; padding-left: 16px; color: var(--muted); font-size: 12.5px; display: grid; gap: 4px; }
+.next { text-align: right; }
+.next .nx { font-family: var(--display); font-weight: 900; font-stretch: 112%; font-size: 26px; line-height: 1.05; margin-top: 6px; }
+.next .nd { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; }
+.card-cta { display: none; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 860px) {
+  .brow { grid-template-columns: 28px minmax(0, 1fr) auto; grid-template-areas: "r a p" ". m m"; row-gap: 8px; }
+  .brow.head { display: none; }
+  .brow > .rank { grid-area: r; }
+  .brow > .agent { grid-area: a; }
+  .brow > .pts { grid-area: p; }
+  .brow > .meta-row { grid-area: m; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .meta-row > * { min-width: 0; }
+  .meta-row .cap { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--dim); text-transform: uppercase; margin-bottom: 3px; }
+  .plays { grid-template-columns: 1fr 1fr; }
+  .fly-grid { grid-template-columns: 1fr 1fr; }
+  .flyers { grid-template-columns: 1fr; }
+  .teams { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 861px) {
+  .meta-row { display: contents; }
+  .meta-row .cap { display: none; }
+}
+@media (max-width: 680px) {
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .two { grid-template-columns: 1fr; }
+  .ways { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr; }
+  .next { text-align: left; }
+  .pace { grid-template-columns: 1fr; }
+  .teams { grid-template-columns: 1fr 1fr; }
+  .rail { grid-template-columns: repeat(7, minmax(46px, 1fr)); overflow-x: auto; }
+  .wk span { display: none; }
+  .podium { gap: 7px; }
+  .step .name { font-size: 14px; }
+  .p1 .name { font-size: 16px; }
+  .av.lg { width: 52px; height: 52px; font-size: 17px; }
+  .block { font-size: 40px; }
+  .p1 .block { height: 118px; } .p2 .block { height: 86px; } .p3 .block { height: 64px; }
+  .prow, .axis { grid-template-columns: minmax(0, 104px) minmax(0, 1fr) 78px; }
+  .brow > .meta-row { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 18px 16px; }
+}
+@media (max-width: 420px) {
+  .plays { grid-template-columns: 1fr; }
+  .badges { grid-template-columns: 1fr 1fr; }
+  .kpi .big { font-size: 30px; }
+}
+
+/* ---------- present mode (16:9) ---------- */
+.present-bar { display: none; }
+body.present { overflow: hidden; height: 100vh; }
+body.present .wrap > section { display: none; }
+body.present .wrap > section.on {
+  display: block; position: fixed; left: 50%; top: 50%; width: 1600px; margin: 0;
+  transform: translate(-50%, -50%) scale(var(--fit, 1)); transform-origin: center; z-index: 5;
+}
+body.present .topbar .top-actions { display: none; }
+body.present .board-rows { columns: 2; column-gap: 26px; }
+body.present .board-rows .brow { break-inside: avoid; grid-template-columns: 30px minmax(0, 2.3fr) 72px 64px 92px 112px 84px; }
+body.present .board-rows .brow.head { display: none; }
+body.present .pulse-rows { columns: 2; column-gap: 34px; }
+body.present .pad { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+body.present .present-bar {
+  display: flex; position: fixed; z-index: 20; left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px)); gap: 8px; align-items: center;
+  padding: 6px; border-radius: 999px; background: rgba(15,12,14,.85); border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+}
+.present-bar span { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 64px; text-align: center; }
+body.present.capture .present-bar { display: none; }
+
+/* ---------- Slack card mode ---------- */
+body.cardmode .full-only { display: none; }
+body.cardmode .card-cta { display: flex; }
+body.cardmode .top-actions { display: none; }
+.card-cta {
+  align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 18px;
+  background: linear-gradient(100deg, var(--red-deep), var(--red)); border-radius: var(--radius);
+}
+.card-cta b { font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 20px; line-height: 1.1; }
+.card-cta span { font-family: var(--mono); font-size: 11.5px; opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-rocket" viewBox="0 0 24 32"><path fill="currentColor" d="M12 0c4.2 3.6 6.3 8.7 6.3 14.6V22H5.7v-7.4C5.7 8.7 7.8 3.6 12 0Z"/><circle cx="12" cy="11.5" r="2.6" fill="#0f0c0e"/><path fill="currentColor" d="M5.7 16.5 1 21.5V25l4.7-2.2zM18.3 16.5l4.7 5V25l-4.7-2.2z"/><path fill="#e8343b" d="M8.2 23.4h7.6c0 3.6-1.7 6.4-3.8 8.6-2.1-2.2-3.8-5-3.8-8.6Z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 46 28"><path fill="currentColor" d="M3 8l9.5 8.5L23 2l10.5 14.5L43 8l-3.5 18h-33z"/><circle cx="3" cy="7" r="3" fill="currentColor"/><circle cx="23" cy="3" r="3" fill="currentColor"/><circle cx="43" cy="7" r="3" fill="currentColor"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.2 5.8 21l1.6-7L2 9.2l7.1-.6z"/></symbol>
+    <symbol id="i-jump" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M3 17 9.5 10.5 13.5 14.5 21 7M15 7h6v6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path fill="currentColor" d="M2.5 11.2 21 3.5l-4.6 17.3-5.1-5.5-4.7 3.4.6-6.2z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path stroke="currentColor" stroke-width="2.8" stroke-linecap="round" d="m15.5 15.5 5.5 5.5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 2 4 14h6.5L9.5 22 20 9.5h-6.6z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M4 12.5 9.5 18 20 6.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><circle cx="8" cy="10.5" r="1.4" fill="#0f0c0e"/><circle cx="12" cy="10.5" r="1.4" fill="#0f0c0e"/><circle cx="16" cy="10.5" r="1.4" fill="#0f0c0e"/></symbol>
+    <symbol id="i-broom" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M19 3 11 11"/><path fill="currentColor" d="M10 10.5c-3 0-6 2.5-7 9.5l2.6-1.2-.6 3 2.7-1.6.2 2.8 2.4-2.6 1.6 2c2.6-3.6 2.8-7.5 1.4-9.6z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></symbol>
+  </defs>
+</svg>
+
+<main class="wrap" id="app">
+  <section class="hero panel band reveal" id="s-hero" aria-labelledby="hero-title">
+    <canvas class="stars" aria-hidden="true"></canvas>
+    <div class="topbar">
+      <div class="brand" aria-label="Redfin powered by Rocket"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div>
+      <div class="top-actions">
+        <span class="pill hot" id="week-pill">Week</span>
+        <button class="btn" id="present-btn" type="button" aria-label="Present in 16:9 slides"><svg><use href="#i-play"/></svg>Present</button>
+      </div>
+    </div>
+    <div class="rail" id="rail" role="list" aria-label="Contest weeks"></div>
+    <h1 class="title" id="hero-title"><span class="l1">Finish strong.</span><span class="l2">Start strong.</span></h1>
+    <p class="subline">Offer writing + Rocket referral contest · Oct 26 – Dec 13 · <b>10,000 pt grand prize drawing</b></p>
+    <div class="rally" id="rally"></div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="panel band podium-band reveal" id="s-podium" aria-labelledby="podium-title">
+    <canvas class="confetti" aria-hidden="true"></canvas>
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span><span id="podium-eyebrow">Command crew · top offer writers</span></p>
+        <h2 id="podium-title">Offers win the week.</h2>
+      </div>
+      <button class="btn" id="celebrate" type="button">Celebrate again</button>
+    </div>
+    <div class="podium" id="podium"></div>
+    <div class="floor"></div>
+    <div class="tiers" id="tiers"></div>
+  </section>
+
+  <section class="two band reveal" id="s-club" aria-label="100% Club and Ava badges">
+    <div class="panel card">
+      <p class="eyebrow"><span class="dot"></span>100% Club · +1,000 each</p>
+      <h2>Every new customer introduced to Rocket.</h2>
+      <div class="club-list" id="club"></div>
+      <div class="goalbar" id="goalbar"></div>
+    </div>
+    <div class="panel card">
+      <p class="eyebrow"><span class="dot"></span>Ava badges · last 30 days</p>
+      <h2>Working smarter shows up here first.</h2>
+      <div class="badges" id="badges"></div>
+      <div class="climbers" id="climbers"></div>
+    </div>
+  </section>
+
+  <section class="panel band road reveal" id="s-road" aria-labelledby="road-title">
+    <div class="road-hero">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>Road to 10 · grand prize</p>
+        <h2 id="road-title">10 offers by Dec 13 puts you in the drawing.</h2>
+        <p class="lede" id="road-lede"></p>
+      </div>
+      <div class="prize">10,000<small>Amaze point drawing</small></div>
+    </div>
+    <div class="track-wrap"><div class="road-track" id="track"></div></div>
+    <div class="pace" id="pace"></div>
+  </section>
+
+  <section class="band reveal" id="s-teams" aria-labelledby="teams-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span><span id="teams-eyebrow">Team race · offers per agent</span></p>
+        <h2 id="teams-title">Which team writes the most?</h2>
+      </div>
+    </div>
+    <div class="teams" id="teams"></div>
+  </section>
+
+  <section class="band reveal full-only" id="s-board" aria-labelledby="board-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>The board · season Amaze points</p>
+        <h2 id="board-title">Everyone who's scored so far.</h2>
+      </div>
+      <span class="pill gold" id="season-total"></span>
+    </div>
+    <div class="panel board"><div class="board-rows" id="board"></div></div>
+  </section>
+
+  <section class="band reveal full-only" id="s-pad" aria-labelledby="pad-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>Launch pad · seat saved</p>
+        <h2 id="pad-title">Your seat is saved.</h2>
+        <p class="lede" id="pad-lede"></p>
+      </div>
+    </div>
+    <div class="pad" id="pad"></div>
+  </section>
+
+  <section class="panel band pulse reveal full-only" id="s-ava" aria-labelledby="ava-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>Ava pulse · last 30 days vs the 30 before</p>
+        <h2 id="ava-title">Every agent's Ava trend, up and down.</h2>
+      </div>
+    </div>
+    <div class="pulse-stats" id="pulse-stats"></div>
+    <div class="pulse-rows" id="pulse"></div>
+    <div class="axis" aria-hidden="true"><span></span><div><span>▼ fewer prompts</span><span>more prompts ▲</span></div><span></span></div>
+  </section>
+
+  <section class="band reveal full-only" id="s-play" aria-labelledby="play-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>The playbook · every week</p>
+        <h2 id="play-title">Four habits that turn tours into submitted offers.</h2>
+      </div>
+    </div>
+    <div class="plays" id="plays"></div>
+    <div class="panel flyers">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>Rocket LO flyers</p>
+        <h3>Give buyers a reason to write now.</h3>
+        <p>The market is softening in buyers' favor. Lead with a branded Rocket LO flyer, and ask your LO for current terms.</p>
+      </div>
+      <div class="fly-grid">
+        <div class="fly"><b>3-2-1 Buydown</b><span>Payments start lower and step up over the first three years.</span></div>
+        <div class="fly"><b>2-1 Buydown</b><span>Lower payments in years one and two.</span></div>
+        <div class="fly"><b>Rate Buydown</b><span>A lower rate for the life of the loan.</span></div>
+        <div class="fly"><b>Buyer's or seller's market?</b><span>Show clients where the leverage sits right now.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band reveal full-only" id="s-ways" aria-labelledby="ways-title">
+    <div class="band-head">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>How to win</p>
+        <h2 id="ways-title">Three ways to earn Amaze points.</h2>
+      </div>
+    </div>
+    <div class="ways">
+      <div class="panel way">
+        <div class="wl">Every week</div>
+        <h3>Submit offers</h3>
+        <div class="ladder"><div><span>2 offers</span><b>500 pts</b></div><div><span>3 offers</span><b>1,000 pts</b></div><div><span>4+ offers</span><b>1,500 pts</b></div></div>
+      </div>
+      <div class="panel way">
+        <div class="wl">Guaranteed every week</div>
+        <h3>Introduce 100% of new customers to Rocket</h3>
+        <p>3-way text with your Rocket LO, or their best channel. Hit 100% and it's yours.</p>
+        <div class="bigpts">1,000 pts</div>
+      </div>
+      <div class="panel way">
+        <div class="wl">Grand prize · Dec 13</div>
+        <h3>Submit 10+ offers in the contest</h3>
+        <p>Every agent who reaches 10 submitted offers enters the drawing.</p>
+        <div class="bigpts">10,000 pts</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel foot band" id="s-foot" aria-label="Sources and next board">
+    <div>
+      <h4>How this board is scored</h4>
+      <ul id="sources"></ul>
+    </div>
+    <div class="next">
+      <h4>Next board</h4>
+      <div class="nx" id="next-board"></div>
+      <div class="nd" id="next-dates"></div>
+    </div>
+  </section>
+
+  <div class="card-cta" id="card-cta">
+    <b>Full board, Ava pulse and playbook at the link.</b>
+    <span id="card-cta-sub">Every agent · every week · through Dec 13</span>
+  </div>
+</main>
+
+<div class="present-bar" role="toolbar" aria-label="Slide controls">
+  <button class="btn" id="prev" type="button" aria-label="Previous slide"><svg><use href="#i-left"/></svg></button>
+  <span id="slide-count">1 / 1</span>
+  <button class="btn" id="next" type="button" aria-label="Next slide"><svg><use href="#i-right"/></svg></button>
+  <button class="btn" id="exit" type="button" aria-label="Exit present mode"><svg><use href="#i-x"/></svg>Exit</button>
+</div>
+
+<script id="season-data" type="application/json">{"weeks":{"1":{"n":1,"start":"2026-10-26","end":"2026-10-31","agents":{"Abdiel Hernandez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Alex Lumukanda":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Amy Black":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Anabella Ertel":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Aubrey Myers Jr":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Brian Layne":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Craig Shapiro":{"offers":1,"volume":1800000,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Dj Bonner":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Gregory Eubanks":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Heidi Ludwig":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Joe Royds":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Justin Vold":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Lisbeth Bitar":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Marianna Smith":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Melanie Gonzalez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":1,"pts_offers":0,"pts_ref":0,"pts":0},"Michael Berlin":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Michael Henderson":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Michele Lopez":{"offers":1,"volume":575000,"mutual":0,"fast":0,"ref_new":2,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Michelle Zabukovec":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Paul Vieyra":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":5,"ref_done":1,"pts_offers":0,"pts_ref":0,"pts":0},"Peter Lim":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Rachel Adkins":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Renata Fallon":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Reza Marashi":{"offers":1,"volume":1050000,"mutual":0,"fast":1,"ref_new":2,"ref_done":2,"pts_offers":0,"pts_ref":1000,"pts":1000},"Rick Wilkinson":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Rob Sterling":{"offers":1,"volume":550000,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Ruben Martinez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Sheila Terrell":{"offers":2,"volume":1155000,"mutual":0,"fast":2,"ref_new":1,"ref_done":0,"pts_offers":500,"pts_ref":0,"pts":500},"Thomas Royds":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Tonya Williams":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Vanessa Neiberg":{"offers":1,"volume":1100000,"mutual":1,"fast":1,"ref_new":3,"ref_done":1,"pts_offers":0,"pts_ref":0,"pts":0},"Venus Martinez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0}},"totals":{"offers":7,"volume":6230000,"mutual":1,"fast":4,"writers":6,"ref_new":27,"ref_done":7,"club":3,"pts":3500},"published":false,"locked":"2026-11-08","road":{"Abdiel Hernandez":0,"Alex Lumukanda":0,"Amy Black":0,"Anabella Ertel":0,"Aubrey Myers Jr":0,"Brian Layne":0,"Craig Shapiro":1,"Dj Bonner":0,"Gregory Eubanks":0,"Heidi Ludwig":0,"Joe Royds":0,"Justin Vold":0,"Lisbeth Bitar":0,"Marianna Smith":0,"Melanie Gonzalez":0,"Michael Berlin":0,"Michael Henderson":0,"Michele Lopez":1,"Michelle Zabukovec":0,"Paul Vieyra":0,"Peter Lim":0,"Rachel Adkins":0,"Renata Fallon":0,"Reza Marashi":1,"Rick Wilkinson":0,"Rob Sterling":1,"Ruben Martinez":0,"Sheila Terrell":2,"Thomas Royds":0,"Tonya Williams":0,"Vanessa Neiberg":1,"Venus Martinez":0},"ava":null},"2":{"n":2,"start":"2026-11-01","end":"2026-11-07","agents":{"Abdiel Hernandez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Alex Lumukanda":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Amy Black":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Anabella Ertel":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Aubrey Myers Jr":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":2,"pts_offers":0,"pts_ref":1000,"pts":1000},"Brian Layne":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Craig Shapiro":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Dj Bonner":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":1,"pts_offers":0,"pts_ref":0,"pts":0},"Gregory Eubanks":{"offers":1,"volume":1750000,"mutual":1,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Heidi Ludwig":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Joe Royds":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Justin Vold":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Lisbeth Bitar":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Marianna Smith":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Melanie Gonzalez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Michael Berlin":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Michael Henderson":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Michele Lopez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":1,"pts_offers":0,"pts_ref":0,"pts":0},"Michelle Zabukovec":{"offers":1,"volume":910000,"mutual":1,"fast":1,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Paul Vieyra":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Peter Lim":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":2,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Rachel Adkins":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Renata Fallon":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Reza Marashi":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Rick Wilkinson":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Rob Sterling":{"offers":2,"volume":1400000,"mutual":0,"fast":2,"ref_new":1,"ref_done":1,"pts_offers":500,"pts_ref":1000,"pts":1500},"Ruben Martinez":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Sheila Terrell":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":1,"ref_done":1,"pts_offers":0,"pts_ref":1000,"pts":1000},"Thomas Royds":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Tonya Williams":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Vanessa Neiberg":{"offers":0,"volume":0,"mutual":0,"fast":0,"ref_new":0,"ref_done":0,"pts_offers":0,"pts_ref":0,"pts":0},"Venus Martinez":{"offers":2,"volume":1310000,"mutual":0,"fast":2,"ref_new":2,"ref_done":0,"pts_offers":500,"pts_ref":0,"pts":500}},"totals":{"offers":6,"volume":5370000,"mutual":2,"fast":5,"writers":4,"ref_new":25,"ref_done":9,"club":6,"pts":7000},"published":true,"locked":"2026-11-08","road":{"Abdiel Hernandez":0,"Alex Lumukanda":0,"Amy Black":0,"Anabella Ertel":0,"Aubrey Myers Jr":0,"Brian Layne":0,"Craig Shapiro":1,"Dj Bonner":0,"Gregory Eubanks":1,"Heidi Ludwig":0,"Joe Royds":0,"Justin Vold":0,"Lisbeth Bitar":0,"Marianna Smith":0,"Melanie Gonzalez":0,"Michael Berlin":0,"Michael Henderson":0,"Michele Lopez":1,"Michelle Zabukovec":1,"Paul Vieyra":0,"Peter Lim":0,"Rachel Adkins":0,"Renata Fallon":0,"Reza Marashi":1,"Rick Wilkinson":0,"Rob Sterling":3,"Ruben Martinez":0,"Sheila Terrell":2,"Thomas Royds":0,"Tonya Williams":0,"Vanessa Neiberg":1,"Venus Martinez":2},"ava":{"agents":{"Abdiel Hernandez":{"team":"Southeast Los Angeles","prompts":88,"prior":37,"sessions":21,"prior_sessions":21,"days":17,"prior_days":14,"score":86,"last_active":"2026-11-06","customers":349,"outreach":61,"properties":139,"delta":51},"Rob Sterling":{"team":"West Los Angeles","prompts":70,"prior":37,"sessions":9,"prior_sessions":5,"days":14,"prior_days":4,"score":79,"last_active":"2026-11-08","customers":143,"outreach":18,"properties":60,"delta":33},"Tonya Williams":{"team":"South Los Angeles","prompts":170,"prior":105,"sessions":37,"prior_sessions":28,"days":12,"prior_days":11,"score":78,"last_active":"2026-11-08","customers":96,"outreach":71,"properties":13,"delta":65},"Peter Lim":{"team":"South Bay Los Angeles","prompts":91,"prior":1,"sessions":15,"prior_sessions":1,"days":11,"prior_days":1,"score":76,"last_active":"2026-11-06","customers":350,"outreach":28,"properties":300,"delta":90},"Justin Vold":{"team":"West Los Angeles","prompts":65,"prior":11,"sessions":8,"prior_sessions":3,"days":10,"prior_days":3,"score":73,"last_active":"2026-11-03","customers":784,"outreach":20,"properties":53,"delta":54},"Melanie Gonzalez":{"team":"South Bay Los Angeles","prompts":88,"prior":181,"sessions":19,"prior_sessions":50,"days":11,"prior_days":16,"score":72,"last_active":"2026-11-03","customers":327,"outreach":51,"properties":57,"delta":-93},"Venus Martinez":{"team":"South Los Angeles","prompts":99,"prior":12,"sessions":3,"prior_sessions":2,"days":8,"prior_days":2,"score":69,"last_active":"2026-10-30","customers":373,"outreach":74,"properties":139,"delta":87},"Michael Henderson":{"team":"West Los Angeles","prompts":59,"prior":48,"sessions":5,"prior_sessions":8,"days":8,"prior_days":10,"score":68,"last_active":"2026-10-31","customers":118,"outreach":27,"properties":47,"delta":11},"Marianna Smith":{"team":"South Bay Los Angeles","prompts":45,"prior":31,"sessions":11,"prior_sessions":7,"days":11,"prior_days":5,"score":64,"last_active":"2026-11-07","customers":156,"outreach":8,"properties":49,"delta":14},"Dj Bonner":{"team":"Southeast Los Angeles","prompts":46,"prior":0,"sessions":5,"prior_sessions":0,"days":10,"prior_days":0,"score":62,"last_active":"2026-10-31","customers":224,"outreach":61,"properties":137,"delta":46},"Brian Layne":{"team":"West Los Angeles","prompts":28,"prior":0,"sessions":10,"prior_sessions":0,"days":14,"prior_days":0,"score":59,"last_active":"2026-11-08","customers":183,"outreach":0,"properties":148,"delta":28},"Michele Lopez":{"team":"South Los Angeles","prompts":43,"prior":1,"sessions":18,"prior_sessions":1,"days":9,"prior_days":1,"score":59,"last_active":"2026-11-04","customers":172,"outreach":52,"properties":244,"delta":42},"Anabella Ertel":{"team":"South Bay Los Angeles","prompts":45,"prior":27,"sessions":3,"prior_sessions":2,"days":8,"prior_days":7,"score":57,"last_active":"2026-11-05","customers":112,"outreach":31,"properties":21,"delta":18},"Gregory Eubanks":{"team":"West Los Angeles","prompts":19,"prior":0,"sessions":7,"prior_sessions":0,"days":13,"prior_days":0,"score":56,"last_active":"2026-11-02","customers":250,"outreach":5,"properties":293,"delta":19},"Paul Vieyra":{"team":"South Los Angeles","prompts":39,"prior":27,"sessions":7,"prior_sessions":8,"days":5,"prior_days":6,"score":47,"last_active":"2026-11-04","customers":207,"outreach":17,"properties":138,"delta":12},"Aubrey Myers Jr":{"team":"South Los Angeles","prompts":18,"prior":0,"sessions":11,"prior_sessions":0,"days":10,"prior_days":0,"score":44,"last_active":"2026-11-05","customers":223,"outreach":0,"properties":310,"delta":18},"Craig Shapiro":{"team":"West Los Angeles","prompts":25,"prior":21,"sessions":9,"prior_sessions":3,"days":8,"prior_days":3,"score":43,"last_active":"2026-11-04","customers":112,"outreach":1,"properties":46,"delta":4},"Renata Fallon":{"team":"Long Beach","prompts":29,"prior":25,"sessions":10,"prior_sessions":9,"days":5,"prior_days":5,"score":42,"last_active":"2026-11-05","customers":145,"outreach":8,"properties":190,"delta":4},"Sheila Terrell":{"team":"South Bay Los Angeles","prompts":24,"prior":0,"sessions":6,"prior_sessions":0,"days":6,"prior_days":0,"score":42,"last_active":"2026-11-05","customers":89,"outreach":0,"properties":19,"delta":24},"Rachel Adkins":{"team":"Long Beach","prompts":17,"prior":2,"sessions":5,"prior_sessions":1,"days":4,"prior_days":1,"score":38,"last_active":"2026-11-03","customers":223,"outreach":1,"properties":31,"delta":15},"Reza Marashi":{"team":"West Los Angeles","prompts":17,"prior":4,"sessions":11,"prior_sessions":1,"days":6,"prior_days":1,"score":35,"last_active":"2026-10-30","customers":87,"outreach":6,"properties":16,"delta":13},"Alex Lumukanda":{"team":"West Los Angeles","prompts":13,"prior":52,"sessions":7,"prior_sessions":19,"days":6,"prior_days":9,"score":33,"last_active":"2026-10-27","customers":23,"outreach":0,"properties":3,"delta":-39},"Lisbeth Bitar":{"team":"South Bay Los Angeles","prompts":34,"prior":0,"sessions":3,"prior_sessions":0,"days":3,"prior_days":0,"score":32,"last_active":"2026-10-31","customers":107,"outreach":89,"properties":0,"delta":34},"Michael Berlin":{"team":"West Los Angeles","prompts":10,"prior":37,"sessions":4,"prior_sessions":11,"days":5,"prior_days":8,"score":29,"last_active":"2026-10-20","customers":3,"outreach":2,"properties":3,"delta":-27},"Vanessa Neiberg":{"team":"South Bay Los Angeles","prompts":10,"prior":0,"sessions":3,"prior_sessions":0,"days":3,"prior_days":0,"score":28,"last_active":"2026-11-02","customers":29,"outreach":1,"properties":12,"delta":10},"Joe Royds":{"team":"South Bay Los Angeles","prompts":16,"prior":25,"sessions":7,"prior_sessions":16,"days":2,"prior_days":5,"score":25,"last_active":"2026-11-05","customers":7,"outreach":8,"properties":11,"delta":-9},"Amy Black":{"team":"West Los Angeles","prompts":13,"prior":0,"sessions":2,"prior_sessions":0,"days":1,"prior_days":0,"score":21,"last_active":"2026-10-26","customers":77,"outreach":0,"properties":15,"delta":13},"Ruben Martinez":{"team":"Southeast Los Angeles","prompts":6,"prior":49,"sessions":2,"prior_sessions":12,"days":2,"prior_days":10,"score":20,"last_active":"2026-10-13","customers":36,"outreach":0,"properties":1,"delta":-43},"Michelle Zabukovec":{"team":"South Bay Los Angeles","prompts":3,"prior":3,"sessions":2,"prior_sessions":2,"days":2,"prior_days":2,"score":18,"last_active":"2026-10-21","customers":88,"outreach":0,"properties":4,"delta":0},"Rick Wilkinson":{"team":"South Bay Los Angeles","prompts":1,"prior":2,"sessions":1,"prior_sessions":1,"days":1,"prior_days":1,"score":7,"last_active":"2026-10-17","customers":0,"outreach":0,"properties":13,"delta":-1},"Heidi Ludwig":{"team":"South Bay Los Angeles","prompts":0,"prior":0,"sessions":0,"prior_sessions":0,"days":0,"prior_days":0,"score":0,"last_active":"","customers":0,"outreach":0,"properties":0,"delta":0},"Thomas Royds":{"team":"South Bay Los Angeles","prompts":0,"prior":3,"sessions":0,"prior_sessions":1,"days":0,"prior_days":1,"score":0,"last_active":"2026-09-14","customers":0,"outreach":0,"properties":0,"delta":-3}},"badges":{"champion":{"agent":"Abdiel Hernandez","label":"Ava Champion","value":86,"unit":"usage score"},"jump":{"agent":"Peter Lim","label":"Biggest Jump","value":90,"unit":"more prompts","from":1,"to":91},"outreach":{"agent":"Lisbeth Bitar","label":"Outreach Pro","value":89,"unit":"outreach drafts"},"research":{"agent":"Justin Vold","label":"Research Pro","value":784,"unit":"customers researched"}},"totals":{"prompts":1231,"prior":741,"active":30,"roster":32,"median_score":44}}}},"contest":{"name":"Finish Strong. Start Strong.","start":"2026-10-26","end":"2026-12-13","tiers":[{"offers":2,"points":500},{"offers":3,"points":1000},{"offers":4,"points":1500}],"referral_award":1000,"grand_prize":{"offers":10,"points":10000},"referral_goal":0.45},"calendar":[{"n":1,"start":"2026-10-26","end":"2026-10-31"},{"n":2,"start":"2026-11-01","end":"2026-11-07"},{"n":3,"start":"2026-11-08","end":"2026-11-14"},{"n":4,"start":"2026-11-15","end":"2026-11-21"},{"n":5,"start":"2026-11-22","end":"2026-11-28"},{"n":6,"start":"2026-11-29","end":"2026-12-05"},{"n":7,"start":"2026-12-06","end":"2026-12-13"}],"current_week":2,"export_date":"2026-11-08","agents":{"Abdiel Hernandez":{"name":"Abdiel Hernandez","first":"Abdiel","initials":"AH","team":"Southeast LA","contest_offers":0},"Alex Lumukanda":{"name":"Alex Lumukanda","first":"Alex","initials":"AL","team":"West LA","contest_offers":0},"Amy Black":{"name":"Amy Black","first":"Amy","initials":"AB","team":"West LA","contest_offers":0},"Anabella Ertel":{"name":"Anabella Ertel","first":"Anabella","initials":"AE","team":"South Bay","contest_offers":0},"Aubrey Myers Jr":{"name":"Aubrey Myers Jr","first":"Aubrey","initials":"AM","team":"South LA","contest_offers":0},"Brian Layne":{"name":"Brian Layne","first":"Brian","initials":"BL","team":"West LA","contest_offers":0},"Craig Shapiro":{"name":"Craig Shapiro","first":"Craig","initials":"CS","team":"West LA","contest_offers":1},"Dj Bonner":{"name":"Dj Bonner","first":"Dj","initials":"DB","team":"Southeast LA","contest_offers":0},"Gregory Eubanks":{"name":"Gregory Eubanks","first":"Gregory","initials":"GE","team":"West LA","contest_offers":1},"Heidi Ludwig":{"name":"Heidi Ludwig","first":"Heidi","initials":"HL","team":"South Bay","contest_offers":0},"Joe Royds":{"name":"Joe Royds","first":"Joe","initials":"JR","team":"South Bay","contest_offers":0},"Justin Vold":{"name":"Justin Vold","first":"Justin","initials":"JV","team":"West LA","contest_offers":0},"Lisbeth Bitar":{"name":"Lisbeth Bitar","first":"Lisbeth","initials":"LB","team":"South Bay","contest_offers":0},"Marianna Smith":{"name":"Marianna Smith","first":"Marianna","initials":"MS","team":"South Bay","contest_offers":0},"Melanie Gonzalez":{"name":"Melanie Gonzalez","first":"Melanie","initials":"MG","team":"South Bay","contest_offers":0},"Michael Berlin":{"name":"Michael Berlin","first":"Michael B.","initials":"MB","team":"West LA","contest_offers":0},"Michael Henderson":{"name":"Michael Henderson","first":"Michael H.","initials":"MH","team":"West LA","contest_offers":0},"Michele Lopez":{"name":"Michele Lopez","first":"Michele","initials":"ML","team":"South LA","contest_offers":1},"Michelle Zabukovec":{"name":"Michelle Zabukovec","first":"Michelle","initials":"MZ","team":"South Bay","contest_offers":1},"Paul Vieyra":{"name":"Paul Vieyra","first":"Paul","initials":"PV","team":"South LA","contest_offers":0},"Peter Lim":{"name":"Peter Lim","first":"Peter","initials":"PL","team":"South Bay","contest_offers":0},"Rachel Adkins":{"name":"Rachel Adkins","first":"Rachel","initials":"RA","team":"Long Beach","contest_offers":0},"Renata Fallon":{"name":"Renata Fallon","first":"Renata","initials":"RF","team":"Long Beach","contest_offers":0},"Reza Marashi":{"name":"Reza Marashi","first":"Reza","initials":"RM","team":"West LA","contest_offers":1},"Rick Wilkinson":{"name":"Rick Wilkinson","first":"Rick","initials":"RW","team":"South Bay","contest_offers":0},"Rob Sterling":{"name":"Rob Sterling","first":"Rob","initials":"RS","team":"West LA","contest_offers":3},"Ruben Martinez":{"name":"Ruben Martinez","first":"Ruben","initials":"RM","team":"Southeast LA","contest_offers":0},"Sheila Terrell":{"name":"Sheila Terrell","first":"Sheila","initials":"ST","team":"South Bay","contest_offers":2},"Thomas Royds":{"name":"Thomas Royds","first":"Thomas","initials":"TR","team":"South Bay","contest_offers":0},"Tonya Williams":{"name":"Tonya Williams","first":"Tonya","initials":"TW","team":"South LA","contest_offers":0},"Vanessa Neiberg":{"name":"Vanessa Neiberg","first":"Vanessa","initials":"VN","team":"South Bay","contest_offers":1},"Venus Martinez":{"name":"Venus Martinez","first":"Venus","initials":"VM","team":"South LA","contest_offers":2}},"t45_referral":{"done":72,"total":190},"board_url":"https://claude.ai/artifact/EJ2dTLhzhqUAjHWts7FR8Z"}</script>
+<script>
+(() => {
+  const S = JSON.parse(document.getElementById("season-data").textContent);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmt = (n) => Number(n).toLocaleString("en-US");
+  const money = (n) => n >= 1e6 ? "$" + (n / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M" : "$" + Math.round(n / 1e3) + "K";
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const d = (iso) => { const [y, m, dd] = iso.split("-").map(Number); return new Date(Date.UTC(y, m - 1, dd)); };
+  const md = (iso) => { const x = d(iso); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCDate()}`; };
+  const span = (a, b) => { const x = d(a), y = d(b); return x.getUTCMonth() === y.getUTCMonth() ? `${md(a)}–${y.getUTCDate()}` : `${md(a)} – ${md(b)}`; };
+  const teamClass = (t) => ({ "South LA": "team-southla", "South Bay": "team-southbay", "West LA": "team-westla", "Southeast LA": "team-southeast", "Long Beach": "team-longbeach" }[t] || "");
+  const A = S.agents;
+  const names = Object.keys(A);
+  const av = (n, cls = "") => `<span class="av ${cls} ${teamClass(A[n].team)}" aria-hidden="true">${esc(A[n].initials)}</span>`;
+  const icon = (id) => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+  const delta = (v, suffix = "") => v > 0 ? `<span class="up">▲${fmt(v)}${suffix}</span>` : v < 0 ? `<span class="down">▼${fmt(-v)}${suffix}</span>` : `<span style="color:var(--dim)">±0${suffix}</span>`;
+
+  const published = Object.values(S.weeks).filter((w) => w.published).map((w) => w.n).sort((a, b) => a - b);
+  const hashWeek = (location.hash.match(/^#week-(\d+)$/) || [])[1];
+  let W = hashWeek && published.includes(+hashWeek) ? +hashWeek : S.current_week;
+
+  const wk = (n) => S.weeks[String(n)];
+  const seasonPts = (name, n) => { let t = 0; for (let k = 1; k <= n; k++) { const w = wk(k); if (w) t += w.agents[name].pts; } return t; };
+  const avaAt = (n) => { for (let k = n; k >= 1; k--) { const w = wk(k); if (w && w.ava) return w.ava; } return null; };
+  const weeksLeft = (n) => S.calendar.length - n;
+
+  /* ---------------- render ---------------- */
+  function render() {
+    const w = wk(W), prev = wk(W - 1), t = w.totals, ava = avaAt(W);
+    const live = W === S.current_week;
+    $("week-pill").textContent = `Week ${W} · ${span(w.start, w.end)}`;
+    $("podium-eyebrow").textContent = `Command crew · Week ${W} top offer writers`;
+    $("teams-eyebrow").textContent = `Team race · offers per agent · Week ${W}`;
+
+    // rail
+    $("rail").innerHTML = S.calendar.map((c) => {
+      const has = wk(c.n);
+      const state = c.n === S.current_week ? "live" : has && c.n < S.current_week ? "done" : "";
+      const pick = has && has.published ? "pickable" : "";
+      const label = c.n === S.current_week ? "This week" : has && has.published ? "Results" : has ? "Credited" : c.n === S.calendar.length ? "Final" : "Ahead";
+      const tag = pick ? "button" : "div";
+      return `<${tag} role="listitem" class="wk ${state} ${pick} ${c.n === W ? "viewing" : ""}" ${pick ? `type="button" data-week="${c.n}" aria-label="Show Week ${c.n}"` : ""}><b>W${c.n}</b><span>${span(c.start, c.end)}</span><i>${label}</i></${tag}>`;
+    }).join("");
+    $("rail").querySelectorAll("[data-week]").forEach((b) => b.addEventListener("click", () => { W = +b.dataset.week; render(); replay(); }));
+
+    // rally line
+    const best = Math.max(...Object.values(S.weeks).filter((x) => x.n <= W).map((x) => x.totals.offers));
+    const trend = prev ? `Week ${W - 1}: <strong>${prev.totals.offers}</strong> offers → Week ${W}: <strong>${t.offers}</strong>.` : `Week ${W}: <strong>${t.offers}</strong> offers.`;
+    const goal = weeksLeft(W) > 0 ? ` <span class="pill gold">Week ${W + 1} goal: beat ${best}</span>` : "";
+    $("rally").innerHTML = `<span>${trend} ${t.mutual ? `<strong>${t.mutual}</strong> already reached mutual.` : ""}</span>${goal}`;
+
+    // KPIs
+    const refRate = pct(t.ref_done, t.ref_new);
+    const prevRate = prev ? pct(prev.totals.ref_done, prev.totals.ref_new) : null;
+    const seasonTotal = Object.values(S.weeks).filter((x) => x.n <= W).reduce((s, x) => s + x.totals.pts, 0);
+    const goalPct = Math.round(S.contest.referral_goal * 100);
+    const t45 = S.t45_referral;
+    $("kpis").innerHTML = `
+      <div class="panel kpi"><div class="big num" data-count="${t.offers}">${t.offers}</div><div class="lab">offers submitted</div>
+        <div class="sub">${prev ? delta(t.offers - prev.totals.offers) + ` vs Week ${W - 1} · ` : ""}${money(t.volume)} written</div></div>
+      <div class="panel kpi gold"><div class="big num" data-count="${t.pts}">${fmt(t.pts)}</div><div class="lab">Amaze points this week</div>
+        <div class="sub">${fmt(seasonTotal)} awarded this season</div></div>
+      <div class="panel kpi"><div class="big num"><span data-count="${refRate}">${refRate}</span><small>%</small></div><div class="lab">Rocket intro rate</div>
+        <div class="sub">${t.ref_done} of ${t.ref_new} new customers${prevRate !== null ? " · " + delta(refRate - prevRate, " pts") : ""}</div>
+        <div class="meter" aria-hidden="true"><i style="width:${Math.min(refRate, 100)}%"></i><b style="left:${goalPct}%"></b></div>
+        <div class="sub">goal ${goalPct}% · 45-day rate ${pct(t45.done, t45.total)}%</div></div>
+      <div class="panel kpi"><div class="big num">${ava ? `<span data-count="${ava.totals.active}">${ava.totals.active}</span><small>/${ava.totals.roster}</small>` : "–"}</div><div class="lab">agents using Ava</div>
+        <div class="sub">${ava ? `${fmt(ava.totals.prompts)} prompts · ${delta(ava.totals.prompts - ava.totals.prior)} vs prior 30 days` : ""}</div></div>`;
+
+    // podium
+    const writers = names.filter((n) => w.agents[n].offers > 0).sort((a, b) => {
+      const x = w.agents[a], y = w.agents[b];
+      return y.offers - x.offers || y.pts - x.pts || y.mutual - x.mutual || a.localeCompare(b);
+    });
+    const key = (n) => `${w.agents[n].offers}|${w.agents[n].pts}`;
+    const slots = [writers[0] ? [writers[0]] : [], writers[1] ? [writers[1]] : [], []];
+    if (writers[2]) slots[2] = writers.slice(2).filter((n) => key(n) === key(writers[2])).slice(0, 3);
+    const stepHTML = (list, place) => {
+      if (!list.length) return `<div class="step p${place} open-seat"><div class="who"><span class="av lg" aria-hidden="true">?</span><div class="name">Open seat</div><div class="meta">2 offers next week takes it</div></div><div class="block">${place}</div></div>`;
+      const a = w.agents[list[0]];
+      const shared = list.length > 1;
+      const nm = shared ? list.map((n) => esc(A[n].first)).join(" & ") : esc(list[0]);
+      const extras = [];
+      if (a.pts_offers) extras.push(`+${fmt(a.pts_offers)} offers`);
+      if (!shared && a.pts_ref) extras.push(`+${fmt(a.pts_ref)} Rocket 100%`);
+      const allMutual = list.every((n) => w.agents[n].mutual >= w.agents[n].offers);
+      const meta = `${a.offers} offer${a.offers === 1 ? "" : "s"}${shared ? " each" : ""}${allMutual ? (shared ? " · all reached mutual" : " · reached mutual") : ""}`;
+      const earn = extras.length ? extras.join(" · ") : `${Math.max(0, 2 - a.offers)} more = 500 pts`;
+      return `<div class="step p${place}"><div class="who">${place === 1 ? `<svg class="crown" aria-hidden="true"><use href="#i-crown"/></svg>` : ""}
+        <div class="avs">${list.map((n) => av(n, "lg")).join("")}</div>
+        <div class="name">${nm}</div><div class="meta">${meta}</div><div class="earn">${earn}</div></div>
+        <div class="block">${place}</div></div>`;
+    };
+    $("podium").innerHTML = stepHTML(slots[1], 2) + stepHTML(slots[0], 1) + stepHTML(slots[2], 3);
+    $("tiers").innerHTML = S.contest.tiers.map((x) => `<span class="pill">${x.offers}${x.offers === 4 ? "+" : ""} offers = ${fmt(x.points)} pts</span>`).join("");
+
+    // 100% club
+    const club = names.filter((n) => w.agents[n].pts_ref > 0).sort((a, b) => w.agents[b].ref_new - w.agents[a].ref_new || a.localeCompare(b));
+    $("club").innerHTML = club.length ? club.map((n, i) => `<div class="club-row" style="animation-delay:${i * 70}ms">${av(n, "sm")}<div><div class="n">${esc(n)}</div><div class="s">${w.agents[n].ref_done} of ${w.agents[n].ref_new} new customer${w.agents[n].ref_new === 1 ? "" : "s"} introduced</div></div><span class="chk">+1,000</span></div>`).join("")
+      : `<div class="club-row"><div class="s">Nobody hit 100% this week. One 3-way text per new customer gets you here.</div></div>`;
+    $("goalbar").innerHTML = `<div class="track"><div class="fill" style="width:${Math.min(refRate, 100)}%"></div><div class="mark" style="left:${goalPct}%"></div></div>
+      <div class="legend"><span>Team: ${refRate}% of new customers introduced</span><span>Goal ${goalPct}%</span></div>`;
+
+    // badges
+    const B = ava ? ava.badges : null;
+    const badge = (b, ic, val) => `<div class="badge"><div class="ic">${icon(ic)}</div><div class="bl">${esc(b.label)}</div><div class="bn">${esc(b.agent)}</div><div class="bv">${val}</div></div>`;
+    $("badges").innerHTML = B ? [
+      badge(B.champion, "i-star", `<b>${B.champion.value}</b> usage score`),
+      badge(B.jump, "i-jump", `<b>+${B.jump.value}</b> prompts · ${B.jump.from} → ${B.jump.to}`),
+      badge(B.outreach, "i-send", `<b>${fmt(B.outreach.value)}</b> outreach drafts`),
+      badge(B.research, "i-search", `<b>${fmt(B.research.value)}</b> customers researched`),
+    ].join("") : "";
+    const climbers = ava ? names.filter((n) => ava.agents[n].delta > 0 && n !== B.jump.agent).sort((a, b) => ava.agents[b].delta - ava.agents[a].delta).slice(0, 3) : [];
+    $("climbers").innerHTML = climbers.length ? `<div class="ch">Also climbing</div>` + climbers.map((n) => `<div class="climb">${av(n, "sm")}<span class="cn">${esc(n)}</span><span class="cv">${ava.agents[n].prior} → ${ava.agents[n].prompts} ${delta(ava.agents[n].delta)}</span></div>`).join("") : "";
+
+    // road to 10
+    const road = w.road || {};
+    const goalN = S.contest.grand_prize.offers;
+    const left = weeksLeft(W);
+    const byCount = {};
+    names.forEach((n) => { const c = Math.min(road[n] || 0, goalN); (byCount[c] = byCount[c] || []).push(n); });
+    let idx = 0;
+    const stops = [];
+    for (let c = 0; c <= goalN; c++) {
+      const list = (byCount[c] || []).sort();
+      let inner = "";
+      if (c === 0) inner = `<div class="pad-count"><b>${list.length}</b>on the pad</div>`;
+      else if (c === goalN) inner = (list.length ? list.map((n) => av(n)).join("") : "") + `<div class="orbit"><svg><use href="#i-rocket"/></svg><span>ORBIT</span></div>`;
+      else inner = list.map((n) => `<span class="av ${teamClass(A[n].team)}" style="--i:${idx++}" title="${esc(n)}: ${c} offers">${esc(A[n].initials)}</span>`).join("");
+      stops.push(`<div class="stop">${inner}</div>`);
+    }
+    $("track").innerHTML = `<div class="stops">${stops.join("")}</div><div class="rail-line"></div><div class="ticks">${Array.from({ length: goalN + 1 }, (_, i) => `<span>${i}</span>`).join("")}</div>`;
+    const leaders = names.filter((n) => road[n] > 0).sort((a, b) => road[b] - road[a] || a.localeCompare(b));
+    const totalRoad = names.reduce((s, n) => s + (road[n] || 0), 0);
+    $("road-lede").textContent = left > 0
+      ? `${totalRoad} contest offers so far from ${leaders.length} agents. ${left} week${left === 1 ? "" : "s"} left: ${Math.ceil(goalN / left)} offers a week gets anyone there from zero.`
+      : `${totalRoad} contest offers from ${leaders.length} agents. The drawing is set.`;
+    const lead = leaders[0];
+    const need = (n) => left > 0 ? ((goalN - (road[n] || 0)) / left).toFixed(1).replace(/\.0$/, "") : "–";
+    $("pace").innerHTML = `
+      <div><div class="pv">${lead ? esc(A[lead].first) + " · " + road[lead] : "–"}</div><div class="pl">${lead ? `Closest to orbit. Needs ${need(lead)} a week.` : "First offer takes the lead."}</div></div>
+      <div><div class="pv">${left > 0 ? Math.ceil(goalN / left) + " / week" : "–"}</div><div class="pl">Pace from zero with ${left} week${left === 1 ? "" : "s"} left</div></div>
+      <div><div class="pv">${leaders.length} of ${names.length}</div><div class="pl">agents on the road so far</div></div>`;
+
+    // team race
+    const teams = {};
+    names.forEach((n) => {
+      const tm = A[n].team; const x = (teams[tm] = teams[tm] || { n: 0, off: 0, road: 0, rd: 0, rn: 0 });
+      x.n++; x.off += w.agents[n].offers; x.road += road[n] || 0; x.rd += w.agents[n].ref_done; x.rn += w.agents[n].ref_new;
+    });
+    const tl = Object.entries(teams).sort((a, b) => b[1].off / b[1].n - a[1].off / a[1].n || b[1].road / b[1].n - a[1].road / a[1].n);
+    $("teams").innerHTML = tl.map(([tm, x], i) => `<div class="team ${teamClass(tm)} ${i === 0 && x.off ? "lead" : ""}" style="--c:var(--${teamClass(tm).replace("team-", "t-")})">
+      <div class="tn">${esc(tm)}</div><div class="tv num">${(x.off / x.n).toFixed(2)}</div>
+      <div class="ts">${x.off} offers · ${x.n} agents<br>season ${(x.road / x.n).toFixed(2)} per agent<br>Rocket ${x.rn ? pct(x.rd, x.rn) + "%" : "–"} (${x.rd}/${x.rn})</div></div>`).join("");
+
+    // board
+    const onBoard = names.filter((n) => seasonPts(n, W) > 0 || (road[n] || 0) > 0)
+      .sort((a, b) => seasonPts(b, W) - seasonPts(a, W) || (road[b] || 0) - (road[a] || 0) || w.agents[b].offers - w.agents[a].offers || a.localeCompare(b));
+    const badgeOf = (n) => B ? [["champion", "i-star", "Champion"], ["jump", "i-jump", "Jump"], ["outreach", "i-send", "Outreach"], ["research", "i-search", "Research"]].filter(([k]) => B[k].agent === n) : [];
+    let rank = 0, lastKey = null;
+    $("board").innerHTML = `<div class="brow head"><span>#</span><span>Agent</span><span>Wk ${W} offers</span><span>Wk ${W} Rocket</span><span>Ava · 30 days</span><span>Road to 10</span><span style="text-align:right">Season</span></div>` +
+      onBoard.map((n, i) => {
+        const a = w.agents[n], sp = seasonPts(n, W), r = road[n] || 0;
+        const k = `${sp}|${r}`; if (k !== lastKey) { rank = i + 1; lastKey = k; }
+        const av30 = ava && ava.agents[n];
+        const rk = a.ref_new ? `<span class="rk ${a.ref_done === a.ref_new ? "full" : ""}">${a.ref_done}/${a.ref_new}${a.ref_done === a.ref_new ? " ✓" : ""}</span>` : `<span class="rk none">no new</span>`;
+        const pips = `<span class="pips" aria-label="${a.offers} offers">${[0, 1, 2, 3].map((j) => `<i class="${j < a.offers ? "on" : ""}"></i>`).join("")}${a.offers > 4 ? `<b>${a.offers}</b>` : ""}</span>`;
+        const tags = badgeOf(n).map(([, ic, lab]) => `<span class="tag">${icon(ic)}${lab}</span>`).join("");
+        return `<div class="brow ${rank <= 3 ? "top" : ""}" style="--i:${i}">
+          <span class="rank">${rank}</span>
+          <div class="agent">${av(n)}<div style="min-width:0"><div class="nm">${esc(n)}</div><div class="tm">${esc(A[n].team)}${a.pts ? ` · <span style="color:var(--gold-hi)">+${fmt(a.pts)} this week</span>` : ""}</div>${tags ? `<div class="tags">${tags}</div>` : ""}</div></div>
+          <div class="meta-row">
+            <div><span class="cap">Wk ${W} offers</span>${pips}</div>
+            <div><span class="cap">Wk ${W} Rocket</span>${rk}</div>
+            <div><span class="cap">Ava · 30 days</span><span class="ava-cell">${av30 ? `${av30.prompts}<span class="d">${delta(av30.delta)}</span>` : "–"}</span></div>
+            <div class="mini"><span class="cap">Road to 10</span><div class="bar"><i style="width:${Math.min(r / goalN, 1) * 100}%"></i></div><span>${r}/${goalN}${left > 0 && r < goalN ? ` · ${need(n)}/wk` : ""}</span></div>
+          </div>
+          <div class="pts num">${fmt(sp)}<small>pts</small></div></div>`;
+      }).join("");
+    $("season-total").textContent = `${fmt(seasonTotal)} pts awarded · ${onBoard.length} agents`;
+
+    // launch pad
+    const pad = names.filter((n) => !onBoard.includes(n)).sort((a, b) => ((ava && ava.agents[b] ? ava.agents[b].prompts : 0) - (ava && ava.agents[a] ? ava.agents[a].prompts : 0)) || a.localeCompare(b));
+    $("pad-title").textContent = pad.length ? `${pad.length} seats saved.` : "Every seat is filled.";
+    $("pad-lede").textContent = pad.length ? `Two offers in a week puts you on the board with 500 points. One 3-way Rocket text per new customer is worth 1,000.` : "";
+    $("pad").innerHTML = pad.map((n) => {
+      const x = ava && ava.agents[n];
+      return `<div class="seat">${av(n, "sm")}<div><div class="nm">${esc(n)}</div><div class="ss">${esc(A[n].team)} · Ava ${x ? `${x.prompts} <span class="d">${delta(x.delta)}</span>` : "–"}</div></div></div>`;
+    }).join("");
+
+    // ava pulse
+    if (ava) {
+      const rows = names.map((n) => ({ n, ...ava.agents[n] })).sort((a, b) => b.delta - a.delta || b.prompts - a.prompts);
+      const maxAbs = Math.max(10, ...rows.map((r) => Math.abs(r.delta)));
+      const at = ava.totals;
+      const zero = rows.filter((r) => r.prompts === 0).map((r) => r.n.split(" ")[0]);
+      $("pulse-stats").innerHTML = `<span class="pill">${fmt(at.prompts)} prompts · ${delta(at.prompts - at.prior)}</span><span class="pill">${at.active} of ${at.roster} agents active</span><span class="pill">median usage score ${at.median_score}</span>${zero.length ? `<span class="pill hot">Not started yet: ${zero.map(esc).join(", ")}</span>` : ""}`;
+      $("pulse").innerHTML = rows.map((r, i) => `<div class="prow ${r.prompts === 0 ? "zero" : ""}" style="--i:${i}">
+        <span class="pn" title="${esc(r.n)}">${esc(r.n)}</span>
+        <span class="pz" aria-hidden="true">${r.delta > 0 ? `<i class="g" style="width:${(r.delta / maxAbs) * 50}%"></i>` : r.delta < 0 ? `<i class="r" style="width:${(-r.delta / maxAbs) * 50}%"></i>` : ""}</span>
+        <span class="pv">${r.prior} → <b>${r.prompts}</b> ${delta(r.delta)}</span></div>`).join("");
+    }
+
+    // playbook
+    const fastPct = pct(t.fast, t.offers);
+    const plays = [
+      ["i-chat", "Introduce Rocket early, every time", "3-way text your Rocket LO for every new customer, at the first tour if you can.", `Week ${W}: ${t.ref_done} of ${t.ref_new} new customers introduced`],
+      ["i-bolt", "Write it with Fast Offers", "Speed wins in multiple-offer situations. Fast Offers gets it out the door.", t.offers ? `Week ${W}: ${t.fast} of ${t.offers} offers used Fast Offers (${fastPct}%)` : ""],
+      ["i-check", "Log it the same day", "Mark every offer “Submitted to Listing Agent” in Agent Tools. It's a DRE compliance requirement, and it's how your offers count here.", ""],
+      ["i-broom", "Clear the pipeline", "Fail old or inactive offers in Agent Tracker so your pipeline shows real, live deals.", ""],
+    ];
+    $("plays").innerHTML = plays.map(([ic, h, p, s]) => `<div class="panel play"><div class="pi">${icon(ic)}</div><h3>${h}</h3><p>${p}</p>${s ? `<div class="stat">${s}</div>` : ""}</div>`).join("");
+
+    // footer
+    const exp = md(S.export_date);
+    $("sources").innerHTML = [
+      `Offers count in the week of their “Submitted to Listing Agent” date (Agent Tools export, ${exp}). Repeat offers for the same buyer each count.`,
+      `Rocket 100%: every new customer created ${span(w.start, w.end)} has a Rocket referral (referral export, ${exp}).`,
+      `Ava: usage export for the last 30 days (${exp}), compared with the 30 days before.`,
+      `Weeks run Sunday–Saturday. Week 1 started Mon Oct 26; Week 7 runs through Sun Dec 13.`,
+    ].map((x) => `<li>${esc(x)}</li>`).join("");
+    const nxt = S.calendar.find((c) => c.n === W + 1);
+    if (nxt) {
+      const pub = d(nxt.end); pub.setUTCDate(pub.getUTCDate() + 1);
+      $("next-board").textContent = `${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][pub.getUTCDay()]}, ${MONTHS[pub.getUTCMonth()]} ${pub.getUTCDate()}`;
+      $("next-dates").textContent = `Week ${nxt.n} · ${span(nxt.start, nxt.end)}${nxt.n === S.calendar.length ? " · final week" : ""}`;
+    } else {
+      $("next-board").textContent = "Final results";
+      $("next-dates").textContent = "Grand prize drawing after Dec 13";
+    }
+    $("card-cta-sub").textContent = `Week ${W} · ${span(w.start, w.end)} · next board ${$("next-board").textContent}`;
+
+    if (!live) $("week-pill").textContent += " · archive";
+  }
+
+  /* ---------------- motion ---------------- */
+  function countUp(root) {
+    if (reduce) return;
+    root.querySelectorAll("[data-count]").forEach((el) => {
+      const target = +el.dataset.count; if (!target) return;
+      const t0 = performance.now(), dur = 1200;
+      const tick = (now) => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(Math.round(target * e));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+
+  const confettiCanvas = document.querySelector(".confetti");
+  let confettiRun = 0;
+  function confetti() {
+    if (reduce) return;
+    const c = confettiCanvas, host = c.parentElement, dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W2 = host.clientWidth, H2 = host.clientHeight;
+    c.width = W2 * dpr; c.height = H2 * dpr;
+    const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cols = ["#e8343b", "#f7b93e", "#ffde87", "#f7f1ee", "#ff8a5c"];
+    const p1 = host.querySelector(".p1 .block"); const r1 = p1 ? p1.getBoundingClientRect() : null; const hr = host.getBoundingClientRect();
+    const sc = hr.width / W2 || 1; // present mode scales the slide
+    const ox = r1 ? (r1.left - hr.left + r1.width / 2) / sc : W2 / 2, oy = r1 ? (r1.top - hr.top) / sc : H2 / 2;
+    const parts = Array.from({ length: 170 }, () => {
+      const a = -Math.PI / 2 + (Math.random() - .5) * 2.1, s = 6 + Math.random() * 9;
+      return { x: ox, y: oy, vx: Math.cos(a) * s, vy: Math.sin(a) * s, w: 5 + Math.random() * 6, h: 8 + Math.random() * 8, r: Math.random() * 6, vr: (Math.random() - .5) * .35, c: cols[(Math.random() * cols.length) | 0] };
+    });
+    const id = ++confettiRun, t0 = performance.now();
+    const step = (now) => {
+      if (id !== confettiRun) return;
+      const el = (now - t0) / 1000;
+      ctx.clearRect(0, 0, W2, H2);
+      parts.forEach((p) => {
+        p.vy += .28; p.vx *= .99; p.vy *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.globalAlpha = Math.max(0, 1 - Math.max(0, el - 2.2) / 1.2);
+        ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 1.7))); ctx.restore();
+      });
+      if (el < 3.5) requestAnimationFrame(step); else ctx.clearRect(0, 0, W2, H2);
+    };
+    requestAnimationFrame(step);
+  }
+  $("celebrate").addEventListener("click", () => { replayEl($("s-podium")); setTimeout(confetti, 900); });
+
+  // starfield in the hero
+  (function stars() {
+    const c = document.querySelector(".stars"), host = c.parentElement, ctx = c.getContext("2d");
+    let pts = [], raf = 0, visible = true;
+    const size = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      c.width = host.clientWidth * dpr; c.height = host.clientHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pts = Array.from({ length: Math.round(host.clientWidth / 9) }, () => ({ x: Math.random() * host.clientWidth, y: Math.random() * host.clientHeight, r: Math.random() * 1.3 + .3, s: Math.random() * .25 + .05, p: Math.random() * 6.28 }));
+    };
+    const draw = (now) => {
+      ctx.clearRect(0, 0, host.clientWidth, host.clientHeight);
+      pts.forEach((s) => {
+        if (!reduce) { s.y -= s.s; if (s.y < -2) { s.y = host.clientHeight + 2; s.x = Math.random() * host.clientWidth; } }
+        ctx.globalAlpha = .25 + .55 * (reduce ? .6 : (Math.sin(now / 900 + s.p) + 1) / 2);
+        ctx.fillStyle = s.r > 1.2 ? "#ffde87" : "#f7f1ee"; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
+      });
+      if (!reduce && visible) raf = requestAnimationFrame(draw);
+    };
+    size(); draw(0);
+    window.addEventListener("resize", () => { size(); if (reduce) draw(0); });
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; cancelAnimationFrame(raf); if (visible && !reduce) raf = requestAnimationFrame(draw); }).observe(host);
+  })();
+
+  const seen = new WeakSet();
+  function replayEl(el) { el.classList.remove("in"); void el.offsetWidth; el.classList.add("in"); countUp(el); }
+  function replay() { document.querySelectorAll(".reveal").forEach((el) => { if (seen.has(el)) replayEl(el); }); }
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting || seen.has(e.target)) return;
+    seen.add(e.target); e.target.classList.add("in"); countUp(e.target);
+    if (e.target.id === "s-podium") setTimeout(confetti, 1100);
+  }), { threshold: .18 });
+
+  /* ---------------- present mode ---------------- */
+  let si = 0;
+  function fit() {
+    const s = document.querySelector(".wrap > section.on"); if (!s) return;
+    s.style.setProperty("--fit", 1);
+    const h = s.offsetHeight, k = Math.min(1, 860 / h);
+    s.style.setProperty("--fit", Math.min(window.innerWidth / 1720, window.innerHeight / 968) * k);
+  }
+  function show(i) {
+    const list = [...document.querySelectorAll(".wrap > section")];
+    si = (i + list.length) % list.length;
+    list.forEach((s, k) => s.classList.toggle("on", k === si));
+    $("slide-count").textContent = `${si + 1} / ${list.length}`;
+    window.dispatchEvent(new Event("resize")); // re-sizes the starfield and refits the slide
+    fit(); replayEl(list[si]); seen.add(list[si]);
+    if (list[si].id === "s-podium") setTimeout(confetti, 1000);
+  }
+  function enterPresent(start = 0) {
+    document.body.classList.add("present");
+    show(start);
+    if (document.documentElement.requestFullscreen && !document.body.classList.contains("capture")) document.documentElement.requestFullscreen().catch(() => {});
+  }
+  function exitPresent() {
+    document.body.classList.remove("present");
+    document.querySelectorAll(".wrap > section").forEach((s) => { s.classList.remove("on"); s.style.removeProperty("--fit"); });
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  }
+  $("present-btn").addEventListener("click", () => enterPresent(0));
+  $("exit").addEventListener("click", exitPresent);
+  $("prev").addEventListener("click", () => show(si - 1));
+  $("next").addEventListener("click", () => show(si + 1));
+  window.addEventListener("resize", () => { if (document.body.classList.contains("present")) fit(); });
+  document.addEventListener("keydown", (e) => {
+    if (!document.body.classList.contains("present")) { if (e.key === "p" && !e.metaKey && !e.ctrlKey) enterPresent(0); return; }
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(si + 1); }
+    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(si - 1); }
+    if (e.key === "Escape") exitPresent();
+  });
+
+  /* ---------------- boot ---------------- */
+  render();
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  const h = location.hash.replace("#", "");
+  if (h === "card") document.body.classList.add("cardmode");
+  if (h === "present") enterPresent(0);
+  window.__board = { show, enterPresent, exitPresent, confetti, count: () => document.querySelectorAll(".wrap > section").length };
+})();
+</script>

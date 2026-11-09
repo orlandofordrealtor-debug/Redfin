@@ -1,0 +1,6 @@
+# Raw weekly exports and the manager page carry client names: never commit them.
+contest/private/
+contest/raw/
+*.local.csv
+__pycache__/
+node_modules/
