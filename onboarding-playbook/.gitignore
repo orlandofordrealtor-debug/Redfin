@@ -1,0 +1,6 @@
+# Private program content, brand assets, and generated deliverables stay out of the public repo.
+content.py
+assets/
+dist/
+__pycache__/
+*.pyc
