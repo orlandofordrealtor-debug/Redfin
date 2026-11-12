@@ -4,3 +4,7 @@ assets/
 dist/
 __pycache__/
 *.pyc
+
+# Consult playbook: builders embed internal program content and branding,
+# so the whole folder stays out of this public repo (backed up privately).
+consult/
