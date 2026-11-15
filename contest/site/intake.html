@@ -1,0 +1,621 @@
+<title>Finish Strong Weekly Intake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+/* Layout: an intake desk in the leaderboard's dark broadcast look. Form on the left in the order you gather
+   things (exports, extras, notes, deliverables); a sticky readiness panel on the right with the save button and history. */
+:root {
+  color-scheme: dark;
+  --ink: #0f0c0e;
+  --panel: #191316;
+  --panel-2: #221a1e;
+  --field: #120e10;
+  --line: #36282e;
+  --line-hi: #4a3740;
+  --text: #f7f1ee;
+  --muted: #b5a5ab;
+  --dim: #85737b;
+  --red: #e8343b;
+  --red-deep: #8f121b;
+  --gold: #f7b93e;
+  --gold-hi: #ffde87;
+  --ok: #4fd890;
+  --warn: #f7b93e;
+  --bad: #ff7d7d;
+  --display: "Archivo", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--ink); }
+body {
+  margin: 0; color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  background: radial-gradient(1000px 520px at 8% -10%, rgba(232,52,59,.26), transparent 62%), var(--ink);
+  background-repeat: no-repeat; -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+a { color: var(--gold-hi); }
+
+.wrap {
+  max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 64px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px;
+}
+.wrap > * { min-width: 0; }
+
+/* header */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 8px; font-family: var(--display); white-space: nowrap; }
+.brand .rf { color: var(--red); font-weight: 900; font-size: 22px; letter-spacing: -.02em; }
+.brand .pb { color: var(--muted); font-size: 12px; }
+.brand .rk { font-weight: 900; font-size: 22px; letter-spacing: -.02em; }
+.board-link { font-family: var(--mono); font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--text); background: var(--panel); }
+.board-link:hover { border-color: var(--gold); }
+.eyebrow { margin: 0; font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+.eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 10px var(--red); }
+h1 { margin: 8px 0 0; font-family: var(--display); font-weight: 900; font-stretch: 118%; font-size: clamp(30px, 5.4vw, 52px); line-height: .98; letter-spacing: -.02em; text-wrap: balance; }
+h1 em { font-style: normal; color: var(--red); }
+.intro { margin: 10px 0 0; color: var(--muted); max-width: 66ch; }
+
+.weekbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+.weekbar label { font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+select { background: var(--field); border: 1px solid var(--line-hi); border-radius: 10px; padding: 9px 12px; font-weight: 700; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.waiting { border-color: rgba(232,52,59,.6); background: rgba(232,52,59,.14); color: #ffd6d7; }
+.chip.submitted { border-color: rgba(247,185,62,.6); background: rgba(247,185,62,.12); color: var(--gold-hi); }
+.chip.published { border-color: rgba(79,216,144,.55); background: rgba(79,216,144,.12); color: var(--ok); }
+
+/* layout */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+.cols > * { min-width: 0; }
+form { display: grid; gap: 18px; }
+fieldset { margin: 0; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); padding: 18px; min-width: 0; }
+legend { padding: 0; float: left; width: 100%; }
+legend + * { clear: both; }
+.fs-head { display: grid; gap: 4px; margin-bottom: 14px; }
+.fs-head h2 { margin: 0; font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 21px; line-height: 1.1; }
+.fs-head p { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 70ch; }
+.req-tag { font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: .12em; color: var(--red); }
+.opt-tag { font-family: var(--mono); font-size: 10px; font-weight: 800; letter-spacing: .12em; color: var(--dim); }
+
+.linkfield { display: grid; gap: 7px; padding: 14px 0; border-top: 1px solid rgba(255,255,255,.05); }
+.linkfield:first-of-type { border-top: 0; padding-top: 0; }
+.lf-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.lf-top label { font-weight: 800; font-size: 15.5px; }
+.lf-window { font-family: var(--mono); font-size: 11px; color: var(--gold-hi); white-space: nowrap; }
+.lf-must { font-size: 13px; color: var(--muted); }
+.lf-cols { font-family: var(--mono); font-size: 10.5px; color: var(--dim); line-height: 1.5; }
+.inrow { display: flex; gap: 8px; align-items: center; }
+input[type="url"], input[type="text"], input[type="date"], textarea {
+  width: 100%; min-width: 0; background: var(--field); border: 1px solid var(--line-hi); border-radius: 10px; padding: 11px 12px;
+  font-size: 14.5px; transition: border-color .15s;
+}
+input::placeholder, textarea::placeholder { color: var(--dim); }
+input[type="url"]:focus, input[type="text"]:focus, input[type="date"]:focus, textarea:focus { border-color: var(--gold); outline: none; }
+input.ok { border-color: rgba(79,216,144,.6); }
+input.warn { border-color: rgba(247,185,62,.7); }
+input.bad { border-color: rgba(255,125,125,.7); }
+textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
+.open { flex: none; font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-decoration: none; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); }
+.open[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+.state { font-family: var(--mono); font-size: 11px; font-weight: 700; min-height: 16px; }
+.state.ok { color: var(--ok); } .state.warn { color: var(--warn); } .state.bad { color: var(--bad); } .state.idle { color: var(--dim); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.grid2 > * { min-width: 0; }
+.mini { display: grid; gap: 6px; }
+.mini label { font-weight: 700; font-size: 13.5px; }
+.mini .state { min-height: 14px; }
+.note { display: grid; gap: 6px; }
+.note label { font-weight: 800; }
+.note .hint { font-size: 12.5px; color: var(--muted); margin-top: -2px; }
+
+.checks { display: grid; gap: 8px; }
+.check { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 11px; background: rgba(255,255,255,.03); border: 1px solid transparent; cursor: pointer; }
+.check:hover { border-color: var(--line); }
+.check input { margin-top: 3px; width: 17px; height: 17px; accent-color: var(--red); flex: none; }
+.check span { font-size: 14px; }
+.check small { display: block; color: var(--dim); font-size: 12px; }
+.deliv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+/* side panel */
+aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 14px); display: grid; gap: 14px; }
+.card { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); padding: 16px; }
+.ready h3 { margin: 4px 0 0; font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 20px; line-height: 1.1; }
+.meter { display: grid; gap: 8px; margin-top: 14px; }
+.mrow { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.mrow b { font-family: var(--mono); font-size: 12.5px; }
+.bar { height: 8px; border-radius: 8px; background: rgba(255,255,255,.07); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--red), var(--gold)); transition: width .35s ease; }
+.save {
+  margin-top: 14px; width: 100%; cursor: pointer; border: 0; border-radius: 12px; padding: 14px 16px;
+  font-family: var(--display); font-weight: 900; font-stretch: 108%; font-size: 17px; color: #fff;
+  background: linear-gradient(100deg, var(--red-deep), var(--red)); box-shadow: 0 12px 30px -14px rgba(232,52,59,.8);
+}
+.save:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.formmsg { margin-top: 10px; font-size: 13px; min-height: 18px; }
+.formmsg.bad { color: var(--bad); } .formmsg.ok { color: var(--ok); } .formmsg.idle { color: var(--muted); }
+.saved-by { margin-top: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.handoff { display: grid; gap: 10px; }
+.handoff p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.handoff pre { margin: 0; white-space: pre-wrap; font-family: var(--mono); font-size: 12px; line-height: 1.5; padding: 10px; border-radius: 10px; border: 1px dashed var(--line-hi); background: var(--field); color: var(--text); }
+.btn { cursor: pointer; font-family: var(--mono); font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 9px 12px; border-radius: 999px; border: 1px solid var(--line-hi); background: var(--panel-2); justify-self: start; }
+.btn:hover { border-color: var(--gold); }
+
+.history h3 { margin: 4px 0 10px; font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 18px; }
+.hlist { display: grid; gap: 6px; }
+.hrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 11px; background: rgba(255,255,255,.03); border: 1px solid transparent; cursor: pointer; text-align: left; width: 100%; }
+.hrow:hover, .hrow.on { border-color: var(--gold); }
+.hrow .wk { font-family: var(--display); font-weight: 900; font-stretch: 110%; font-size: 17px; }
+.hrow .meta { font-size: 12px; color: var(--muted); line-height: 1.35; min-width: 0; }
+.hrow .meta span { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empty { font-size: 13px; color: var(--dim); padding: 8px 2px; }
+
+.banner { display: none; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(247,185,62,.5); background: rgba(247,185,62,.1); color: var(--gold-hi); font-size: 13.5px; }
+.banner.show { display: block; }
+
+@media (max-width: 960px) {
+  .cols { grid-template-columns: 1fr; }
+  aside { position: static; }
+}
+@media (max-width: 620px) {
+  .grid2, .deliv { grid-template-columns: 1fr; }
+  fieldset { padding: 14px; }
+  .lf-window { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main class="wrap">
+  <header>
+    <div class="top">
+      <div class="brand" aria-label="Redfin powered by Rocket"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div>
+      <a class="board-link" id="board-link" href="https://claude.ai/artifact/EJ2dTLhzhqUAjHWts7FR8Z" target="_blank" rel="noopener">Open the leaderboard ↗</a>
+    </div>
+    <p class="eyebrow" style="margin-top:18px">Finish Strong · Start Strong · weekly intake</p>
+    <h1>Drop the links. <em>Claude builds the board.</em></h1>
+    <p class="intro">Every Sunday, paste the three exports for the week that just closed, add anything the data can't show, and save. Then send Claude the one-line message from the panel and the board, Slack card, reel and manager page get rebuilt.</p>
+    <div class="weekbar">
+      <label for="week">Contest week</label>
+      <select id="week"></select>
+      <span class="chip" id="week-status">Loading…</span>
+      <span class="chip" id="week-due"></span>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" role="status"></div>
+
+  <div class="cols">
+    <form id="intake" novalidate>
+      <fieldset id="fs-required">
+        <legend class="fs-head"><span class="req-tag">REQUIRED</span><h2>The three weekly exports</h2>
+          <p>Paste each Google Sheet's share link. Claude reads them through your Google Drive connection, so they need to open for your account.</p></legend>
+        <div id="required-fields"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend class="fs-head"><span class="opt-tag">OPTIONAL</span><h2>Rocket status for offer clients</h2>
+          <p>Most offer clients became customers before the 45-day referral window, so the manager page marks them “unverified.” A report showing Rocket status for those clients clears that list.</p></legend>
+        <div id="status-field"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend class="fs-head"><span class="opt-tag">OPTIONAL · CARRIES FORWARD</span><h2>Rocket LO flyers and resources</h2>
+          <p>These make the playbook tiles on the board clickable. They're filled in from your last submission, so you only paste them once.</p></legend>
+        <div class="grid2" id="flyer-fields"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend class="fs-head"><span class="opt-tag">OPTIONAL</span><h2>What the data can't show</h2>
+          <p>Anything here gets reflected on the board or flagged before it goes out.</p></legend>
+        <div class="grid2">
+          <div class="note"><label for="n-roster">Roster changes</label><div class="hint">New agents, departures, team moves, anyone to leave off the board.</div><textarea id="n-roster" placeholder="e.g. Jane Doe joined South Bay on Nov 10"></textarea></div>
+          <div class="note"><label for="n-corrections">Corrections</label><div class="hint">Offers logged late or on the wrong date, a Rocket intro that didn't record.</div><textarea id="n-corrections" placeholder="e.g. Peter submitted an offer Nov 13 that shows Nov 15 in Agent Tools"></textarea></div>
+          <div class="note"><label for="n-shoutouts">Shout-outs to feature</label><div class="hint">Wins worth celebrating that aren't in the exports: a closing, a client story, a great save.</div><textarea id="n-shoutouts" placeholder="e.g. Venus won a 5-offer situation in Inglewood"></textarea></div>
+          <div class="note"><label for="n-other">Anything else for this week</label><div class="hint">Rule changes, a theme for the week, a message you want on the board.</div><textarea id="n-other" placeholder="e.g. Week 4 theme: buydown flyers at every tour"></textarea></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend class="fs-head"><span class="opt-tag">THIS WEEK'S OUTPUT</span><h2>What you need back</h2></legend>
+        <div class="deliv" id="deliverables"></div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="mini"><label for="export-date">Exports pulled on</label><input type="date" id="export-date"></div>
+          <div class="mini"><label for="need-by">Need it by</label><input type="date" id="need-by"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend class="fs-head"><span class="opt-tag">BEFORE YOU SAVE</span><h2>Quick data check</h2>
+          <p>Clean exports mean the right people get the right points.</p></legend>
+        <div class="checks" id="checks"></div>
+      </fieldset>
+    </form>
+
+    <aside>
+      <div class="card ready" aria-live="polite">
+        <p class="eyebrow">Ready check</p>
+        <h3 id="ready-title">Week</h3>
+        <div class="meter">
+          <div class="mrow"><span>Required exports</span><b id="m-req">0 / 3</b></div>
+          <div class="bar"><i id="m-req-bar" style="width:0%"></i></div>
+          <div class="mrow"><span>Data check</span><b id="m-check">0 / 4</b></div>
+          <div class="mrow"><span>Deliverables</span><b id="m-deliv">0</b></div>
+        </div>
+        <button class="save" id="save" type="submit" form="intake">Save intake</button>
+        <div class="formmsg idle" id="formmsg">Fill in the three exports to save.</div>
+        <div class="saved-by" id="saved-by"></div>
+      </div>
+
+      <div class="card handoff" id="handoff" hidden>
+        <p class="eyebrow">Next step</p>
+        <p>Send this to Claude in your Redfin session:</p>
+        <pre id="handoff-text"></pre>
+        <button class="btn" type="button" id="copy-handoff">Copy message</button>
+      </div>
+
+      <div class="card history">
+        <p class="eyebrow">Season log</p>
+        <h3>Week by week</h3>
+        <div class="hlist" id="history"><div class="empty" id="history-empty">Connecting to saved intakes…</div></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+(() => {
+  const INTAKE_URL = "https://claude.ai/artifact/7boFUiHD85NyH8bcRZFdX8";
+  const BOARD_URL = "https://claude.ai/artifact/EJ2dTLhzhqUAjHWts7FR8Z";
+  const $ = (id) => document.getElementById(id);
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const WEEKS = [
+    { n: 1, start: "2026-10-26", end: "2026-10-31" },
+    { n: 2, start: "2026-11-01", end: "2026-11-07" },
+    { n: 3, start: "2026-11-08", end: "2026-11-14" },
+    { n: 4, start: "2026-11-15", end: "2026-11-21" },
+    { n: 5, start: "2026-11-22", end: "2026-11-28" },
+    { n: 6, start: "2026-11-29", end: "2026-12-05" },
+    { n: 7, start: "2026-12-06", end: "2026-12-13" },
+  ];
+  const parse = (iso) => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d); };
+  const iso = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+  const md = (s) => { const x = parse(s); return `${MONTHS[x.getMonth()]} ${x.getDate()}`; };
+  const range = (w) => { const a = parse(w.start), b = parse(w.end); return a.getMonth() === b.getMonth() ? `${md(w.start)}–${b.getDate()}` : `${md(w.start)} – ${md(w.end)}`; };
+  const publishDay = (w) => { const d = parse(w.end); d.setDate(d.getDate() + 1); return d; };
+  const pad = (n) => String(n).padStart(2, "0");
+  const docId = (n) => `week-${pad(n)}`;
+  const today = iso(new Date());
+
+  const REQUIRED = [
+    { key: "offers", label: "Offers detail export", window: "Trailing 2 weeks or longer",
+      must: (w) => `Every offer with a Submitted to Listing Agent date from ${range(w)}.`,
+      cols: "Agent · Submitted to Listing Agent Date · Offer Submitted? · Reached Mutual? · Used Fast Offer? · Deal Status · Client Name · Deal Link · Offer Price",
+      ph: "https://docs.google.com/spreadsheets/d/…  (e.g. “Detailed Data - Offers T2W”)" },
+    { key: "referral", label: "Rocket referral rate", window: "Trailing 45 days (T45)",
+      must: (w) => `Every new customer created ${range(w)}, with their Referral Type.`,
+      cols: "Agent · Customer Name · Customer Date · Referral Type · CUSTOMER_URL",
+      ph: "https://docs.google.com/spreadsheets/d/…  (e.g. “Referral Rate T45D”)" },
+    { key: "ava", label: "Ava usage", window: "Trailing 30 days (T30D)",
+      must: (w) => `Pulled on or after ${md(iso(publishDay(w)))} so the full week is in the last 30 days.`,
+      cols: "Agent · Team · Prompts · Prior prompts · Active days · Usage score · Customers researched · Outreach drafted",
+      ph: "https://docs.google.com/spreadsheets/d/…  (e.g. “Ava Usage T30D”)" },
+  ];
+  const STATUS_FIELD = { key: "rocketStatus", label: "Rocket status report", window: "Any window covering contest offers",
+    must: () => "Client name plus Rocket referral or loan status for anyone with a contest offer.", cols: "", ph: "https://docs.google.com/spreadsheets/d/…" };
+  const FLYERS = [
+    { key: "buydown321", label: "3-2-1 Buydown flyer" },
+    { key: "buydown21", label: "2-1 Buydown flyer" },
+    { key: "rateBuydown", label: "Rate Buydown flyer" },
+    { key: "marketFlyer", label: "“Buyer's or seller's market?” flyer" },
+    { key: "attachPlan", label: "Drive to 45%: Q4 Attach Rate Action Plan" },
+    { key: "threeWay", label: "3-way Rocket text template" },
+  ];
+  const DELIVERABLES = [
+    { key: "board", label: "Leaderboard update", always: true },
+    { key: "slackCard", label: "Slack card PNG" },
+    { key: "reel", label: "20-sec reel MP4" },
+    { key: "slides", label: "16:9 meeting slides" },
+    { key: "manager", label: "Manager page" },
+    { key: "slackPost", label: "Slack post copy" },
+  ];
+  const CHECKS = [
+    { key: "offersWindow", label: (w) => `Offers export covers ${range(w)} by Submitted to Listing Agent date` },
+    { key: "t45", label: () => "Referral export is the trailing 45 days, pulled the same day" },
+    { key: "t30", label: () => "Ava export is the trailing 30 days, pulled the same day" },
+    { key: "hygiene", label: () => "Team reminded to mark offers “Submitted to Listing Agent” and fail old offers in Agent Tracker", sub: "Offers that aren't marked don't count on the board." },
+  ];
+
+  /* ---------- build the form ---------- */
+  const linkHTML = (f, required) => `
+    <div class="linkfield">
+      <div class="lf-top"><label for="l-${f.key}">${f.label}</label><span class="lf-window">${f.window}</span></div>
+      <div class="lf-must" id="must-${f.key}"></div>
+      ${f.cols ? `<div class="lf-cols">Columns used: ${f.cols}</div>` : ""}
+      <div class="inrow"><input type="url" id="l-${f.key}" inputmode="url" autocomplete="off" spellcheck="false" placeholder="${f.ph}" ${required ? 'aria-required="true"' : ""}>
+        <a class="open" id="o-${f.key}" href="#" target="_blank" rel="noopener" aria-disabled="true">Open ↗</a></div>
+      <div class="state idle" id="s-${f.key}">${required ? "Required" : "Optional"}</div>
+    </div>`;
+  $("required-fields").innerHTML = REQUIRED.map((f) => linkHTML(f, true)).join("");
+  $("status-field").innerHTML = linkHTML(STATUS_FIELD, false);
+  $("flyer-fields").innerHTML = FLYERS.map((f) => `<div class="mini"><label for="l-${f.key}">${f.label}</label>
+      <input type="url" id="l-${f.key}" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…">
+      <div class="state idle" id="s-${f.key}"></div></div>`).join("");
+  $("deliverables").innerHTML = DELIVERABLES.map((d) => `<label class="check"><input type="checkbox" id="d-${d.key}" checked ${d.always ? "disabled" : ""}><span>${d.label}${d.always ? "<small>Always included</small>" : ""}</span></label>`).join("");
+  $("week").innerHTML = WEEKS.map((w) => `<option value="${w.n}">Week ${w.n} · ${range(w)}</option>`).join("");
+
+  const LINK_KEYS = [...REQUIRED, STATUS_FIELD, ...FLYERS].map((f) => f.key);
+  const NOTE_KEYS = ["roster", "corrections", "shoutouts", "other"];
+
+  /* ---------- link validation ---------- */
+  function inspect(url) {
+    const v = (url || "").trim();
+    if (!v) return { kind: "empty" };
+    let u;
+    try { u = new URL(v); } catch (_) { return { kind: "bad", msg: "Paste the full link, starting with https://" }; }
+    if (!/^https?:$/.test(u.protocol)) return { kind: "bad", msg: "Paste the full link, starting with https://" };
+    const id = (v.match(/\/d\/([A-Za-z0-9_-]{20,})/) || v.match(/[?&]id=([A-Za-z0-9_-]{20,})/) || [])[1];
+    const google = /(^|\.)google\.com$/.test(u.hostname);
+    if (google && id) {
+      const what = /spreadsheets/.test(u.pathname) ? "Google Sheet" : /document/.test(u.pathname) ? "Google Doc" : /presentation/.test(u.pathname) ? "Google Slides" : "Drive file";
+      return { kind: "ok", id, what, msg: `${what} found · ID ending ${id.slice(-6)}` };
+    }
+    if (google) return { kind: "warn", msg: "Google link without a file ID. Use the sheet's Share → Copy link." };
+    return { kind: "warn", msg: "Not a Google Drive link. Claude may not be able to open it." };
+  }
+  function paintLink(key, required) {
+    const el = $("l-" + key), st = $("s-" + key), open = $("o-" + key);
+    const r = inspect(el.value);
+    el.classList.remove("ok", "warn", "bad");
+    if (r.kind !== "empty") el.classList.add(r.kind);
+    st.className = "state " + (r.kind === "empty" ? "idle" : r.kind);
+    st.textContent = r.kind === "empty" ? (required ? "Required" : "") : r.msg;
+    if (open) {
+      const live = r.kind === "ok" || r.kind === "warn";
+      open.setAttribute("aria-disabled", live ? "false" : "true");
+      open.href = live ? el.value.trim() : "#";
+    }
+    return r;
+  }
+
+  /* ---------- state ---------- */
+  let db = null, user = null, myId = null, canWrite = true, readOnly = false;
+  let records = {};            // docId -> data
+  let loaded = false;
+  let currentWeek = null;
+  let dirty = false;
+  let saving = false;
+
+  function defaultWeek() {
+    const t = parse(today);
+    let pick = WEEKS[0];
+    for (const w of WEEKS) if (parse(w.end) < t) pick = w;
+    return pick.n;
+  }
+  const weekObj = (n) => WEEKS.find((w) => w.n === n);
+
+  function latestOther(n) {
+    return Object.values(records).filter((r) => r.week !== n).sort((a, b) => (b.submittedAt || "").localeCompare(a.submittedAt || ""))[0] || null;
+  }
+
+  function fillForm(n) {
+    const w = weekObj(n), rec = records[docId(n)];
+    const prev = latestOther(n);
+    REQUIRED.concat(STATUS_FIELD).forEach((f) => {
+      $("must-" + f.key).textContent = f.must(w);
+      $("l-" + f.key).value = rec && rec.links && rec.links[f.key] ? rec.links[f.key].url || "" : "";
+    });
+    FLYERS.forEach((f) => {
+      const own = rec && rec.resources && rec.resources[f.key];
+      const carried = !own && prev && prev.resources && prev.resources[f.key];
+      $("l-" + f.key).value = own || carried || "";
+    });
+    NOTE_KEYS.forEach((k) => { $("n-" + k).value = rec && rec.notes ? rec.notes[k] || "" : ""; });
+    DELIVERABLES.forEach((d) => { if (!d.always) $("d-" + d.key).checked = rec && rec.deliverables ? rec.deliverables.includes(d.key) : true; });
+    $("export-date").value = rec && rec.exportDate ? rec.exportDate : (today >= iso(publishDay(w)) ? today : iso(publishDay(w)));
+    $("need-by").value = rec && rec.needBy ? rec.needBy : iso(publishDay(w));
+    $("checks").innerHTML = CHECKS.map((c) => `<label class="check"><input type="checkbox" id="c-${c.key}" ${rec && rec.checklist && rec.checklist[c.key] ? "checked" : ""}><span>${c.label(w)}${c.sub ? `<small>${c.sub}</small>` : ""}</span></label>`).join("");
+    dirty = false;
+    refresh();
+  }
+
+  function collect() {
+    const w = weekObj(currentWeek);
+    const links = {};
+    REQUIRED.concat(STATUS_FIELD).forEach((f) => {
+      const url = $("l-" + f.key).value.trim();
+      if (url) { const r = inspect(url); links[f.key] = { url, fileId: r.id || null }; }
+    });
+    const resources = {};
+    FLYERS.forEach((f) => { const url = $("l-" + f.key).value.trim(); if (url) resources[f.key] = url; });
+    const notes = {};
+    NOTE_KEYS.forEach((k) => { const v = $("n-" + k).value.trim(); if (v) notes[k] = v; });
+    const checklist = {};
+    CHECKS.forEach((c) => { checklist[c.key] = $("c-" + c.key).checked; });
+    return {
+      week: w.n, weekStart: w.start, weekEnd: w.end,
+      exportDate: $("export-date").value || today,
+      needBy: $("need-by").value || iso(publishDay(w)),
+      links, resources, notes, checklist,
+      deliverables: DELIVERABLES.filter((d) => d.always || $("d-" + d.key).checked).map((d) => d.key),
+    };
+  }
+
+  function refresh() {
+    const w = weekObj(currentWeek), rec = records[docId(currentWeek)];
+    let reqOk = 0, reqBad = false;
+    REQUIRED.forEach((f) => { const r = paintLink(f.key, true); if (r.kind === "ok" || r.kind === "warn") reqOk++; if (r.kind === "bad") reqBad = true; });
+    paintLink(STATUS_FIELD.key, false);
+    FLYERS.forEach((f) => paintLink(f.key, false));
+    const checks = CHECKS.filter((c) => $("c-" + c.key) && $("c-" + c.key).checked).length;
+    const deliv = DELIVERABLES.filter((d) => d.always || $("d-" + d.key).checked).length;
+    $("m-req").textContent = `${reqOk} / 3`;
+    $("m-req-bar").style.width = (reqOk / 3) * 100 + "%";
+    $("m-check").textContent = `${checks} / ${CHECKS.length}`;
+    $("m-deliv").textContent = deliv;
+
+    // week status
+    const status = rec ? (rec.status === "published" && !dirty ? "published" : "submitted") : "waiting";
+    const label = !loaded ? "Loading…" : rec ? (rec.status === "published" ? "Board published" : "Saved · waiting for Claude") : "Waiting for links";
+    $("week-status").className = "chip " + (loaded ? status : "");
+    $("week-status").textContent = label;
+    const pub = publishDay(w);
+    $("week-due").textContent = `Board due ${DAYS[pub.getDay()]}, ${MONTHS[pub.getMonth()]} ${pub.getDate()}`;
+    $("ready-title").textContent = `Week ${w.n} · ${range(w)}`;
+
+    const btn = $("save");
+    btn.textContent = saving ? "Saving…" : rec ? `Update Week ${w.n} intake` : `Save Week ${w.n} intake`;
+    btn.disabled = saving || readOnly || reqOk < 3 || reqBad || !loaded || !db;
+    const msg = $("formmsg");
+    if (readOnly) { msg.className = "formmsg bad"; msg.textContent = "You can view this form, but saving needs Contributor access. Ask Orlando to share it with you."; }
+    else if (!db && loaded) { msg.className = "formmsg bad"; msg.textContent = "Saving isn't available in this view. Open the form from claude.ai while signed in."; }
+    else if (reqBad) { msg.className = "formmsg bad"; msg.textContent = "One of the export links isn't a full link. Fix the field marked in red."; }
+    else if (reqOk < 3) { msg.className = "formmsg idle"; msg.textContent = `Add ${3 - reqOk} more export link${3 - reqOk === 1 ? "" : "s"} to save.`; }
+    else if (dirty && rec) { msg.className = "formmsg idle"; msg.textContent = "You have changes that aren't saved yet."; }
+    else if (!rec) { msg.className = "formmsg idle"; msg.textContent = "Ready to save."; }
+    else if (!saving && !msg.classList.contains("ok")) { msg.className = "formmsg idle"; msg.textContent = "Saved. Edit anything and save again to update."; }
+
+    // saved by
+    if (rec && rec.submittedAt) {
+      const when = new Date(rec.submittedAt);
+      const base = `Last saved ${MONTHS[when.getMonth()]} ${when.getDate()}, ${when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+      $("saved-by").textContent = base;
+      if (rec.submittedBy && user) user.profiles([rec.submittedBy]).then((ps) => {
+        const p = ps[rec.submittedBy];
+        if (records[docId(currentWeek)] === rec) $("saved-by").textContent = `${base} by ${p.isMe ? "you" : p.name || "a teammate"}`;
+      });
+    } else $("saved-by").textContent = "";
+
+    // hand-off message
+    if (rec) {
+      $("handoff").hidden = false;
+      $("handoff-text").textContent = `Week ${w.n} intake is saved (${range(w)}). Please update the Finish Strong leaderboard${INTAKE_URL ? ` from ${INTAKE_URL}` : " from the weekly intake form"}.`;
+    } else $("handoff").hidden = true;
+
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const box = $("history");
+    if (!loaded) return;
+    const rows = WEEKS.map((w) => ({ w, rec: records[docId(w.n)] })).filter((x) => x.rec || x.w.n === currentWeek);
+    if (!rows.length) { box.innerHTML = `<div class="empty">No weeks yet.</div>`; return; }
+    box.innerHTML = rows.reverse().map(({ w, rec }) => {
+      const st = rec ? (rec.status === "published" ? "published" : "submitted") : "waiting";
+      const lab = rec ? (rec.status === "published" ? "Published" : "Saved") : "No links";
+      const meta = rec ? (rec.status === "published" && rec.published && rec.published.at ? `Board published ${md(rec.published.at.slice(0, 10))}` : `Saved ${md((rec.submittedAt || today).slice(0, 10))}`) : w.n === currentWeek ? "Due " + md(iso(publishDay(w))) : "Not submitted";
+      return `<button type="button" class="hrow ${w.n === currentWeek ? "on" : ""}" data-week="${w.n}"><span class="wk">W${w.n}</span>
+        <span class="meta">${meta}<span></span></span><span class="chip ${st}">${lab}</span></button>`;
+    }).join("");
+    // summaries are other people's text: set with textContent
+    box.querySelectorAll(".hrow").forEach((b) => {
+      const n = +b.dataset.week, rec = records[docId(n)], w = weekObj(n);
+      b.querySelector(".meta span").textContent = rec && rec.published && rec.published.summary ? rec.published.summary : range(w);
+      b.addEventListener("click", () => selectWeek(n));
+    });
+  }
+
+  function selectWeek(n) {
+    if (n === currentWeek) return;
+    currentWeek = n;
+    $("week").value = String(n);
+    $("formmsg").className = "formmsg idle";
+    fillForm(n);
+  }
+
+  /* ---------- events ---------- */
+  $("week").addEventListener("change", (e) => selectWeek(+e.target.value));
+  $("intake").addEventListener("input", () => { dirty = true; if ($("formmsg").classList.contains("ok")) $("formmsg").className = "formmsg idle"; refresh(); });
+  $("intake").addEventListener("change", () => { dirty = true; refresh(); });
+  $("intake").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if ($("save").disabled || !db) return;
+    const body = collect();
+    const prev = records[docId(currentWeek)];
+    const now = new Date().toISOString();
+    const doc = {
+      ...body,
+      status: "submitted",
+      submittedBy: myId,
+      submittedAt: now,
+      firstSubmittedAt: prev && prev.firstSubmittedAt ? prev.firstSubmittedAt : now,
+      boardUrl: BOARD_URL,
+    };
+    if (prev && prev.published) doc.published = prev.published; // keep Claude's publish record
+    saving = true; refresh();
+    try {
+      await db.doc("intake/" + docId(currentWeek)).set(doc);
+      records[docId(currentWeek)] = doc;
+      dirty = false; saving = false;
+      $("formmsg").className = "formmsg ok";
+      $("formmsg").textContent = `Saved Week ${currentWeek} intake. Copy the message below and send it to Claude.`;
+      refresh();
+    } catch (err) {
+      saving = false;
+      const code = err && err.code;
+      $("formmsg").className = "formmsg bad";
+      if (code === "invalid_argument") { readOnly = true; $("formmsg").textContent = "This form can't save for your account. Ask Orlando for Contributor access."; }
+      else if (code === "quota_exceeded") $("formmsg").textContent = "The form's storage is full. Ask Claude to archive older weeks.";
+      else $("formmsg").textContent = "Couldn't save just now. Check your connection and try again.";
+      refresh();
+    }
+  });
+  $("copy-handoff").addEventListener("click", async (e) => {
+    const btn = e.currentTarget, text = $("handoff-text").textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+    catch (_) { const r = document.createRange(); r.selectNodeContents($("handoff-text")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Selected · press copy"; }
+    setTimeout(() => { btn.textContent = "Copy message"; }, 2200);
+  });
+
+  /* ---------- boot ---------- */
+  currentWeek = defaultWeek();
+  $("week").value = String(currentWeek);
+  fillForm(currentWeek);
+
+  (async () => {
+    const timer = setTimeout(() => {
+      if (!loaded) {
+        $("banner").textContent = "Can't reach saved intakes yet. You can keep filling in the form; saving will work once the connection is back.";
+        $("banner").classList.add("show");
+        $("history-empty") && ($("history-empty").textContent = "Saved weeks will show here once the connection is back.");
+      }
+    }, 10000);
+    let api = null;
+    for (let i = 0; i < 30 && !api; i++) { // the viewer attaches window.claude; give it a moment
+      if (window.claude && typeof window.claude.use === "function") api = window.claude;
+      else await new Promise((r) => setTimeout(r, 100));
+    }
+    if (!api) { clearTimeout(timer); loaded = true; $("banner").textContent = "Open this form from claude.ai to save. You can fill it in here, but nothing will be stored."; $("banner").classList.add("show"); refresh(); return; }
+    [db, user] = await Promise.all([api.use("db"), api.use("user")]);
+    if (user) {
+      myId = await user.id();
+      const can = await user.can("data.write");
+      if (can === false) readOnly = true;
+    }
+    if (!db) { clearTimeout(timer); loaded = true; refresh(); return; }
+    db.collection("intake").onSnapshot((snap) => {
+      const next = {};
+      snap.docs.forEach((d) => { if (d.exists) next[d.id] = d.data(); });
+      const firstLoad = !loaded;
+      const before = records[docId(currentWeek)];
+      records = next;
+      if (!snap.metadata.fromCache) { clearTimeout(timer); $("banner").classList.remove("show"); }
+      loaded = true;
+      // Refill only when the person hasn't started typing, so a save from elsewhere never wipes their edits.
+      if (firstLoad || (!dirty && before !== records[docId(currentWeek)])) fillForm(currentWeek); else refresh();
+    }, () => {
+      clearTimeout(timer); loaded = true;
+      $("banner").textContent = "Saved intakes aren't available right now. Reload the page to try again.";
+      $("banner").classList.add("show"); refresh();
+    });
+  })();
+})();
+</script>

@@ -11,6 +11,7 @@ Weekly animated leaderboard for the Redfin powered by Rocket LA offer-writing an
 | 16:9 slides | `exports/week-NN/slides-16x9/` | Team meeting backup |
 | 20-second reel | `exports/week-NN/week-NN-reel.mp4` | Slack, group text |
 | Manager page | `--private-out` folder only (never committed) | Rocket intro gaps, offer verification, Ava watch, Slack post |
+| Weekly intake form | `site/intake.html` → https://claude.ai/artifact/7boFUiHD85NyH8bcRZFdX8 | Paste the 3 export links + notes each Sunday; saved to the form's database (`intake/week-NN`) |
 
 ## Contest rules as scored
 
@@ -23,6 +24,11 @@ Weekly animated leaderboard for the Redfin powered by Rocket LA offer-writing an
 
 ## Weekly run (every Sunday)
 
+0. Orlando saves the week in the intake form, then sends Claude the hand-off message. Claude reads
+   `intake/week-NN` from the form's database (Artifact database tool, `collection: "intake"`), downloads the three
+   linked sheets as CSV through the Google Drive connector, and applies the notes (roster changes, corrections,
+   shout-outs) before building. After publishing, Claude updates that record: `status: "published"` and
+   `published: {at, summary}`, which shows the week as Published in the form's season log.
 1. Export the three sheets as CSV (Offers detail, Referral rate T45, Ava usage T30D). Keep them outside the repo, or in `contest/raw/` (git-ignored).
 2. Build data and pages:
    ```bash
