@@ -72,7 +72,9 @@ canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
 .badge .bv { font-family: var(--mono); font-size: 22px; color: var(--muted); margin-top: 8px; }
 .badge .bv b { color: var(--text); font-size: 28px; }
 .road { margin-top: auto; margin-bottom: 40px; }
-.stops { display: grid; grid-template-columns: repeat(11, 1fr); align-items: end; gap: 6px; height: 470px; }
+.stops { display: grid; grid-template-columns: repeat(11, 1fr); align-items: end; gap: 6px; min-height: 360px; }
+.stops .av.xs { width: 56px; height: 56px; font-size: 19px; }
+.stop { gap: 6px !important; }
 .stop { display: flex; flex-direction: column-reverse; align-items: center; gap: 8px; }
 .pad { font-family: var(--mono); font-weight: 800; font-size: 18px; color: var(--muted); text-align: center; border: 2px dashed var(--line); border-radius: 16px; padding: 12px 4px; width: 100%; }
 .pad b { display: block; font-family: var(--display); font-size: 40px; color: var(--text); }
@@ -132,7 +134,7 @@ canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
   // ---- data for scenes
   const writers = names.filter((n) => w.agents[n].offers > 0).sort((a, b) => w.agents[b].offers - w.agents[a].offers || w.agents[b].pts - w.agents[a].pts || w.agents[b].mutual - w.agents[a].mutual || a.localeCompare(b));
   const key = (n) => `${w.agents[n].offers}|${w.agents[n].pts}`;
-  const third = writers[2] ? writers.slice(2).filter((n) => key(n) === key(writers[2])).slice(0, 2) : [];
+  const third = writers[2] ? writers.slice(2).filter((n) => key(n) === key(writers[2])) : [];
   const club = names.filter((n) => w.agents[n].pts_ref > 0).sort((a, b) => w.agents[b].ref_new - w.agents[a].ref_new || a.localeCompare(b));
   const left = S.calendar.length - W;
   const nxt = S.calendar.find((c) => c.n === W + 1);
@@ -142,10 +144,11 @@ canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
   const step = (list, place) => {
     if (!list || !list.length) return `<div class="step p${place}"><div class="who" data-fx="drop" data-in="${7300 + place * 120}" data-dur="600"><span class="av" style="--c:#85737b;border-style:dashed">?</span><div class="nm">Open seat</div></div><div class="block" data-fx="grow" data-in="${6200 + (3 - place) * 150}" data-dur="800">${place}</div></div>`;
     const a = w.agents[list[0]], shared = list.length > 1;
-    const nm = shared ? list.map((n) => esc(A[n].first)).join(" & ") : esc(list[0]);
+    const big = list.length > 2;
+    const nm = big ? `${list.length} agents tied` : shared ? list.map((n) => esc(A[n].first)).join(" & ") : esc(list[0]);
     const earn = [a.pts_offers ? `+${fmt(a.pts_offers)}` : "", !shared && a.pts_ref ? `+${fmt(a.pts_ref)} Rocket` : ""].filter(Boolean).join(" · ") || (list.every((n) => w.agents[n].mutual) ? "reached mutual" : "");
     const whoIn = { 1: 7600, 2: 7200, 3: 7400 }[place], blockIn = { 1: 6500, 2: 6200, 3: 6350 }[place];
-    return `<div class="step p${place}"><div class="who" data-fx="drop" data-in="${whoIn}" data-dur="650">${place === 1 ? `<svg class="crown"><use href="#i-crown"/></svg>` : ""}<div class="avs">${list.map((n) => av(n, place === 1 ? "" : "sm")).join("")}</div><div class="nm">${nm}</div><div class="mt">${a.offers} offer${a.offers === 1 ? "" : "s"}${shared ? " each" : ""}</div><div class="ea">${earn}</div></div><div class="block" data-fx="grow" data-in="${blockIn}" data-dur="900">${place}</div></div>`;
+    return `<div class="step p${place}"><div class="who" data-fx="drop" data-in="${whoIn}" data-dur="650">${place === 1 ? `<svg class="crown"><use href="#i-crown"/></svg>` : ""}<div class="avs">${list.slice(0, big ? 3 : 2).map((n) => av(n, big ? "xs" : place === 1 ? "" : "sm")).join("")}${big && list.length > 3 ? `<span class="av xs" style="--c:#b5a5ab">+${list.length - 3}</span>` : ""}</div><div class="nm">${nm}</div><div class="mt">${a.offers} offer${a.offers === 1 ? "" : "s"}${shared ? " each" : ""}</div><div class="ea">${earn}</div></div><div class="block" data-fx="grow" data-in="${blockIn}" data-dur="900">${place}</div></div>`;
   };
 
   const road = w.road || {};
@@ -165,7 +168,7 @@ canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
       <div class="sub" data-fx="rise" data-in="1100" data-dur="600">Week ${W} results are in.<br>Offer writing + Rocket referral contest · <b>10,000 pt grand prize</b></div>`],
     [2800, 6000, `<div class="eyebrow" data-fx="rise" data-in="2900" data-dur="500">Week ${W} by the numbers</div>
       <div class="kgrid">
-        <div class="k" data-fx="pop" data-in="3050" data-dur="550"><div class="v" data-count="${t.offers}" data-in="3150" data-dur="1100">${t.offers}</div><div class="l">offers submitted</div><div class="s">${t.mutual} already reached mutual</div></div>
+        <div class="k" data-fx="pop" data-in="3050" data-dur="550"><div class="v" data-count="${t.offers}" data-in="3150" data-dur="1100">${t.offers}</div><div class="l">offers submitted</div><div class="s">${t.mutual ? `${t.mutual} already reached mutual` : `${t.fast} of ${t.offers} written with Fast Offers`}</div></div>
         <div class="k" data-fx="pop" data-in="3250" data-dur="550"><div class="v" data-count="${t.volume}" data-fmt="money" data-in="3350" data-dur="1100">${money(t.volume)}</div><div class="l">in offers written</div><div class="s">${t.writers} agents writing</div></div>
         <div class="k gold" data-fx="pop" data-in="3450" data-dur="550"><div class="v" data-count="${t.pts}" data-in="3550" data-dur="1200">${fmt(t.pts)}</div><div class="l">Amaze points awarded</div><div class="s">offers + Rocket 100%</div></div>
         <div class="k" data-fx="pop" data-in="3650" data-dur="550"><div class="v" data-count="${pct(t.ref_done, t.ref_new)}" data-fmt="pct" data-in="3750" data-dur="1100">${pct(t.ref_done, t.ref_new)}%</div><div class="l">Rocket intro rate</div><div class="s">${t.ref_done} of ${t.ref_new} new customers · goal ${Math.round(S.contest.referral_goal * 100)}%</div></div>
@@ -175,7 +178,7 @@ canvas { position: absolute; inset: 0; width: 1080px; height: 1350px; }
     [10600, 13000, `<div class="eyebrow" data-fx="rise" data-in="10650" data-dur="500">100% club · +1,000 each</div><div class="h" data-fx="rise" data-in="10750" data-dur="550">Every new customer introduced to Rocket.</div>
       <div class="list">${club.slice(0, 6).map((n, i) => `<div class="row" data-fx="left" data-in="${11050 + i * 140}" data-dur="500">${av(n, "xs")}<div><div class="n">${esc(n)}</div><div class="s">${w.agents[n].ref_done} of ${w.agents[n].ref_new} introduced</div></div><div class="p">+1,000</div></div>`).join("")}</div>`],
     [13000, 15300, B ? `<div class="eyebrow" data-fx="rise" data-in="13050" data-dur="500">Ava badges · last 30 days</div><div class="h" data-fx="rise" data-in="13150" data-dur="550">Working smarter shows up here first.</div>
-      <div class="bgrid">${[[B.champion, "i-star", `<b>${B.champion.value}</b> usage score`], [B.jump, "i-jump", `<b>+${B.jump.value}</b> prompts`], [B.outreach, "i-send", `<b>${fmt(B.outreach.value)}</b> outreach drafts`], [B.research, "i-search", `<b>${fmt(B.research.value)}</b> customers researched`]]
+      <div class="bgrid">${[[B.champion, "i-star", `<b>${B.champion.value}</b> usage score`], [B.jump, "i-jump", `<b>+${B.jump.value}</b> prompts${B.jump.agents && B.jump.agents.length > 1 ? " each" : ""}`], [B.outreach, "i-send", `<b>${fmt(B.outreach.value)}</b> outreach drafts`], [B.research, "i-search", `<b>${fmt(B.research.value)}</b> customers researched`]]
         .map(([b, ic, v], i) => `<div class="badge" data-fx="flip" data-in="${13400 + i * 160}" data-dur="650"><div class="i"><svg><use href="#${ic}"/></svg></div><div class="bl">${esc(b.label)}</div><div class="bn">${esc(b.agent)}</div><div class="bv">${v}</div></div>`).join("")}</div>` : ""],
     [15300, 18200, `<div class="eyebrow" data-fx="rise" data-in="15350" data-dur="500">Road to 10 · grand prize</div><div class="h" data-fx="rise" data-in="15450" data-dur="550">10 offers by Dec 13.</div>
       <div class="prize" data-fx="rise" data-in="15650" data-dur="600">10,000 pts<small>DRAWING · ${left} WEEKS LEFT · ${Math.ceil(goalN / Math.max(left, 1))} OFFERS/WEEK GETS YOU THERE</small></div>

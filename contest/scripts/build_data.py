@@ -240,13 +240,19 @@ def ava_snapshot(ava):
     # The manager-action label stays off the public board; it only appears on the manager page.
     snap = {name: {k: x for k, x in dict(v, delta=v["prompts"] - v["prior"]).items() if k != "action"}
             for name, v in ava.items()}
-    pick = lambda key: max(snap, key=lambda a: (snap[a][key], snap[a]["score"]))
+    def badge(key, label, unit):
+        """Everyone tied at the top shares the badge (co-holders), listed by usage score."""
+        top = max(v[key] for v in snap.values())
+        holders = sorted((a for a in snap if snap[a][key] == top), key=lambda a: (-snap[a]["score"], a))
+        b = {"agent": " & ".join(holders), "agents": holders, "label": label, "value": top, "unit": unit}
+        if key == "delta" and len(holders) == 1:
+            b.update({"from": snap[holders[0]]["prior"], "to": snap[holders[0]]["prompts"]})
+        return b
     badges = {
-        "champion": {"agent": pick("score"), "label": "Ava Champion", "value": snap[pick("score")]["score"], "unit": "usage score"},
-        "jump": {"agent": pick("delta"), "label": "Biggest Jump", "value": snap[pick("delta")]["delta"], "unit": "more prompts",
-                 "from": snap[pick("delta")]["prior"], "to": snap[pick("delta")]["prompts"]},
-        "outreach": {"agent": pick("outreach"), "label": "Outreach Pro", "value": snap[pick("outreach")]["outreach"], "unit": "outreach drafts"},
-        "research": {"agent": pick("customers"), "label": "Research Pro", "value": snap[pick("customers")]["customers"], "unit": "customers researched"},
+        "champion": badge("score", "Ava Champion", "usage score"),
+        "jump": badge("delta", "Biggest Jump", "more prompts"),
+        "outreach": badge("outreach", "Outreach Pro", "outreach drafts"),
+        "research": badge("customers", "Research Pro", "customers researched"),
     }
     return {
         "agents": snap,
@@ -272,6 +278,9 @@ def main():
     ap.add_argument("--private-out", required=True)
     ap.add_argument("--season", default=str(ROOT / "data" / "season.json"))
     ap.add_argument("--board-url", default="", help="published team board link, used in the Slack post")
+    ap.add_argument("--backfill-offers", action="append", default=[],
+                    help="an earlier offers export whose contest deals belong in the deal ledger (one-time migration)")
+    ap.add_argument("--deals", default=str(ROOT / "data" / "deals.json"))
     args = ap.parse_args()
 
     ava = read_ava(args.ava)
@@ -283,6 +292,23 @@ def main():
     unknown -= set(roster) | EXCLUDE
     if unknown:
         print("WARNING: agents in exports but not in the Ava roster (ignored):", sorted(unknown), file=sys.stderr)
+
+    # Deal ledger: every contest offer ever seen, keyed by deal ID, so the Road to 10 stays cumulative
+    # whatever window an export covers (T7D, T2W, ...), and a deal that shows up in two exports counts once.
+    deals_path = Path(args.deals)
+    deals = json.loads(deals_path.read_text()) if deals_path.exists() else {}
+    def add_deals(rows):
+        for o in rows:
+            if not (o["submitted"] and o["date"] and CONTEST_START <= o["date"] <= CONTEST_END and o["agent"] in ava):
+                continue
+            deal = re.sub(r"\D", "", o["link"].rsplit("/", 1)[-1])
+            if deal and deal not in deals:
+                deals[deal] = {"agent": o["agent"], "date": o["date"].isoformat(), "week": week_of(o["date"])}
+    for extra in args.backfill_offers:
+        add_deals(read_offers(extra))
+    add_deals(offers)
+    deals_path.parent.mkdir(parents=True, exist_ok=True)
+    deals_path.write_text(json.dumps(dict(sorted(deals.items())), indent=1))
 
     season_path = Path(args.season)
     season = json.loads(season_path.read_text()) if season_path.exists() else {"weeks": {}}
@@ -297,10 +323,9 @@ def main():
         week = score_week(n, roster, offers, referrals)
         week["published"] = n == args.week or season["weeks"].get(str(n), {}).get("published", False)
         week["locked"] = args.export_date
-        # Road to 10: contest offers through the end of this week, from the latest export.
+        # Road to 10: contest offers through the end of this week, from the cumulative deal ledger.
         week["road"] = {
-            name: sum(1 for o in offers if o["agent"] == name and o["submitted"] and o["date"]
-                      and CONTEST_START <= o["date"] <= dt.date.fromisoformat(week["end"]))
+            name: sum(1 for d in deals.values() if d["agent"] == name and d["date"] <= week["end"])
             for name in roster
         }
         if n == args.week:

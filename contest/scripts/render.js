@@ -92,7 +92,7 @@ function stage(file, wrap) {
     execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(fps), "-i", path.join(frames, "f%04d.jpg"),
       "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-preset", "slow", "-movflags", "+faststart", mp4]);
     console.log("reel:", mp4, Math.round(fs.statSync(mp4).size / 1024), "KB,", total, "frames");
-    if (qaDir) for (const ms of [1500, 4600, 8400, 10300, 14600, 17600, 19600]) {
+    if (qaDir) for (const ms of [1500, 4600, 8000, 10300, 14600, 17600, 19600]) {
       const f = Math.round((ms / 1000) * fps);
       fs.copyFileSync(path.join(frames, `f${String(f).padStart(4, "0")}.jpg`), path.join(qaDir, `reel-${ms}.jpg`));
     }
