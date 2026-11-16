@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Podium Infographics</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap">
+<style>
+/* Three 1080x1920 podium infographics, one creative world per place:
+   #1 Gold Standard (medal + spotlight), #2 Cover Story (Redfin-red magazine), #3 Liftoff (launch log).
+   Story content stays between y=200 and y=1720 so agenda crops and story overlays never cut it. */
+:root {
+  --ink: #0f0c0e; --red: #e8343b; --red-deep: #8f121b; --gold: #f7b93e; --gold-hi: #ffde87; --gold-lo: #c98a17;
+  --text: #f7f1ee; --muted: #b5a5ab; --dim: #85737b; --up: #4fd890;
+  --t-southla: #ff5a5f; --t-southbay: #f7b93e; --t-westla: #73adff; --t-southeast: #be8cf7; --t-longbeach: #45d3cb;
+  --display: "Archivo", "Arial Black", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #000; display: grid; gap: 40px; padding: 40px; justify-content: center; }
+.s { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: var(--text); font-family: var(--display); }
+.lock { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; }
+.lock .rf { color: var(--red); font-weight: 900; font-size: 44px; letter-spacing: -.02em; }
+.lock .pb { font-size: 21px; font-weight: 500; opacity: .75; }
+.lock .rk { font-weight: 900; font-size: 44px; letter-spacing: -.02em; }
+.k { font-family: var(--mono); font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+.abs { position: absolute; }
+
+/* =========== #1 GOLD STANDARD =========== */
+.g { background: radial-gradient(1200px 900px at 50% 30%, #2a1c14 0%, #120c0b 55%, #070505 100%); }
+.g .spot { position: absolute; left: 50%; top: -120px; width: 1200px; height: 1300px; transform: translateX(-50%); background: radial-gradient(ellipse 42% 100% at 50% 0%, rgba(255,226,160,.26), transparent 70%); }
+.g .top { position: absolute; top: 104px; left: 0; right: 0; display: flex; justify-content: center; }
+.g .kick { position: absolute; top: 180px; left: 0; right: 0; text-align: center; font-size: 24px; color: var(--gold); }
+.g .ribbon { position: absolute; top: 225px; left: 50%; width: 260px; height: 190px; transform: translateX(-50%); }
+.g .ribbon i { position: absolute; top: 0; width: 104px; height: 196px; background: linear-gradient(180deg, var(--red-deep), var(--red)); }
+.g .ribbon i:first-child { left: 34px; transform: skewX(18deg); } .g .ribbon i:last-child { right: 34px; transform: skewX(-18deg); }
+.g .medal { position: absolute; top: 330px; left: 50%; transform: translateX(-50%); width: 236px; height: 236px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff5cf 0%, var(--gold-hi) 18%, var(--gold) 45%, #a8700f 78%, #6e4807 100%);
+  box-shadow: 0 0 0 12px rgba(255,222,135,.16), 0 40px 70px -20px rgba(0,0,0,.85), 0 0 140px rgba(247,185,62,.45); display: grid; place-items: center; }
+.g .medal::before { content: ""; position: absolute; inset: 22px; border-radius: 50%; border: 5px solid rgba(110,72,7,.55); }
+.g .medal b { position: relative; font-family: var(--serif); font-weight: 800; font-size: 160px; line-height: 1; color: #7a4f08; text-shadow: 0 3px 0 rgba(255,245,207,.7); }
+.g .name { position: absolute; top: 592px; left: 0; right: 0; text-align: center; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 104px; line-height: 1; color: #fff6e3; letter-spacing: -.02em; }
+.g .role { position: absolute; top: 712px; left: 0; right: 0; text-align: center; font-size: 22px; color: var(--gold); letter-spacing: .3em; }
+.g .col { position: absolute; top: 770px; left: 72px; right: 72px; display: grid; gap: 18px; }
+.g .panel { position: relative; border: 2px solid rgba(247,185,62,.32); border-radius: 26px; background: rgba(18,12,11,.72); padding: 22px 28px; }
+.g .ph { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.g .ph .k { font-size: 19px; color: var(--gold); }
+.g .ph .big { font-family: var(--serif); font-weight: 700; font-size: 40px; color: #fff6e3; white-space: nowrap; }
+.g .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 22px; align-items: end; }
+.g .day { display: grid; justify-items: center; gap: 8px; }
+.g .stack { display: flex; flex-direction: column-reverse; gap: 8px; align-items: center; min-height: 120px; justify-content: flex-start; }
+.g .chip { width: 74px; height: 56px; border-radius: 14px; background: linear-gradient(180deg, var(--gold-hi), var(--gold)); color: #3a2603; display: grid; place-items: center; font-weight: 900; font-size: 26px; box-shadow: 0 8px 22px -6px rgba(247,185,62,.7); }
+.g .none { width: 14px; height: 14px; border-radius: 50%; background: rgba(247,185,62,.22); margin-bottom: 20px; }
+.g .dl { font-family: var(--mono); font-weight: 800; font-size: 18px; letter-spacing: .1em; color: var(--muted); }
+.g .dn { font-family: var(--serif); font-weight: 700; font-size: 30px; color: #fff6e3; line-height: 1; }
+.g .day.on .dl { color: var(--gold); }
+.g .two { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
+.g .donut { display: grid; justify-items: center; gap: 6px; }
+.g .donut svg { width: 176px; height: 176px; }
+.g .road { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-top: 24px; }
+.g .road i { height: 64px; border-radius: 10px; background: rgba(247,185,62,.12); border: 2px solid rgba(247,185,62,.25); }
+.g .road i.on { background: linear-gradient(180deg, var(--gold-hi), var(--gold)); border-color: var(--gold-hi); box-shadow: 0 6px 18px -6px rgba(247,185,62,.7); }
+.g .road i:last-child { position: relative; }
+.g .road i:last-child::after { content: "10"; position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 20px; color: var(--gold); }
+.g .note { margin-top: 16px; font-size: 24px; color: var(--muted); line-height: 1.35; }
+.g .note b { color: #fff6e3; }
+.g .season { display: flex; height: 70px; border-radius: 14px; overflow: hidden; margin-top: 22px; }
+.g .season div { display: grid; place-items: center; font-weight: 900; font-size: 24px; color: #2a1a03; white-space: nowrap; padding: 0 8px; }
+.g .season div:nth-child(1) { background: #c98a17; } .g .season div:nth-child(2) { background: var(--gold); } .g .season div:nth-child(3) { background: var(--gold-hi); }
+.g .season div:nth-child(4) { background: #fff0c2; } .g .season div:nth-child(5) { background: #fff7de; }
+.g .slabels { display: flex; margin-top: 10px; }
+.g .slabels span { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--muted); text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 4px; }
+.g .reward { position: absolute; top: 1716px; left: 50%; transform: translateX(-50%); padding: 16px 40px; border-radius: 999px; white-space: nowrap;
+  background: linear-gradient(180deg, var(--gold-hi), var(--gold)); color: #2a1a03; font-weight: 900; font-stretch: 110%; font-size: 38px; box-shadow: 0 16px 40px -10px rgba(247,185,62,.7); }
+
+/* =========== #2 COVER STORY =========== */
+.c { background: var(--red); color: #fff; }
+.c::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0,0,0,.15) 2.2px, transparent 2.6px); background-size: 16px 16px; }
+.c .top { position: absolute; top: 100px; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: center; }
+.c .top .lock .rf { color: #fff; }
+.c .issue { font-size: 19px; }
+.c .mast { position: absolute; top: 172px; left: 0; right: 0; text-align: center; white-space: nowrap; font-weight: 900; font-stretch: 112%; font-size: 152px; line-height: .85; letter-spacing: -.05em; text-transform: uppercase; }
+.c .badge2 { position: absolute; top: 352px; right: 60px; width: 196px; height: 196px; border-radius: 50%; background: #f4f6f9; color: #8f121b; display: grid; place-items: center; transform: rotate(10deg);
+  box-shadow: 0 18px 40px -10px rgba(60,0,4,.6); border: 8px solid #cfd5dd; }
+.c .badge2 b { font-weight: 900; font-size: 92px; line-height: .9; }
+.c .badge2 small { display: block; font-family: var(--mono); font-weight: 800; font-size: 16px; letter-spacing: .14em; text-align: center; }
+.c .who { position: absolute; top: 340px; left: 64px; right: 280px; }
+.c .who .kk { font-family: var(--serif); font-style: italic; font-size: 40px; }
+.c .who .n { font-weight: 900; font-stretch: 112%; font-size: 112px; line-height: .86; letter-spacing: -.035em; text-transform: uppercase; margin-top: 8px; }
+.c .who .r { font-size: 20px; margin-top: 16px; color: #ffe3e4; }
+.c .col { position: absolute; top: 650px; left: 64px; right: 64px; display: grid; gap: 20px; }
+.c .box { position: relative; border-radius: 26px; background: rgba(40,4,8,.38); border: 2px solid rgba(255,255,255,.22); padding: 26px 30px; }
+.c .bh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.c .bh .k { font-size: 19px; color: #ffe3e4; }
+.c .bh .t { font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 34px; }
+.c .rocket { display: grid; grid-template-columns: 250px 1fr; gap: 30px; align-items: center; margin-top: 18px; }
+.c .ring svg { width: 250px; height: 250px; }
+.c .bars { display: grid; gap: 18px; }
+.c .bar .bl { display: flex; justify-content: space-between; font-size: 24px; font-weight: 800; }
+.c .bar .bt { position: relative; height: 26px; border-radius: 13px; background: rgba(0,0,0,.28); margin-top: 8px; }
+.c .bar .bt i { position: absolute; inset: 0 auto 0 0; border-radius: 13px; background: #fff; }
+.c .bar.team .bt i { background: rgba(255,255,255,.5); }
+.c .bar .bt b { position: absolute; top: -8px; bottom: -8px; width: 4px; background: var(--gold-hi); border-radius: 2px; }
+.c .goal { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--gold-hi); }
+.c .slope { display: grid; grid-template-columns: 1fr 300px; gap: 26px; align-items: center; margin-top: 12px; }
+.c .slope svg { width: 100%; height: 210px; overflow: visible; }
+.c .facts { display: grid; gap: 14px; }
+.c .facts div { font-size: 22px; color: #ffe3e4; }
+.c .facts b { display: block; font-weight: 900; font-stretch: 108%; font-size: 52px; line-height: 1; color: #fff; }
+.c .offer { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; margin-top: 14px; }
+.c .offer .v { font-weight: 900; font-stretch: 112%; font-size: 84px; line-height: .95; }
+.c .offer .d { font-size: 24px; color: #ffe3e4; margin-top: 6px; }
+.c .dots { display: grid; grid-template-columns: repeat(5, 30px); gap: 10px; }
+.c .dots i { width: 30px; height: 30px; border-radius: 50%; border: 3px solid rgba(255,255,255,.55); }
+.c .dots i.on { background: #fff; border-color: #fff; }
+.c .dots + div { font-family: var(--mono); font-size: 16px; font-weight: 800; letter-spacing: .12em; text-align: center; margin-top: 10px; }
+.c .bottom { position: absolute; top: 1712px; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: center; }
+.c .pill { padding: 16px 34px; border-radius: 999px; background: #fff; color: var(--red-deep); font-weight: 900; font-stretch: 108%; font-size: 34px; white-space: nowrap; }
+.c .barcode { width: 200px; height: 70px; background: repeating-linear-gradient(90deg, #fff 0 4px, transparent 4px 7px, #fff 7px 9px, transparent 9px 14px, #fff 14px 20px, transparent 20px 23px); }
+
+/* =========== #3 LIFTOFF =========== */
+.l { background: radial-gradient(900px 700px at 50% 115%, rgba(232,52,59,.7), transparent 62%), radial-gradient(700px 500px at 0% 0%, rgba(143,18,27,.5), transparent 60%), linear-gradient(180deg, #0b0910 0%, #140c10 60%, #1d0b0e 100%); }
+.l canvas { position: absolute; inset: 0; }
+.l .top { position: absolute; top: 100px; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: center; }
+.l .pill { font-size: 20px; padding: 12px 20px; border: 2px solid #cd7a52; border-radius: 999px; background: rgba(229,135,90,.16); color: #ffd2b8; }
+.l .kick { position: absolute; top: 210px; left: 64px; font-size: 24px; color: #ffb48d; }
+.l .h { position: absolute; top: 252px; left: 56px; right: 40px; font-weight: 900; font-stretch: 118%; font-size: 124px; line-height: .88; letter-spacing: -.04em; text-transform: uppercase; }
+.l .h span { color: var(--red); }
+.l .sub { position: absolute; top: 540px; left: 64px; right: 64px; font-size: 34px; color: var(--muted); }
+.l .sub b { color: #fff; }
+.l .chips { position: absolute; top: 610px; left: 64px; right: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.l .chips div { border-radius: 20px; padding: 18px 18px; border: 2px solid rgba(255,255,255,.12); background: rgba(15,12,14,.7); }
+.l .chips b { display: block; font-weight: 900; font-stretch: 110%; font-size: 50px; line-height: 1; color: #ffd2b8; }
+.l .chips span { display: block; margin-top: 8px; font-size: 20px; color: var(--muted); }
+.l .log { position: absolute; top: 770px; left: 64px; right: 64px; }
+.l .lh { display: grid; grid-template-columns: 92px 1fr; gap: 18px; font-family: var(--mono); font-weight: 800; font-size: 16px; letter-spacing: .16em; color: var(--dim); margin-bottom: 12px; }
+.l .row { display: grid; grid-template-columns: 92px 1fr; gap: 18px; align-items: center; padding: 11px 0; border-top: 1px solid rgba(255,255,255,.07); }
+.l .av { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 32px; color: var(--c); background: color-mix(in srgb, var(--c) 16%, #140c10); border: 4px solid var(--c); }
+.l .rt { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.l .rn { font-weight: 900; font-stretch: 104%; font-size: 36px; line-height: 1; }
+.l .rd { font-family: var(--mono); font-weight: 700; font-size: 17px; color: var(--muted); letter-spacing: .06em; white-space: nowrap; }
+.l .track { position: relative; height: 34px; margin-top: 12px; border-radius: 17px; background: rgba(255,255,255,.05); }
+.l .track i { position: absolute; inset: 0 auto 0 0; border-radius: 17px; background: linear-gradient(90deg, rgba(232,52,59,.35), var(--red) 55%, var(--gold)); }
+.l .track em { position: absolute; top: 50%; transform: translate(-30%, -50%) rotate(90deg); width: 30px; height: 40px; color: var(--gold-hi); font-style: normal; }
+.l .track span { position: absolute; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 24px; color: #fff; white-space: nowrap; }
+.l .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.l .tag { font-family: var(--mono); font-weight: 800; font-size: 15px; letter-spacing: .06em; padding: 5px 10px; border-radius: 8px; background: rgba(255,255,255,.07); color: var(--muted); white-space: nowrap; }
+.l .tag.first { background: rgba(247,185,62,.18); color: var(--gold-hi); }
+.l .tag.fast { background: rgba(79,216,144,.14); color: var(--up); }
+.l .tag.badge { background: rgba(232,52,59,.2); color: #ffd6d7; }
+.l .next { position: absolute; top: 1712px; left: 50%; transform: translateX(-50%); padding: 16px 36px; border-radius: 999px; white-space: nowrap;
+  border: 3px solid #e5875a; background: rgba(20,12,16,.85); color: #ffd2b8; font-weight: 900; font-stretch: 108%; font-size: 34px; }
+</style>
+</head>
+<body>
+<section class="s g" id="pod1"></section>
+<section class="s c" id="pod2"></section>
+<section class="s l" id="pod3"></section>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-rocket" viewBox="0 0 24 32"><path fill="currentColor" d="M12 0c4.2 3.6 6.3 8.7 6.3 14.6V22H5.7v-7.4C5.7 8.7 7.8 3.6 12 0Z"/><circle cx="12" cy="11.5" r="2.6" fill="#0f0c0e"/><path fill="currentColor" d="M5.7 16.5 1 21.5V25l4.7-2.2zM18.3 16.5l4.7 5V25l-4.7-2.2z"/><path fill="#e8343b" d="M8.2 23.4h7.6c0 3.6-1.7 6.4-3.8 8.6-2.1-2.2-3.8-5-3.8-8.6Z"/></symbol>
+</defs></svg>
+<script id="data" type="application/json">__PODIUM_DATA__</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const S = D.season, deals = D.deals, W = D.week, wk = S.weeks[String(W)], A = S.agents;
+  const cards = wk.cards || [];
+  const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const fmt = (n) => Number(n).toLocaleString("en-US");
+  const money = (v) => v >= 1e6 ? "$" + (v / 1e6).toFixed(2).replace(/\.?0+$/, "") + "M" : "$" + Math.round(v / 1e3) + "K";
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const day = (iso) => { const [y, m, d] = iso.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const md = (iso) => { const x = day(iso); return `${MON[x.getUTCMonth()]} ${x.getUTCDate()}`; };
+  const span = `${md(wk.start)}–${day(wk.end).getUTCDate()}`;
+  const TEAMC = { "South LA": "var(--t-southla)", "South Bay": "var(--t-southbay)", "West LA": "var(--t-westla)", "Southeast LA": "var(--t-southeast)", "Long Beach": "var(--t-longbeach)" };
+  const lock = `<div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div>`;
+  const left = S.calendar.length - W, goalN = S.contest.grand_prize.offers;
+  const roadMax = Math.max(...Object.values(wk.road));
+  const dealsOf = (n) => Object.values(deals).filter((d) => d.agent === n && d.week === W).map((d) => d.date).sort();
+  const ava = wk.ava ? wk.ava.agents : {};
+  const badgeHolders = wk.ava ? wk.ava.badges : {};
+  const badgesOf = (n) => Object.values(badgeHolders).filter((b) => (b.agents || [b.agent]).includes(n)).map((b) => b.label + ((b.agents || []).length > 1 ? " (shared)" : ""));
+  const weeksUpTo = Object.values(S.weeks).filter((x) => x.n <= W).sort((a, b) => a.n - b.n);
+
+  /* ---------- #1 Gold Standard ---------- */
+  function gold(c) {
+    const n = c.agents[0], a = wk.agents[n], dates = dealsOf(n), road = wk.road[n];
+    const counts = {}; dates.forEach((d) => (counts[d] = (counts[d] || 0) + 1));
+    const days = []; for (let x = day(wk.start); x <= day(wk.end); x.setUTCDate(x.getUTCDate() + 1)) days.push(x.toISOString().slice(0, 10));
+    const spanDays = dates.length ? (day(dates[dates.length - 1]) - day(dates[0])) / 864e5 + 1 : 0;
+    const fastPct = a.offers ? a.fast / a.offers : 0, R = 80, C = 2 * Math.PI * R;
+    const seasonParts = weeksUpTo.map((x) => ({ n: x.n, pts: x.agents[n].pts, why: x.agents[n].pts_offers && x.agents[n].pts_ref ? `${x.agents[n].offers} offers + Rocket` : x.agents[n].pts_offers ? `${x.agents[n].offers} offers` : x.agents[n].pts_ref ? "Rocket 100%" : "" })).filter((p) => p.pts);
+    const seasonTot = seasonParts.reduce((s, p) => s + p.pts, 0);
+    const toGo = Math.max(0, goalN - road);
+    return `<div class="spot"></div><div class="top">${lock}</div>
+      <div class="kick k">Podium · Week ${W} · ${span}</div>
+      <div class="ribbon"><i></i><i></i></div><div class="medal"><b>1</b></div>
+      <div class="name">${esc(n)}</div>
+      <div class="role k">No. 1 offer writer · ${esc(A[n].team)}</div>
+      <div class="col"><div class="panel">
+        <div class="ph"><span class="k">Her week, day by day</span><span class="big">${a.offers} offers in ${spanDays === 1 ? "one day" : spanDays + " days"}</span></div>
+        <div class="days">${days.map((d) => `<div class="day ${counts[d] ? "on" : ""}"><div class="stack">${counts[d] ? Array.from({ length: counts[d] }, () => `<div class="chip">✓</div>`).join("") : `<div class="none"></div>`}</div><div class="dl">${DOW[day(d).getUTCDay()].toUpperCase()}</div><div class="dn">${day(d).getUTCDate()}</div></div>`).join("")}</div>
+        <div class="note" style="margin-top:14px"><b>${money(a.volume)}</b> written for her buyers this week.</div>
+      </div>
+      <div class="two">
+        <div class="panel donut"><span class="k" style="font-size:19px;color:var(--gold)">Fast Offers</span>
+          <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="${R}" fill="none" stroke="rgba(247,185,62,.16)" stroke-width="26"/>
+            <circle cx="100" cy="100" r="${R}" fill="none" stroke="#f7b93e" stroke-width="26" stroke-linecap="round" stroke-dasharray="${C * fastPct} ${C}" transform="rotate(-90 100 100)"/>
+            <text x="100" y="98" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="700" font-size="54" fill="#fff6e3">${a.fast}/${a.offers}</text>
+            <text x="100" y="132" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="800" font-size="17" fill="#b5a5ab">${Math.round(fastPct * 100)}%</text></svg></div>
+        <div class="panel"><div class="ph"><span class="k">Road to 10</span><span class="big">${road} of ${goalN}</span></div>
+          <div class="road">${Array.from({ length: goalN }, (_, i) => `<i class="${i < road ? "on" : ""}"></i>`).join("")}</div>
+          <div class="note">${road === roadMax ? "<b>Leads the team.</b> " : ""}${toGo ? `${toGo} to go with ${left} weeks left: <b>${(toGo / left).toFixed(2).replace(/0$/, "").replace(/\.0$/, "")} a week</b> gets her into the drawing.` : "<b>In the drawing.</b>"}</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="k">Season Amaze points</span><span class="big">${fmt(seasonTot)}</span></div>
+        <div class="season">${seasonParts.map((p) => `<div style="flex:${p.pts}">W${p.n} · ${fmt(p.pts)}</div>`).join("")}</div>
+        <div class="slabels">${seasonParts.map((p) => `<span style="flex:${p.pts}">${esc(p.why)}</span>`).join("")}</div>
+      </div></div>
+      <div class="reward">+${fmt(a.pts)} Amaze Points this week</div>`;
+  }
+
+  /* ---------- #2 Cover Story ---------- */
+  function cover(c) {
+    const n = c.agents[0], a = wk.agents[n], x = ava[n] || {}, road = wk.road[n], dates = dealsOf(n);
+    const rate = a.ref_new ? a.ref_done / a.ref_new : 0, team = wk.totals.ref_new ? wk.totals.ref_done / wk.totals.ref_new : 0, goal = S.contest.referral_goal;
+    const R = 100, C = 2 * Math.PI * R;
+    const words = n.split(" ");
+    // slope chart: prior 30 days -> last 30 days
+    const maxP = Math.max(x.prior || 0, x.prompts || 0, 10), y = (v) => 200 - (v / maxP) * 170;
+    const story = a.pts_ref ? "Every new customer introduced to Rocket" : `${a.ref_done} of ${a.ref_new} new customers introduced`;
+    return `<div class="top">${lock}<span class="issue k">The All-Star issue · Week ${W}</span></div>
+      <div class="mast">All-Star</div>
+      <div class="badge2"><div><b>#2</b><small>PODIUM</small></div></div>
+      <div class="who"><div class="kk">The week's No. 2 offer writer</div><div class="n">${words.map(esc).join("<br>")}</div><div class="r k">Offer writer · ${esc(A[n].team)} · ${span}</div></div>
+      <div class="col"><div class="box">
+        <div class="bh"><span class="k">Rocket intros</span><span class="t">${esc(story)}</span></div>
+        <div class="rocket">
+          <div class="ring"><svg viewBox="0 0 250 250"><circle cx="125" cy="125" r="${R}" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="30"/>
+            <circle cx="125" cy="125" r="${R}" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-dasharray="${C * rate} ${C}" transform="rotate(-90 125 125)"/>
+            <text x="125" y="128" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="54" fill="#fff">${Math.round(rate * 100)}%</text>
+            <text x="125" y="164" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="800" font-size="20" fill="#ffe3e4">${a.ref_done} OF ${a.ref_new}</text></svg></div>
+          <div class="bars">
+            <div class="bar"><div class="bl"><span>${esc(words[0])}</span><span>${Math.round(rate * 100)}%</span></div><div class="bt"><i style="width:${rate * 100}%"></i><b style="left:${goal * 100}%"></b></div></div>
+            <div class="bar team"><div class="bl"><span>Team</span><span>${Math.round(team * 100)}%</span></div><div class="bt"><i style="width:${team * 100}%"></i><b style="left:${goal * 100}%"></b></div></div>
+            <div class="goal">GOLD LINE = ${Math.round(goal * 100)}% Q4 GOAL</div>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bh"><span class="k">Ava climb · prompts</span><span class="t">${x.delta >= 0 ? "+" : ""}${x.delta} in 30 days</span></div>
+        <div class="slope">
+          <svg viewBox="0 0 520 230" preserveAspectRatio="none">
+            <line x1="40" y1="${y(x.prior)}" x2="480" y2="${y(x.prompts)}" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="40" cy="${y(x.prior)}" r="16" fill="rgba(255,255,255,.5)"/><circle cx="480" cy="${y(x.prompts)}" r="20" fill="#fff"/>
+            <text x="40" y="${y(x.prior) - 30}" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="40" fill="#ffe3e4">${x.prior}</text>
+            <text x="480" y="${y(x.prompts) - 34}" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="900" font-size="52" fill="#fff">${x.prompts}</text>
+            <text x="40" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="800" font-size="17" fill="#ffe3e4">PRIOR 30</text>
+            <text x="480" y="228" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="800" font-size="17" fill="#ffe3e4">LAST 30</text>
+          </svg>
+          <div class="facts"><div><b>${fmt(x.customers || 0)}</b>customers researched</div><div><b>${x.score ?? "–"}</b>usage score · ${x.days || 0} active days</div></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bh"><span class="k">The offer${a.offers > 1 ? "s" : ""}</span><span class="t">${dates.map((d) => `${DOW[day(d).getUTCDay()]}, ${md(d)}`).join(" · ")}</span></div>
+        <div class="offer"><div><div class="v">${money(a.volume)}</div><div class="d">${a.offers} offer${a.offers > 1 ? "s" : ""} written for ${a.offers > 1 ? "buyers" : "a buyer"}</div></div>
+          <div><div class="dots">${Array.from({ length: goalN }, (_, i) => `<i class="${i < road ? "on" : ""}"></i>`).join("")}</div><div>ROAD TO 10 · ${road}</div></div></div>
+      </div></div>
+      <div class="bottom"><span class="pill">+${fmt(a.pts)} Amaze Points${a.pts_ref ? " · Rocket 100%" : ""}</span><span class="barcode"></span></div>`;
+  }
+
+  /* ---------- #3 Liftoff ---------- */
+  function liftoff(c) {
+    const names = c.agents.slice().sort((p, q) => (dealsOf(p)[0] || "").localeCompare(dealsOf(q)[0] || "") || wk.agents[q].volume - wk.agents[p].volume);
+    const maxV = Math.max(...names.map((n) => wk.agents[n].volume));
+    const firsts = names.filter((n) => (S.weeks[String(W - 1)] ? S.weeks[String(W - 1)].road[n] : 0) === 0);
+    const fast = names.filter((n) => wk.agents[n].fast > 0).length;
+    const each = wk.agents[names[0]].offers;
+    const word = { 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight" }[names.length] || names.length;
+    const rows = names.map((n) => {
+      const a = wk.agents[n], d = dealsOf(n), pct = maxV ? (a.volume / maxV) * 0.92 : 0;
+      const tags = [];
+      if (firsts.includes(n)) tags.push(`<span class="tag first">1st contest offer</span>`);
+      if (a.fast) tags.push(`<span class="tag fast">⚡ Fast Offer</span>`);
+      badgesOf(n).forEach((b) => tags.push(`<span class="tag badge">${esc(b)}</span>`));
+      if (wk.road[n] >= 3) tags.push(`<span class="tag">Road to 10 · ${wk.road[n]}</span>`);
+      if (a.pts_ref) tags.push(`<span class="tag">Rocket 100%</span>`);
+      if (ava[n] && ava[n].prior === 0 && ava[n].prompts > 0) tags.push(`<span class="tag">First Ava week</span>`);
+      const labelInside = pct > .45;
+      return `<div class="row"><span class="av" style="--c:${TEAMC[A[n].team] || "var(--muted)"}">${esc(A[n].initials)}</span>
+        <div><div class="rt"><span class="rn">${esc(n)}</span><span class="rd">${d.map((x) => `${DOW[day(x).getUTCDay()].toUpperCase()} ${md(x).toUpperCase()}`).join(" · ")} · ${esc(A[n].team.toUpperCase())}</span></div>
+          <div class="track"><i style="width:${Math.max(pct * 100, 8)}%"></i><em style="left:${Math.max(pct * 100, 8)}%"><svg width="30" height="40"><use href="#i-rocket"/></svg></em>
+            <span style="${labelInside ? `left:20px` : `left:calc(${Math.max(pct * 100, 8)}% + 34px)`}">${money(a.volume)}</span></div>
+          <div class="tags">${tags.join("")}</div></div></div>`;
+    }).join("");
+    const nextPts = each < 2 ? 500 : each < 3 ? 1000 : 1500;
+    return `<canvas width="1080" height="1920"></canvas>
+      <div class="top">${lock}<span class="pill k">Mission log · Wk ${String(W).padStart(2, "0")}</span></div>
+      <div class="kick k">Podium · #3 · ${c.group ? "crew pull" : "launch"}</div>
+      <div class="h">${word} <span>launch${names.length > 1 ? "es" : ""}.</span></div>
+      <div class="sub"><b>${names.length} agent${names.length > 1 ? "s" : ""} · ${each} offer${each > 1 ? "s" : ""} each</b> · ${span}</div>
+      <div class="chips">
+        <div><b>${money(names.reduce((s, n) => s + wk.agents[n].volume, 0))}</b><span>written combined</span></div>
+        <div><b>${fast} of ${names.length}</b><span>on Fast Offers</span></div>
+        <div><b>${firsts.length}</b><span>first contest offer${firsts.length === 1 ? "" : "s"}</span></div>
+      </div>
+      <div class="log"><div class="lh"><span></span><span>LAUNCH ORDER · OFFER SIZE</span></div>${rows}</div>
+      <div class="next">Next stage: 1 more offer = +${fmt(nextPts)} each</div>`;
+  }
+
+  const byPlace = Object.fromEntries(cards.map((c) => [c.place, c]));
+  if (byPlace[1]) document.getElementById("pod1").innerHTML = gold(byPlace[1]);
+  if (byPlace[2]) document.getElementById("pod2").innerHTML = cover(byPlace[2]);
+  if (byPlace[3]) document.getElementById("pod3").innerHTML = liftoff(byPlace[3]);
+  // starfield for the launch log (seeded, so renders repeat)
+  const cv = document.querySelector("#pod3 canvas");
+  if (cv) { const g = cv.getContext("2d"); let seed = 5; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 240; i++) { g.globalAlpha = .2 + r() * .7; g.fillStyle = r() > .85 ? "#ffde87" : "#f7f1ee"; g.beginPath(); g.arc(r() * 1080, r() * 1920, r() * 2.2 + .4, 0, 6.283); g.fill(); } }
+  window.PODIUM = { places: cards.map((c) => c.place) };
+})();
+</script>
+</body>
+</html>

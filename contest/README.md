@@ -10,6 +10,7 @@ Weekly animated leaderboard for the Redfin powered by Rocket LA offer-writing an
 | Full board PNG | `exports/week-NN/week-NN-full-board.png` | Archive / email |
 | 16:9 slides | `exports/week-NN/slides-16x9/` | Team meeting backup |
 | 20-second reel | `exports/week-NN/week-NN-reel.mp4` | Slack, group text |
+| Podium infographics (team agenda) | `exports/week-NN/podium/week-NN-podium-{1-gold-standard,2-cover-story,3-liftoff}.png` | 9:16 story of each podium place: #1 Gold Standard, #2 Cover Story, #3 Liftoff. Render with `node contest/scripts/podium.js NN <fonts.css>` |
 | Collector Cards (top 3 offer writers) | `exports/week-NN/cards/week-NN-card-{1,2,3}.{png,jpg,mp4}` | 9:16 cards: PNG for Slack, 7-sec MP4 for stories; JPG + MP4 also play on the board |
 | Manager page | `--private-out` folder only (never committed) | Rocket intro gaps, offer verification, Ava watch, Slack post |
 | Weekly intake form | `site/intake.html` → https://claude.ai/artifact/7boFUiHD85NyH8bcRZFdX8 | Paste the 3 export links + notes each Sunday; saved to the form's database (`intake/week-NN`) |
