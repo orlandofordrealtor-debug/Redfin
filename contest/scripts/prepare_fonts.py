@@ -11,7 +11,8 @@ import sys
 from pathlib import Path
 
 CSS_URL = ("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900"
-           "&family=JetBrains+Mono:wght@500;700;800&display=swap")
+           "&family=JetBrains+Mono:wght@500;700;800"
+           "&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap")
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
 

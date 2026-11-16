@@ -10,6 +10,7 @@ Weekly animated leaderboard for the Redfin powered by Rocket LA offer-writing an
 | Full board PNG | `exports/week-NN/week-NN-full-board.png` | Archive / email |
 | 16:9 slides | `exports/week-NN/slides-16x9/` | Team meeting backup |
 | 20-second reel | `exports/week-NN/week-NN-reel.mp4` | Slack, group text |
+| Collector Cards (top 3 offer writers) | `exports/week-NN/cards/week-NN-card-{1,2,3}.{png,jpg,mp4}` | 9:16 cards: PNG for Slack, 7-sec MP4 for stories; JPG + MP4 also play on the board |
 | Manager page | `--private-out` folder only (never committed) | Rocket intro gaps, offer verification, Ava watch, Slack post |
 | Weekly intake form | `site/intake.html` → https://claude.ai/artifact/7boFUiHD85NyH8bcRZFdX8 | Paste the 3 export links + notes each Sunday; saved to the form's database (`intake/week-NN`) |
 
@@ -41,5 +42,16 @@ Weekly animated leaderboard for the Redfin powered by Rocket LA offer-writing an
    python3 contest/scripts/prepare_fonts.py contest/private/fonts.css
    node contest/scripts/render.js 3 contest/private/fonts.css
    ```
-4. Republish `site/leaderboard.html` to the same artifact link, and `contest/private/manager.html` to the private manager link.
+4. Republish `site/leaderboard.html` to the same artifact link with this week's cards attached
+   (`files`: `cards/week-NN-card-{1,2,3}.jpg` and `.mp4` from `exports/week-NN/cards/`; capabilities `downloads`),
+   and `contest/private/manager.html` to the private manager link (honoree DMs and captions are on it).
 5. Commit `data/season.json`, `site/`, and `exports/week-NN/`.
+
+## Collector Cards
+
+Every week the top three offer writers get a 9:16 Collector Card (`templates/card.html`), using the board's podium order:
+offers, then points that week, then offers at mutual. #1 is the gold edition, #2 silver, #3 bronze; everyone tied with
+the #3 agent shares one group card. Card numbers count up all season (Week 3 = No. 01-03, Week 4 = No. 04-06).
+Each card shows offers, volume, Fast Offers, Ava score and Rocket intros, plus a shout-out written from the stats.
+Initials monograms stand in for photos. The other four explored directions (Liftoff, Cover Story, Jumbotron,
+Gold Standard) are saved in `concepts/` as designs for on-demand use.

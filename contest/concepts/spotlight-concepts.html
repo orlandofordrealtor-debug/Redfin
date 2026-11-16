@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spotlight Concepts</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap">
+<style>
+/* Five 9:16 directions for the weekly offer-writer spotlight. Each .s is one 1080x1920 frame.
+   Critical content sits between y=220 and y=1700 (story-safe zone). */
+:root {
+  --ink: #0f0c0e; --red: #e8343b; --red-deep: #8f121b; --red-hot: #ff4a50;
+  --gold: #f7b93e; --gold-hi: #ffde87; --gold-lo: #c98a17; --text: #f7f1ee; --muted: #b5a5ab;
+  --team: #f7b93e; /* South Bay */
+  --display: "Archivo", "Arial Black", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #000; display: grid; gap: 40px; padding: 40px; justify-content: center; }
+.s { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: var(--text); font-family: var(--display); }
+.lock { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; }
+.lock .rf { color: var(--red); font-weight: 900; font-size: 46px; letter-spacing: -.02em; }
+.lock .pb { font-size: 22px; font-weight: 500; opacity: .75; }
+.lock .rk { font-weight: 900; font-size: 46px; letter-spacing: -.02em; }
+.mono { font-family: var(--mono); }
+
+/* ============ 1. LIFTOFF ============ */
+.c1 { background: radial-gradient(900px 700px at 50% 112%, rgba(232,52,59,.75), transparent 62%), radial-gradient(700px 500px at 0% 0%, rgba(143,18,27,.55), transparent 60%), linear-gradient(180deg, #0b0910 0%, #140c10 60%, #1d0b0e 100%); }
+.c1 .stars { position: absolute; inset: 0; }
+.c1 .top { position: absolute; top: 120px; left: 72px; right: 72px; display: flex; justify-content: space-between; align-items: center; }
+.c1 .pill { font-family: var(--mono); font-weight: 800; font-size: 22px; letter-spacing: .14em; padding: 12px 20px; border: 2px solid var(--red); border-radius: 999px; background: rgba(232,52,59,.18); color: #ffd6d7; }
+.c1 .eyebrow { position: absolute; top: 250px; left: 72px; font-family: var(--mono); font-weight: 800; font-size: 26px; letter-spacing: .2em; color: var(--gold); }
+.c1 .lift { position: absolute; top: 290px; left: 64px; font-weight: 900; font-stretch: 125%; font-size: 214px; line-height: .86; letter-spacing: -.04em; text-transform: uppercase; }
+.c1 .lift span { display: block; }
+.c1 .lift .r { color: var(--red); }
+.c1 svg.traj { position: absolute; left: 0; top: 640px; width: 1080px; height: 720px; }
+.c1 .capsule { position: absolute; left: 50%; top: 860px; transform: translateX(-50%); width: 380px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a2a31, #120d10 70%); border: 10px solid var(--gold);
+  box-shadow: 0 0 0 18px rgba(247,185,62,.16), 0 0 0 36px rgba(247,185,62,.07), 0 0 120px rgba(247,185,62,.55);
+  display: grid; place-items: center; font-weight: 900; font-stretch: 112%; font-size: 150px; color: var(--gold-hi); letter-spacing: -.02em; }
+.c1 .capsule::after { content: "#1"; position: absolute; right: -30px; top: -10px; width: 120px; height: 120px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font-size: 46px; font-stretch: 100%; border: 6px solid #140c10; }
+.c1 .name { position: absolute; top: 1290px; left: 0; right: 0; text-align: center; font-weight: 900; font-stretch: 112%; font-size: 82px; letter-spacing: -.02em; text-transform: uppercase; line-height: 1; }
+.c1 .role { position: absolute; top: 1395px; left: 0; right: 0; text-align: center; font-size: 34px; color: var(--muted); }
+.c1 .role b { color: var(--gold); }
+.c1 .telem { position: absolute; top: 1470px; left: 72px; right: 72px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.c1 .t { border: 2px solid rgba(255,255,255,.12); border-radius: 22px; padding: 20px 16px; background: rgba(15,12,14,.72); text-align: center; }
+.c1 .t b { display: block; font-weight: 900; font-stretch: 112%; font-size: 54px; line-height: 1; }
+.c1 .t span { display: block; margin-top: 8px; font-family: var(--mono); font-size: 17px; font-weight: 800; letter-spacing: .12em; color: var(--muted); }
+.c1 .reward { position: absolute; top: 1640px; left: 50%; transform: translateX(-50%); font-weight: 900; font-stretch: 112%; font-size: 40px; color: #1a0f05; background: linear-gradient(180deg, var(--gold-hi), var(--gold)); padding: 14px 34px; border-radius: 999px; white-space: nowrap; box-shadow: 0 14px 40px -10px rgba(247,185,62,.7); }
+
+/* ============ 2. COLLECTOR CARD ============ */
+.c2 { background: radial-gradient(circle at 50% 46%, #3a0d12 0%, #160a0d 55%, #0b0709 100%); }
+.c2 .rays { position: absolute; inset: -400px; background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(232,52,59,.16) 0deg 6deg, transparent 6deg 15deg); }
+.c2 .conf i { position: absolute; width: 18px; height: 34px; border-radius: 3px; }
+.c2 .head { position: absolute; top: 210px; left: 0; right: 0; text-align: center; }
+.c2 .head .k { font-family: var(--mono); font-weight: 800; font-size: 26px; letter-spacing: .26em; color: var(--gold); }
+.c2 .head .h { font-weight: 900; font-stretch: 125%; font-size: 128px; line-height: .9; letter-spacing: -.03em; text-transform: uppercase; margin-top: 10px; }
+.c2 .card { position: absolute; left: 50%; top: 470px; width: 800px; height: 1130px; transform: translateX(-50%) rotate(-3deg); border-radius: 44px; padding: 22px;
+  background: linear-gradient(135deg, #fff2c4 0%, var(--gold) 22%, #a56d10 45%, var(--gold-hi) 62%, var(--gold-lo) 82%, #ffe9a8 100%);
+  box-shadow: 0 60px 120px -30px rgba(0,0,0,.9), 0 0 120px rgba(247,185,62,.35); }
+.c2 .inner { position: relative; height: 100%; border-radius: 28px; overflow: hidden; background: #140e11; display: flex; flex-direction: column; }
+.c2 .strip { display: flex; justify-content: space-between; padding: 22px 30px; font-family: var(--mono); font-weight: 800; font-size: 20px; letter-spacing: .14em; color: var(--gold-hi); background: #1d1418; }
+.c2 .art { position: relative; height: 560px; background: repeating-linear-gradient(135deg, rgba(247,185,62,.95) 0 46px, rgba(232,52,59,.92) 46px 92px, rgba(20,14,17,.95) 92px 138px); display: grid; place-items: center; }
+.c2 .art::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(10,6,8,.65) 85%); }
+.c2 .mono-big { position: relative; z-index: 2; width: 380px; height: 380px; border-radius: 50%; background: #140e11; border: 12px solid #fff6dc; display: grid; place-items: center; font-weight: 900; font-stretch: 112%; font-size: 168px; color: var(--gold-hi); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.c2 .rank { position: absolute; z-index: 3; top: 26px; right: 26px; width: 150px; height: 150px; border-radius: 50%; background: var(--red); border: 8px solid #fff6dc; display: grid; place-items: center; font-weight: 900; font-size: 64px; color: #fff; transform: rotate(8deg); }
+.c2 .plate { background: linear-gradient(90deg, var(--red-deep), var(--red)); padding: 22px 30px 20px; }
+.c2 .plate .n { font-weight: 900; font-stretch: 70%; font-size: 104px; line-height: .9; text-transform: uppercase; letter-spacing: .005em; }
+.c2 .plate .p { font-family: var(--mono); font-weight: 800; font-size: 22px; letter-spacing: .16em; margin-top: 8px; opacity: .92; }
+.c2 .stats { display: grid; grid-template-columns: repeat(5, 1fr); flex: 1; }
+.c2 .stats div { display: grid; align-content: center; justify-items: center; border-right: 2px solid rgba(255,255,255,.08); }
+.c2 .stats div:last-child { border-right: 0; }
+.c2 .stats b { font-weight: 900; font-stretch: 100%; font-size: 52px; line-height: 1; color: var(--gold-hi); }
+.c2 .stats span { font-family: var(--mono); font-weight: 800; font-size: 17px; letter-spacing: .14em; color: var(--muted); margin-top: 10px; }
+.c2 .foot { display: flex; justify-content: space-between; padding: 16px 30px 20px; font-family: var(--mono); font-weight: 800; font-size: 18px; letter-spacing: .14em; color: var(--muted); border-top: 2px solid rgba(255,255,255,.06); }
+.c2 .holo { position: absolute; inset: 0; border-radius: 28px; pointer-events: none; mix-blend-mode: screen; opacity: .28;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,120,120,.6) 35%, rgba(255,230,120,.6) 45%, rgba(120,255,200,.5) 55%, rgba(120,170,255,.5) 65%, transparent 80%); }
+.c2 .reward { position: absolute; top: 1660px; left: 50%; transform: translateX(-50%); font-weight: 900; font-stretch: 110%; font-size: 40px; white-space: nowrap; padding: 14px 32px; border-radius: 999px; border: 3px solid var(--gold); color: var(--gold-hi); background: rgba(20,14,17,.85); }
+.c2 .lockwrap { position: absolute; top: 112px; left: 0; right: 0; display: flex; justify-content: center; }
+
+/* ============ 3. COVER STORY ============ */
+.c3 { background: var(--red); color: #fff; }
+.c3::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0,0,0,.16) 2.2px, transparent 2.6px); background-size: 16px 16px; }
+.c3 .issue { position: absolute; top: 200px; left: 64px; right: 64px; display: flex; justify-content: space-between; font-family: var(--mono); font-weight: 800; font-size: 22px; letter-spacing: .16em; }
+.c3 .mast { position: absolute; top: 236px; left: 0; right: 0; text-align: center; font-weight: 900; font-stretch: 108%; font-size: 226px; line-height: .85; letter-spacing: -.05em; text-transform: uppercase; color: #fff; }
+.c3 .photo { position: absolute; top: 500px; right: 50px; width: 650px; height: 650px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #2c2026, #0f0b0d 72%); border: 16px solid #fff; display: grid; place-items: center; box-shadow: 0 50px 90px -30px rgba(70,0,6,.8); }
+.c3 .photo::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background-image: radial-gradient(rgba(247,185,62,.22) 3px, transparent 3.4px); background-size: 22px 22px; }
+.c3 .photo b { position: relative; font-weight: 900; font-stretch: 118%; font-size: 250px; letter-spacing: -.04em; color: var(--gold-hi); }
+.c3 .sticker { position: absolute; top: 1010px; right: 40px; width: 230px; height: 230px; border-radius: 50%; background: var(--gold); color: #1a0f05; display: grid; place-items: center; text-align: center; transform: rotate(12deg); box-shadow: 0 20px 40px -10px rgba(0,0,0,.5); }
+.c3 .sticker div { font-weight: 900; font-size: 64px; line-height: .9; }
+.c3 .sticker small { display: block; font-family: var(--mono); font-size: 18px; letter-spacing: .1em; margin-top: 6px; }
+.c3 .lines { position: absolute; top: 540px; left: 56px; display: grid; gap: 30px; width: 300px; }
+.c3 .lines p { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 34px; line-height: 1.02; text-shadow: 0 3px 14px rgba(60,0,4,.55); }
+.c3 .lines p b { display: block; font-family: var(--display); font-style: normal; font-weight: 900; font-stretch: 104%; font-size: 72px; line-height: .9; }
+.c3 .main { position: absolute; top: 1220px; left: 56px; right: 56px; }
+.c3 .main .k { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 48px; }
+.c3 .main .n { font-weight: 900; font-stretch: 118%; font-size: 146px; line-height: .86; letter-spacing: -.04em; text-transform: uppercase; margin-top: 6px; }
+.c3 .main .d { font-family: var(--mono); font-weight: 800; font-size: 24px; letter-spacing: .14em; margin-top: 18px; color: #ffe3e4; }
+.c3 .bottom { position: absolute; top: 1630px; left: 56px; right: 56px; display: flex; justify-content: space-between; align-items: flex-end; }
+.c3 .barcode { width: 220px; height: 74px; background: repeating-linear-gradient(90deg, #fff 0 4px, transparent 4px 7px, #fff 7px 9px, transparent 9px 14px, #fff 14px 20px, transparent 20px 23px); }
+.c3 .lock .rf { color: #fff; }
+
+/* ============ 4. JUMBOTRON ============ */
+.c4 { background: linear-gradient(180deg, #05060a 0%, #0c0d14 55%, #16080b 100%); }
+.c4 .beam { position: absolute; top: -200px; width: 420px; height: 1600px; background: linear-gradient(180deg, rgba(255,240,200,.32), transparent 80%); filter: blur(18px); transform-origin: top center; }
+.c4 .crowd { position: absolute; left: -40px; right: -40px; bottom: 0; height: 330px; }
+.c4 .crowd i { position: absolute; bottom: 0; width: 120px; border-radius: 60px 60px 0 0; background: #050407; }
+.c4 .sponsor { position: absolute; top: 170px; left: 50%; transform: translateX(-50%); padding: 18px 34px; border-radius: 18px; background: #f7f1ee; color: #111; }
+.c4 .sponsor .lock .rk { color: #111; }
+.c4 .board { position: absolute; top: 300px; left: 70px; right: 70px; height: 1060px; border-radius: 30px; padding: 26px; background: linear-gradient(180deg, #2a2d36, #15161c); box-shadow: 0 0 0 6px #08090c, 0 40px 120px rgba(232,52,59,.35); }
+.c4 .screen { position: relative; height: 100%; border-radius: 16px; background: #020203; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+.c4 .screen::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(transparent 60%, rgba(2,2,3,.85) 70%); background-size: 6px 6px; pointer-events: none; }
+.c4 .led { font-family: var(--display); font-stretch: 100%; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; line-height: 1; }
+.c4 .l-red { color: #ff3b42; text-shadow: 0 0 10px #ff3b42, 0 0 34px rgba(255,59,66,.8); }
+.c4 .l-gold { color: #ffcf5a; text-shadow: 0 0 10px #ffcf5a, 0 0 34px rgba(255,207,90,.8); }
+.c4 .l-white { color: #fff4e6; text-shadow: 0 0 10px #fff4e6, 0 0 30px rgba(255,244,230,.6); }
+.c4 .hdr { font-size: 44px; letter-spacing: .2em; }
+.c4 .one { font-size: 330px; margin-top: 10px; font-family: var(--display); font-weight: 900; font-stretch: 112%; }
+.c4 .first { font-size: 150px; margin-top: 4px; font-family: var(--display); font-weight: 900; font-stretch: 100%; }
+.c4 .last { font-size: 76px; margin-top: 16px; letter-spacing: .14em; }
+.c4 .rows { margin-top: 56px; width: 82%; display: grid; gap: 22px; }
+.c4 .row { display: flex; justify-content: space-between; font-size: 48px; }
+.c4 .ticker { position: absolute; top: 1400px; left: 70px; right: 70px; height: 96px; border-radius: 14px; background: #020203; border: 4px solid #2a2d36; overflow: hidden; display: flex; align-items: center; }
+.c4 .ticker::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(transparent 60%, rgba(2,2,3,.85) 70%); background-size: 6px 6px; }
+.c4 .ticker div { white-space: nowrap; font-size: 46px; padding-left: 30px; }
+.c4 .reward { position: absolute; top: 1540px; left: 0; right: 0; text-align: center; font-weight: 900; font-stretch: 112%; font-size: 52px; color: var(--gold-hi); text-shadow: 0 0 30px rgba(247,185,62,.6); }
+
+/* ============ 5. GOLD STANDARD ============ */
+.c5 { background: radial-gradient(1200px 900px at 50% 40%, #2a1c14 0%, #120c0b 55%, #070505 100%); }
+.c5 .spot { position: absolute; left: 50%; top: -100px; width: 1100px; height: 1500px; transform: translateX(-50%); background: radial-gradient(ellipse 45% 100% at 50% 0%, rgba(255,226,160,.28), transparent 70%); }
+.c5 .lockwrap { position: absolute; top: 150px; left: 0; right: 0; display: flex; justify-content: center; }
+.c5 .lockwrap .lock .rf { font-size: 38px; } .c5 .lockwrap .lock .rk { font-size: 38px; } .c5 .lockwrap .lock .pb { font-size: 19px; }
+.c5 .kicker { position: absolute; top: 250px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 24px; letter-spacing: .4em; color: var(--gold); }
+.c5 .ribbon { position: absolute; top: 300px; left: 50%; transform: translateX(-50%); width: 420px; height: 420px; }
+.c5 .ribbon i { position: absolute; top: 0; width: 170px; height: 430px; background: linear-gradient(180deg, var(--red-deep), var(--red)); }
+.c5 .ribbon i:first-child { left: 55px; transform: skewX(18deg); }
+.c5 .ribbon i:last-child { right: 55px; transform: skewX(-18deg); }
+.c5 .ribbon span { position: absolute; top: 120px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-weight: 800; font-size: 24px; letter-spacing: .3em; color: #ffe1e2; z-index: 2; }
+.c5 .medal { position: absolute; top: 620px; left: 50%; transform: translateX(-50%); width: 470px; height: 470px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff5cf 0%, var(--gold-hi) 18%, var(--gold) 45%, #a8700f 78%, #6e4807 100%);
+  box-shadow: 0 0 0 14px rgba(255,222,135,.18), 0 50px 90px -20px rgba(0,0,0,.85), 0 0 160px rgba(247,185,62,.4);
+  display: grid; place-items: center; }
+.c5 .medal::before { content: ""; position: absolute; inset: 34px; border-radius: 50%; border: 6px solid rgba(110,72,7,.55); box-shadow: inset 0 0 0 3px rgba(255,245,207,.5); }
+.c5 .medal b { position: relative; font-family: var(--serif); font-weight: 800; font-size: 300px; line-height: 1; color: #7a4f08; text-shadow: 0 3px 0 rgba(255,245,207,.7), 0 -2px 0 rgba(60,38,4,.4); }
+.c5 .medal small { position: absolute; bottom: 92px; font-family: var(--mono); font-weight: 800; font-size: 20px; letter-spacing: .3em; color: #6e4807; }
+.c5 .name { position: absolute; top: 1160px; left: 0; right: 0; text-align: center; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 138px; line-height: 1; letter-spacing: -.02em; color: #fff6e3; }
+.c5 .title { position: absolute; top: 1320px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 25px; letter-spacing: .32em; color: var(--gold); }
+.c5 .stats { position: absolute; top: 1410px; left: 90px; right: 90px; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid rgba(247,185,62,.45); border-bottom: 2px solid rgba(247,185,62,.45); }
+.c5 .stats div { padding: 28px 10px; text-align: center; }
+.c5 .stats div + div { border-left: 2px solid rgba(247,185,62,.25); }
+.c5 .stats b { display: block; font-family: var(--serif); font-weight: 700; font-size: 82px; line-height: 1; color: #fff6e3; }
+.c5 .stats span { display: block; font-size: 24px; color: var(--muted); margin-top: 10px; }
+.c5 .reward { position: absolute; top: 1640px; left: 0; right: 0; text-align: center; font-family: var(--serif); font-style: italic; font-size: 46px; color: var(--gold-hi); }
+</style>
+</head>
+<body>
+
+<!-- 1 LIFTOFF -->
+<section class="s c1" id="c1">
+  <canvas class="stars" width="1080" height="1920"></canvas>
+  <div class="top"><div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div><span class="pill">MISSION LOG · WK 03</span></div>
+  <div class="eyebrow">COMMAND CREW · NOV 8–14</div>
+  <div class="lift"><span>Lift</span><span class="r">off.</span></div>
+  <svg class="traj" viewBox="0 0 1080 720" aria-hidden="true">
+    <defs><linearGradient id="tg" x1="0" x2="1"><stop offset="0" stop-color="#e8343b"/><stop offset="1" stop-color="#f7b93e"/></linearGradient></defs>
+    <path d="M110 520 C 320 470, 700 330, 1030 40" fill="none" stroke="url(#tg)" stroke-width="10" stroke-dasharray="2 22" stroke-linecap="round"/>
+  </svg>
+  <div class="capsule">ST</div>
+  <div class="name">Sheila Terrell</div>
+  <div class="role">Week 3's <b>#1 offer writer</b> · South Bay</div>
+  <div class="telem">
+    <div class="t"><b>03</b><span>OFFERS</span></div>
+    <div class="t"><b>$1.19M</b><span>WRITTEN</span></div>
+    <div class="t"><b>3/3</b><span>FAST OFFERS</span></div>
+    <div class="t"><b>5/10</b><span>ROAD TO 10</span></div>
+  </div>
+  <div class="reward">+1,000 AMAZE POINTS</div>
+</section>
+
+<!-- 2 COLLECTOR CARD -->
+<section class="s c2" id="c2">
+  <div class="rays"></div>
+  <div class="conf" id="c2conf"></div>
+  <div class="lockwrap"><div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div></div>
+  <div class="head"><div class="k">WEEK 3 · NOV 8–14</div><div class="h">MVP Pull</div></div>
+  <div class="card"><div class="inner">
+    <div class="strip"><span>FINISH STRONG '26</span><span>No. 01 / 03</span></div>
+    <div class="art"><div class="mono-big">ST</div><div class="rank">#1</div></div>
+    <div class="plate"><div class="n">Sheila Terrell</div><div class="p">OFFER WRITER · SOUTH BAY</div></div>
+    <div class="stats">
+      <div><b>3</b><span>OFFERS</span></div><div><b>1.19M</b><span>VOLUME</span></div><div><b>3/3</b><span>FAST</span></div><div><b>5/10</b><span>ROAD</span></div><div><b>59</b><span>AVA</span></div>
+    </div>
+    <div class="foot"><span>★ GOLD EDITION</span><span>COMMAND CREW</span></div>
+    <div class="holo"></div>
+  </div></div>
+  <div class="reward">+1,000 AMAZE POINTS</div>
+</section>
+
+<!-- 3 COVER STORY -->
+<section class="s c3" id="c3">
+  <div class="issue"><span>THE FINISH STRONG ISSUE</span><span>WEEK 3 · NOV 2026</span></div>
+  <div class="mast">Offers</div>
+  <div class="photo"><b>ST</b></div>
+  <div class="sticker"><div>+1,000<small>AMAZE POINTS</small></div></div>
+  <div class="lines">
+    <p><b>3</b>offers in four days</p>
+    <p><b>$1.19M</b>written for her buyers</p>
+    <p><b>5/10</b>out front on the Road to 10</p>
+  </div>
+  <div class="main"><div class="k">The week's No. 1 offer writer</div><div class="n">Sheila<br>Terrell</div><div class="d">SOUTH BAY · EVERY OFFER ON FAST OFFERS</div></div>
+  <div class="bottom"><div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div><div class="barcode"></div></div>
+</section>
+
+<!-- 4 JUMBOTRON -->
+<section class="s c4" id="c4">
+  <div class="beam" style="left:40px; transform: rotate(18deg)"></div>
+  <div class="beam" style="right:40px; transform: rotate(-18deg)"></div>
+  <div class="sponsor"><div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div></div>
+  <div class="board"><div class="screen">
+    <div class="led l-white hdr">OFFER WRITER · WK 3</div>
+    <div class="led l-red one">#1</div>
+    <div class="led l-gold first">SHEILA</div>
+    <div class="led l-white last">TERRELL</div>
+    <div class="rows">
+      <div class="row led l-white"><span>OFFERS</span><span class="l-gold">3</span></div>
+      <div class="row led l-white"><span>VOLUME</span><span class="l-gold">$1.19M</span></div>
+      <div class="row led l-white"><span>ROAD TO 10</span><span class="l-gold">5</span></div>
+    </div>
+  </div></div>
+  <div class="ticker"><div class="led l-red">▶ COMMAND CREW · NOV 8–14 · FAST OFFERS 3/3 · SOUTH BAY ▶</div></div>
+  <div class="reward">+1,000 AMAZE POINTS</div>
+  <div class="crowd" id="c4crowd"></div>
+</section>
+
+<!-- 5 GOLD STANDARD -->
+<section class="s c5" id="c5">
+  <div class="spot"></div>
+  <div class="lockwrap"><div class="lock"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div></div>
+  <div class="kicker">FINISH STRONG · 2026</div>
+  <div class="ribbon"><i></i><span>WEEK 3</span><i></i></div>
+  <div class="medal"><b>1</b><small>OFFER WRITER</small></div>
+  <div class="name">Sheila Terrell</div>
+  <div class="title">NO. 1 OFFER WRITER · SOUTH BAY</div>
+  <div class="stats">
+    <div><b>3</b><span>offers this week</span></div>
+    <div><b>$1.19M</b><span>written</span></div>
+    <div><b>5 of 10</b><span>to the grand prize</span></div>
+  </div>
+  <div class="reward">+1,000 Amaze Points</div>
+</section>
+
+<script>
+  // seeded randomness so renders repeat exactly
+  let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  // 1: starfield + lit Road to 10 nodes along the trajectory
+  (() => {
+    const c = document.querySelector(".c1 .stars").getContext("2d");
+    for (let i = 0; i < 260; i++) { c.globalAlpha = .2 + rnd() * .7; c.fillStyle = rnd() > .85 ? "#ffde87" : "#f7f1ee"; c.beginPath(); c.arc(rnd() * 1080, rnd() * 1920, rnd() * 2.2 + .4, 0, 6.283); c.fill(); }
+    const svg = document.querySelector(".c1 svg.traj"), path = svg.querySelector("path"), len = path.getTotalLength();
+    for (let k = 1; k <= 10; k++) {
+      const p = path.getPointAtLength((k / 10.6) * len), lit = k <= 5;
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      g.setAttribute("cx", p.x); g.setAttribute("cy", p.y); g.setAttribute("r", lit ? 16 : 11);
+      g.setAttribute("fill", lit ? "#f7b93e" : "#1a1216"); g.setAttribute("stroke", lit ? "#ffde87" : "#5a434c"); g.setAttribute("stroke-width", 4);
+      svg.appendChild(g);
+    }
+  })();
+  // 2: confetti
+  (() => {
+    const box = document.getElementById("c2conf"), cols = ["#e8343b", "#f7b93e", "#ffde87", "#f7f1ee"];
+    for (let i = 0; i < 70; i++) {
+      const el = document.createElement("i");
+      const x = rnd() * 1080, y = rnd() * 1920;
+      if (x > 120 && x < 960 && y > 430 && y < 1640) continue;
+      el.style.cssText = `left:${x}px;top:${y}px;background:${cols[(rnd() * 4) | 0]};transform:rotate(${rnd() * 360}deg);opacity:${.6 + rnd() * .4}`;
+      box.appendChild(el);
+    }
+  })();
+  // 4: crowd silhouettes
+  (() => {
+    const box = document.getElementById("c4crowd");
+    for (let i = 0; i < 26; i++) {
+      const el = document.createElement("i"), h = 150 + rnd() * 140;
+      el.style.cssText = `left:${i * 44 - 20}px;height:${h}px;width:${100 + rnd() * 40}px`;
+      box.appendChild(el);
+    }
+  })();
+</script>
+</body>
+</html>

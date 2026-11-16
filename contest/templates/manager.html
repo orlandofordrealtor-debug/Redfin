@@ -110,6 +110,17 @@ td.num { font-variant-numeric: tabular-nums; text-align: right; }
     </div>
   </section>
 
+  <section aria-labelledby="honor-title" id="honor-section">
+    <div class="head">
+      <div>
+        <p class="eyebrow">Collector cards</p>
+        <h2 id="honor-title">Messages for this week's card winners</h2>
+        <p class="lede">A personal DM for each honoree and a caption for posting their card in the team channel. Attach the card PNG or MP4 from this week's exports.</p>
+      </div>
+    </div>
+    <div class="coach" id="honor"></div>
+  </section>
+
   <section aria-labelledby="post-title">
     <div class="head">
       <div>
@@ -218,6 +229,27 @@ td.num { font-variant-numeric: tabular-nums; text-align: right; }
   $("post").textContent = post;
   const pb = $("copy-post"); pb.dataset.label = "Copy post";
   pb.addEventListener("click", () => copy(post, pb));
+
+  // honoree messages
+  const cards = w.cards || [];
+  const medal = { 1: "🏆", 2: "🥈", 3: "🥉" };
+  const firsts = (c) => c.agents.map(first);
+  const joinNames = (xs) => xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} & ${xs[xs.length - 1]}`;
+  const lower1 = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+  $("honor-section").hidden = !cards.length;
+  $("honor").innerHTML = cards.map((c, i) => {
+    const s = c.stats;
+    const dm = c.group
+      ? `${joinNames(firsts(c))}: ${medal[c.place]} you're sharing the Week ${M.week} #${c.place} spot and the ${c.edition} Collector Card, with ${s.offers.replace(" ea", "")} offer each and ${s.volume} written between you. One more offer next week is worth 500 Amaze points, and the Road to 10 is wide open. Let's go! 🚀`
+      : `${firsts(c)[0]}, congrats! ${medal[c.place]} You're Week ${M.week}'s #${c.place} offer writer and you pulled the ${c.edition} Collector Card: ${lower1(c.shout)} ${c.pts ? `That's +${fmt(c.pts)} Amaze points.` : "One more offer next week is worth 500 Amaze points."} Your card goes up in the channel today. Keep it rolling as we finish strong! 🚀`;
+    const caption = `🃏 *Week ${M.week} ${c.headline}: ${c.group ? joinNames(firsts(c)) : c.title}* · ${c.group ? `${s.offers.replace(" ea", "")} offer each` : `${s.offers} offer${s.offers === "1" ? "" : "s"}`} · ${s.volume} written · Fast Offers ${s.fast}${s.rocket !== "–" ? ` · Rocket ${s.rocket}` : ""} · ${c.reward}.\n${c.shout} Who pulls next week's card? 👀`;
+    return `<div class="cc"><div class="top"><span class="nm">#${c.place} · ${esc(c.group ? joinNames(firsts(c)) : c.title)}</span><span class="rate" style="color:var(--gold)">${esc(c.edition)} · No. ${String(c.no).padStart(2, "0")}</span></div>
+      <div class="msg" id="dm-${i}">${esc(dm)}</div>
+      <div><button class="btn" type="button" data-label="Copy DM" data-msg="dm-${i}">Copy DM</button></div>
+      <div class="msg" id="cap-${i}">${esc(caption)}</div>
+      <div><button class="btn" type="button" data-label="Copy caption" data-msg="cap-${i}">Copy caption</button></div></div>`;
+  }).join("");
+  document.querySelectorAll("#honor [data-msg]").forEach((b) => b.addEventListener("click", () => copy($(b.dataset.msg).textContent, b)));
 
   $("foot").textContent = `Sources: offers export, Rocket referral export (45 days) and Ava usage export (30 days), pulled ${md(M.export_date)}. Client names come from those exports.`;
 })();

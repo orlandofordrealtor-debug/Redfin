@@ -27,6 +27,45 @@ function stage(file, wrap) {
 
 (async () => {
   const browser = await chromium.launch();
+
+  // Collector Cards for the week's top three offer writers: PNG (Slack), JPG (board) and a 7-second MP4.
+  const season = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "season.json"), "utf8"));
+  const cards = (season.weeks[String(week)] || {}).cards || [];
+  const cardDir = path.join(OUT, "cards");
+  if (cards.length && !flags.includes("--skip-cards")) {
+    fs.mkdirSync(cardDir, { recursive: true });
+    const cardUrl = stage("card.html", false);
+    const ctxc = await browser.newContext({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
+    const pc = await ctxc.newPage();
+    for (const c of cards) {
+      await pc.goto(`${cardUrl}#p${c.place}-w${week}-capture`);
+      await pc.reload(); // hash-only navigation does not re-run the page script
+      await pc.evaluate(() => document.fonts.ready);
+      const base = path.join(cardDir, `week-${pad}-card-${c.place}`);
+      const still = await pc.evaluate(() => window.CARD.still);
+      await pc.evaluate((ms) => window.CARD.seek(ms), still);
+      await pc.screenshot({ path: base + ".png" });
+      await pc.screenshot({ path: base + ".jpg", type: "jpeg", quality: 86 });
+      const frames = path.join(tmp, `card-${c.place}`);
+      fs.mkdirSync(frames, { recursive: true });
+      const dur = await pc.evaluate(() => window.CARD.DURATION), fps = 30, total = Math.round((dur / 1000) * fps);
+      for (let f = 0; f < total; f++) {
+        await pc.evaluate((ms) => window.CARD.seek(ms), (f * 1000) / fps);
+        await pc.screenshot({ path: path.join(frames, `f${String(f).padStart(4, "0")}.jpg`), type: "jpeg", quality: 90 });
+      }
+      execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(fps), "-i", path.join(frames, "f%04d.jpg"),
+        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "23", "-preset", "slow", "-movflags", "+faststart", base + ".mp4"]);
+      if (qaDir) { fs.mkdirSync(qaDir, { recursive: true }); fs.copyFileSync(path.join(frames, "f0045.jpg"), path.join(qaDir, `card-${c.place}-1500ms.jpg`)); }
+      console.log(`card ${c.place}: ${c.title} ->`, base + ".{png,jpg,mp4}", Math.round(fs.statSync(base + ".mp4").size / 1024), "KB video");
+    }
+    await ctxc.close();
+  }
+  // The board shows this week's cards from cards/; mirror that folder beside the staged page.
+  if (fs.existsSync(cardDir)) {
+    fs.mkdirSync(path.join(tmp, "cards"), { recursive: true });
+    for (const f of fs.readdirSync(cardDir)) fs.copyFileSync(path.join(cardDir, f), path.join(tmp, "cards", f));
+  }
+
   const board = stage("leaderboard.html", true);
 
   // Slack card (portrait, final frame of every animation)

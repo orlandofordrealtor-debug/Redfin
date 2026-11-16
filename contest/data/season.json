@@ -2269,7 +2269,120 @@
      "roster": 32,
      "median_score": 48
     }
-   }
+   },
+   "cards": [
+    {
+     "place": 1,
+     "no": 1,
+     "edition": "gold",
+     "headline": "MVP Pull",
+     "group": false,
+     "agents": [
+      "Sheila Terrell"
+     ],
+     "initials": [
+      "ST"
+     ],
+     "teams": [
+      "South Bay"
+     ],
+     "title": "Sheila Terrell",
+     "sub": "OFFER WRITER \u00b7 SOUTH BAY",
+     "stats": {
+      "offers": "3",
+      "volume": "$1.19M",
+      "fast": "3/3",
+      "ava": "59",
+      "ava_label": "AVA",
+      "rocket": "2/3"
+     },
+     "pts": 1000,
+     "reward": "+1,000 Amaze Points",
+     "shout": "3 offers in 4 days, every one on Fast Offers. Leads the Road to 10 at 5.",
+     "image": "cards/week-03-card-1.jpg",
+     "video": "cards/week-03-card-1.mp4",
+     "slug": "week-03-card-1-sheila"
+    },
+    {
+     "place": 2,
+     "no": 2,
+     "edition": "silver",
+     "headline": "All-Star Pull",
+     "group": false,
+     "agents": [
+      "Michele Lopez"
+     ],
+     "initials": [
+      "ML"
+     ],
+     "teams": [
+      "South LA"
+     ],
+     "title": "Michele Lopez",
+     "sub": "OFFER WRITER \u00b7 SOUTH LA",
+     "stats": {
+      "offers": "1",
+      "volume": "$820K",
+      "fast": "0/1",
+      "ava": "62",
+      "ava_label": "AVA",
+      "rocket": "2/2"
+     },
+     "pts": 1000,
+     "reward": "+1,000 Amaze Points",
+     "shout": "1 offer and every new customer introduced to Rocket.",
+     "image": "cards/week-03-card-2.jpg",
+     "video": "cards/week-03-card-2.mp4",
+     "slug": "week-03-card-2-michele"
+    },
+    {
+     "place": 3,
+     "no": 3,
+     "edition": "bronze",
+     "headline": "Crew Pull",
+     "group": true,
+     "agents": [
+      "Abdiel Hernandez",
+      "Alex Lumukanda",
+      "Heidi Ludwig",
+      "Justin Vold",
+      "Reza Marashi",
+      "Rob Sterling"
+     ],
+     "initials": [
+      "AH",
+      "AL",
+      "HL",
+      "JV",
+      "RM",
+      "RS"
+     ],
+     "teams": [
+      "Southeast LA",
+      "West LA",
+      "South Bay",
+      "West LA",
+      "West LA",
+      "West LA"
+     ],
+     "title": "6 agents tied",
+     "sub": "ABDIEL \u00b7 ALEX \u00b7 HEIDI \u00b7 JUSTIN \u00b7 REZA \u00b7 ROB",
+     "stats": {
+      "offers": "1 ea",
+      "volume": "$5.34M",
+      "fast": "4/6",
+      "ava": "53",
+      "ava_label": "AVA AVG",
+      "rocket": "3/8"
+     },
+     "pts": 0,
+     "reward": "1 more offer = 500 pts",
+     "shout": "Six agents on the board with 1 offer each. One more next week is worth 500 points.",
+     "image": "cards/week-03-card-3.jpg",
+     "video": "cards/week-03-card-3.mp4",
+     "slug": "week-03-card-3-abdiel-alex-heidi-crew"
+    }
+   ]
   }
  },
  "contest": {

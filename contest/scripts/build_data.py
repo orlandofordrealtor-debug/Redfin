@@ -267,6 +267,99 @@ def ava_snapshot(ava):
     }
 
 
+# ---------------------------------------------------------------- spotlight cards
+FIRST_CARD_WEEK = 3  # the Collector Card series started with Week 3
+EDITIONS = {1: ("gold", "MVP Pull"), 2: ("silver", "All-Star Pull"), 3: ("bronze", "Crew Pull")}
+NUMBER_WORDS = {2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
+
+
+def short_money(v):
+    return f"${v / 1e6:.2f}M".replace(".00M", "M") if v >= 1e6 else f"${round(v / 1e3)}K"
+
+
+def spotlight_cards(week, deals, roster, ava):
+    """The week's top three offer writers as Collector Card data, using the board's podium order:
+    offers, then points this week, then offers at mutual, then name. #1 and #2 are single agents;
+    everyone tied with the #3 agent on offers and points shares one group card."""
+    A = week["agents"]
+    writers = sorted((n for n in roster if A[n]["offers"] > 0),
+                     key=lambda n: (-A[n]["offers"], -A[n]["pts"], -A[n]["mutual"], n))
+    if not writers:
+        return []
+    slots = [[writers[0]]]
+    if len(writers) > 1:
+        slots.append([writers[1]])
+    if len(writers) > 2:
+        key = lambda n: (A[n]["offers"], A[n]["pts"])
+        slots.append([n for n in writers[2:] if key(n) == key(writers[2])])
+    snap = week.get("ava") or {"agents": {}}
+    road = week["road"]
+    leader = max(road.values()) if road else 0
+    leaders = [n for n in roster if road.get(n) == leader and leader > 0]
+    cards = []
+    for place, names in enumerate(slots, start=1):
+        group = len(names) > 1
+        tot = lambda k: sum(A[n][k] for n in names)
+        offers, fast, rd, rn = tot("offers"), tot("fast"), tot("ref_done"), tot("ref_new")
+        scores = [snap["agents"].get(n, {}).get("score") for n in names]
+        scores = [s for s in scores if s is not None]
+        ava_score = round(sum(scores) / len(scores)) if scores else None
+        each = A[names[0]]["offers"]
+        pts = A[names[0]]["pts"]
+        # Shout-out line, written from the stats
+        if group:
+            word = NUMBER_WORDS.get(len(names), str(len(names)))
+            shout = (f"{word} agents on the board with {each} offer{'s' if each > 1 else ''} each. "
+                     f"One more next week is worth {500 if each < 2 else 1000 if each < 3 else 1500} points.")
+        else:
+            n = names[0]
+            dates = sorted(d["date"] for d in deals.values() if d["agent"] == n and d.get("week") == week["n"])
+            span = (dt.date.fromisoformat(dates[-1]) - dt.date.fromisoformat(dates[0])).days + 1 if dates else 1
+            days = "one day" if span == 1 else f"{span} days"
+            if offers >= 2:
+                shout = f"{offers} offers in {days}" + (", every one on Fast Offers." if fast == offers else ".")
+            elif A[n]["pts_ref"]:
+                shout = f"{offers} offer and every new customer introduced to Rocket."
+            elif A[n]["mutual"]:
+                shout = f"{offers} offer, already at mutual."
+            else:
+                shout = f"{offers} offer and {short_money(A[n]['volume'])} written for a buyer."
+            if leaders == [n]:
+                shout += f" Leads the Road to 10 at {leader}."
+        edition, headline = EDITIONS[place]
+        cards.append({
+            "place": place,
+            "no": (week["n"] - FIRST_CARD_WEEK) * 3 + place,
+            "edition": edition,
+            "headline": headline,
+            "group": group,
+            "agents": names,
+            "initials": [initials(n) for n in names],
+            "teams": [TEAM_SHORT.get(ava[n]["team"], ava[n]["team"]) for n in names],
+            "title": f"{len(names)} agents tied" if group else names[0],
+            "sub": " · ".join(n.split()[0].upper() for n in names) if group
+                   else f"OFFER WRITER · {TEAM_SHORT.get(ava[names[0]]['team'], ava[names[0]]['team']).upper()}",
+            "stats": {
+                "offers": f"{each} ea" if group else str(offers),
+                "volume": short_money(tot("volume")),
+                "fast": f"{fast}/{offers}",
+                "ava": "–" if ava_score is None else str(ava_score),
+                "ava_label": "AVA AVG" if group else "AVA",
+                "rocket": f"{rd}/{rn}" if rn else "–",
+            },
+            "pts": pts,
+            "reward": f"+{pts:,} Amaze Points" if pts else
+                      f"1 more offer = {500 if each < 2 else 1000 if each < 3 else 1500} pts",
+            "shout": shout,
+            # published beside the board under cards/; rendered into exports/week-NN/cards/
+            "image": f"cards/week-{week['n']:02d}-card-{place}.jpg",
+            "video": f"cards/week-{week['n']:02d}-card-{place}.mp4",
+            "slug": f"week-{week['n']:02d}-card-{place}-" + "-".join(n.split()[0].lower() for n in names[:3])
+                    + ("-crew" if len(names) > 3 else ""),
+        })
+    return cards
+
+
 # ---------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
@@ -330,6 +423,7 @@ def main():
         }
         if n == args.week:
             week["ava"] = ava_snapshot(ava)
+            week["cards"] = spotlight_cards(week, deals, roster, ava)
         else:
             week["ava"] = season["weeks"].get(str(n), {}).get("ava")
         season["weeks"][str(n)] = week
@@ -410,7 +504,8 @@ def main():
     public_json = json.dumps(season, separators=(",", ":"), default=str).replace("</", "<\\/")
     site = ROOT / "site"
     site.mkdir(exist_ok=True)
-    for tpl, out in [("leaderboard.html", site / "leaderboard.html"), ("reel.html", site / "reel.html")]:
+    for tpl, out in [("leaderboard.html", site / "leaderboard.html"), ("reel.html", site / "reel.html"),
+                     ("card.html", site / "card.html")]:
         src = (ROOT / "templates" / tpl)
         if src.exists():
             out.write_text(src.read_text().replace("__SEASON_DATA__", public_json))

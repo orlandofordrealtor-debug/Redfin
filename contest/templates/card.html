@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finish Strong Collector Card</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900&family=JetBrains+Mono:wght@500;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap">
+<style>
+/* Layout: one 1080x1920 Collector Card per podium place (#p1, #p2, #p3), driven by one timeline (seek(t))
+   so the MP4 is frame-exact. Gold, silver and bronze editions differ only in the foil tokens. */
+:root {
+  --ink: #0f0c0e; --red: #e8343b; --red-deep: #8f121b; --text: #f7f1ee; --muted: #b5a5ab;
+  --display: "Archivo", "Arial Black", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  /* edition tokens, set per card */
+  --foil: linear-gradient(135deg, #fff2c4 0%, #f7b93e 22%, #a56d10 45%, #ffde87 62%, #c98a17 82%, #ffe9a8 100%);
+  --hi: #ffde87; --mid: #f7b93e; --glow: rgba(247,185,62,.38);
+}
+.gold   { --foil: linear-gradient(135deg, #fff2c4 0%, #f7b93e 22%, #a56d10 45%, #ffde87 62%, #c98a17 82%, #ffe9a8 100%); --hi: #ffde87; --mid: #f7b93e; --glow: rgba(247,185,62,.38); }
+.silver { --foil: linear-gradient(135deg, #ffffff 0%, #cfd5dd 22%, #6f7986 45%, #eef2f6 62%, #9aa3ae 82%, #f8fafc 100%); --hi: #eef2f6; --mid: #cfd5dd; --glow: rgba(214,222,232,.34); }
+.bronze { --foil: linear-gradient(135deg, #ffd9c2 0%, #e5875a 22%, #7e3a19 45%, #f6b28f 62%, #b4552d 82%, #ffd2b8 100%); --hi: #ffc3a2; --mid: #e5875a; --glow: rgba(229,135,90,.38); }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+.stage { position: absolute; left: 50%; top: 50%; width: 1080px; height: 1920px; transform: translate(-50%, -50%) scale(var(--k, 1)); overflow: hidden;
+  color: var(--text); font-family: var(--display); background: radial-gradient(circle at 50% 46%, #3a0d12 0%, #160a0d 55%, #0b0709 100%); }
+.rays { position: absolute; left: 50%; top: 46%; width: 2800px; height: 2800px; margin: -1400px 0 0 -1400px;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(232,52,59,.17) 0deg 6deg, transparent 6deg 15deg); }
+canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; pointer-events: none; }
+.lock { position: absolute; top: 112px; left: 0; right: 0; display: flex; justify-content: center; align-items: baseline; gap: 12px; white-space: nowrap; }
+.lock .rf { color: var(--red); font-weight: 900; font-size: 46px; letter-spacing: -.02em; }
+.lock .pb { font-size: 22px; font-weight: 500; opacity: .75; }
+.lock .rk { font-weight: 900; font-size: 46px; letter-spacing: -.02em; }
+.head { position: absolute; top: 210px; left: 0; right: 0; text-align: center; }
+.head .k { font-family: var(--mono); font-weight: 800; font-size: 26px; letter-spacing: .26em; color: var(--hi); }
+.head .h { font-weight: 900; font-stretch: 125%; font-size: 124px; line-height: .9; letter-spacing: -.03em; text-transform: uppercase; margin-top: 10px; }
+.cardwrap { position: absolute; left: 50%; top: 470px; width: 800px; height: 1130px; margin-left: -400px; perspective: 2200px; }
+.card { position: absolute; inset: 0; border-radius: 44px; padding: 22px; background: var(--foil);
+  box-shadow: 0 60px 120px -30px rgba(0,0,0,.9), 0 0 120px var(--glow); transform-origin: 50% 60%; }
+.inner { position: relative; height: 100%; border-radius: 28px; overflow: hidden; background: #140e11; display: flex; flex-direction: column; }
+.strip { display: flex; justify-content: space-between; padding: 22px 30px; font-family: var(--mono); font-weight: 800; font-size: 20px; letter-spacing: .14em; color: var(--hi); background: #1d1418; }
+.art { position: relative; height: 470px; flex: none; display: grid; place-items: center;
+  background: repeating-linear-gradient(135deg, var(--mid) 0 46px, rgba(232,52,59,.92) 46px 92px, rgba(20,14,17,.95) 92px 138px); }
+.art::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(10,6,8,.65) 85%); }
+.mono-big { position: relative; z-index: 2; width: 350px; height: 350px; border-radius: 50%; background: #140e11; border: 12px solid #fff6dc;
+  display: grid; place-items: center; font-weight: 900; font-stretch: 112%; font-size: 152px; color: var(--hi); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.crew { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 170px); gap: 22px 26px; }
+.crew span { width: 170px; height: 170px; border-radius: 50%; background: #140e11; border: 8px solid #fff6dc; display: grid; place-items: center;
+  font-weight: 900; font-stretch: 108%; font-size: 64px; color: var(--hi); box-shadow: 0 12px 30px rgba(0,0,0,.55); }
+.crew.n4 { grid-template-columns: repeat(2, 170px); }
+.art.crew-art { place-items: center start; padding-left: 36px; }
+.crew-art .crew { grid-template-columns: repeat(3, 140px); gap: 18px 20px; }
+.crew-art .crew span { width: 140px; height: 140px; font-size: 52px; border-width: 7px; }
+.crew-art .crew.n4 { grid-template-columns: repeat(2, 140px); }
+.rank { position: absolute; z-index: 3; top: 24px; right: 24px; width: 146px; height: 146px; border-radius: 50%; background: var(--red); border: 8px solid #fff6dc;
+  display: grid; place-items: center; font-weight: 900; font-size: 62px; color: #fff; transform: rotate(8deg); }
+.plate { background: linear-gradient(90deg, var(--red-deep), var(--red)); padding: 20px 30px 18px; flex: none; }
+.plate .n { font-weight: 900; font-stretch: 70%; font-size: 96px; line-height: .9; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plate .p { font-family: var(--mono); font-weight: 800; font-size: 21px; letter-spacing: .14em; margin-top: 10px; opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shout { flex: none; padding: 20px 30px 6px; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 32px; line-height: 1.22; color: #fff6e6; min-height: 112px; }
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); flex: 1; align-items: center; }
+.stats div { display: grid; justify-items: center; border-right: 2px solid rgba(255,255,255,.08); padding: 6px 4px; }
+.stats div:last-child { border-right: 0; }
+.stats b { font-weight: 900; font-stretch: 96%; font-size: 46px; line-height: 1; color: var(--hi); white-space: nowrap; }
+.stats span { font-family: var(--mono); font-weight: 800; font-size: 16px; letter-spacing: .12em; color: var(--muted); margin-top: 10px; white-space: nowrap; }
+.foot { display: flex; justify-content: space-between; padding: 16px 30px 20px; font-family: var(--mono); font-weight: 800; font-size: 18px; letter-spacing: .14em; color: var(--muted); border-top: 2px solid rgba(255,255,255,.06); flex: none; }
+.holo { position: absolute; inset: 0; border-radius: 28px; pointer-events: none; mix-blend-mode: screen; opacity: .3;
+  background: linear-gradient(115deg, transparent 20%, rgba(255,120,120,.6) 35%, rgba(255,230,120,.6) 45%, rgba(120,255,200,.5) 55%, rgba(120,170,255,.5) 65%, transparent 80%);
+  background-size: 260% 100%; }
+.reward { position: absolute; top: 1660px; left: 50%; font-weight: 900; font-stretch: 110%; font-size: 40px; white-space: nowrap; padding: 14px 32px; border-radius: 999px;
+  border: 3px solid var(--mid); color: var(--hi); background: rgba(20,14,17,.88); text-transform: uppercase; }
+.reward.earned { background: var(--foil); color: #1a0f05; border-color: transparent; box-shadow: 0 14px 40px -10px var(--glow); }
+.progress { position: absolute; left: 0; bottom: 0; height: 8px; background: linear-gradient(90deg, var(--red), var(--mid)); }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="rays" id="rays"></div>
+  <canvas id="fx" width="1080" height="1920"></canvas>
+  <div class="lock" data-fx="fade" data-in="0" data-dur="500"><span class="rf">Redfin</span><span class="pb">powered by</span><span class="rk">Rocket</span></div>
+  <div class="head">
+    <div class="k" id="kicker" data-fx="rise" data-in="250" data-dur="500"></div>
+    <div class="h" id="headline" data-fx="slam" data-in="450" data-dur="650"></div>
+  </div>
+  <div class="cardwrap"><div class="card" id="card"><div class="inner">
+    <div class="strip"><span>FINISH STRONG '26</span><span id="no"></span></div>
+    <div class="art" id="art"><div class="rank" id="rank" data-fx="popr" data-in="2100" data-dur="500"></div></div>
+    <div class="plate"><div class="n" id="name"></div><div class="p" id="sub"></div></div>
+    <div class="shout" id="shout" data-fx="rise" data-in="2700" data-dur="600"></div>
+    <div class="stats" id="stats"></div>
+    <div class="foot"><span id="edition"></span><span>COMMAND CREW</span></div>
+    <div class="holo" id="holo"></div>
+  </div></div></div>
+  <div class="reward" id="reward" data-fx="popx" data-in="3300" data-dur="550"></div>
+  <canvas id="conf" width="1080" height="1920"></canvas>
+  <div class="progress" id="progress"></div>
+</div>
+<script id="season-data" type="application/json">__SEASON_DATA__</script>
+<script>
+(() => {
+  const S = JSON.parse(document.getElementById("season-data").textContent);
+  const hash = location.hash.match(/^#p(\d)(?:-w(\d+))?(-capture)?$/) || [];
+  const place = +(hash[1] || 1), W = +(hash[2] || S.current_week), capture = !!hash[3];
+  const w = S.weeks[String(W)];
+  const c = (w.cards || []).find((x) => x.place === place);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const md = (iso) => { const [, m, d] = iso.split("-").map(Number); return `${MONTHS[m - 1]} ${d}`; };
+  const DURATION = 7000;
+  if (!c) { document.body.textContent = "No card for this place."; window.CARD = { seek() {}, DURATION, missing: true }; return; }
+
+  document.getElementById("stage").classList.add(c.edition);
+  $("kicker").textContent = `WEEK ${W} · ${md(w.start).toUpperCase()}–${w.end.split("-")[2].replace(/^0/, "")}`;
+  $("headline").textContent = c.headline;
+  $("headline").style.fontSize = Math.min(124, Math.floor(980 / (c.headline.length * 0.8))) + "px"; // one line at any length
+  $("no").textContent = `No. ${String(c.no).padStart(2, "0")}`;
+  $("rank").textContent = `#${c.place}`;
+  $("name").textContent = c.title;
+  $("sub").textContent = c.sub;
+  $("shout").textContent = c.shout;
+  $("edition").textContent = `★ ${c.edition.toUpperCase()} EDITION`;
+  $("reward").textContent = c.reward;
+  if (c.pts) $("reward").classList.add("earned");
+  const art = $("art");
+  if (c.group) {
+    art.classList.add("crew-art");
+    const shown = c.initials.slice(0, 6);
+    art.insertAdjacentHTML("afterbegin", `<div class="crew ${shown.length === 4 ? "n4" : ""}">${shown.map((x, i) => `<span data-fx="pop" data-in="${1500 + i * 90}" data-dur="450">${esc(x)}</span>`).join("")}</div>`);
+  } else {
+    art.insertAdjacentHTML("afterbegin", `<div class="mono-big" data-fx="pop" data-in="1500" data-dur="550">${esc(c.initials[0])}</div>`);
+  }
+  const st = c.stats;
+  const cells = [["offers", "OFFERS"], ["volume", "VOLUME"], ["fast", "FAST"], ["ava", st.ava_label], ["rocket", "ROCKET"]];
+  $("stats").innerHTML = cells.map(([k, lab], i) => `<div data-fx="rise" data-in="${2200 + i * 110}" data-dur="450"><b data-count="${esc(st[k])}" data-in="${2250 + i * 110}">${esc(st[k])}</b><span>${esc(lab)}</span></div>`).join("");
+
+  /* ---------- timeline ---------- */
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const outCubic = (p) => 1 - Math.pow(1 - p, 3);
+  const outBack = (p) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+  const FX = {
+    fade: (p) => [outCubic(p), ""],
+    rise: (p) => [outCubic(p), `translateY(${(1 - outCubic(p)) * 30}px)`],
+    slam: (p) => [clamp(p * 1.5), `translateY(${(1 - outBack(p)) * 30}px) scale(${1 + (1 - outCubic(p)) * 0.14})`],
+    pop: (p) => [clamp(p * 1.8), `scale(${0.6 + 0.4 * outBack(p)})`],
+    popx: (p) => [clamp(p * 1.8), `translateX(-50%) scale(${0.7 + 0.3 * outBack(p)})`],
+    popr: (p) => [clamp(p * 1.8), `rotate(8deg) scale(${0.5 + 0.5 * outBack(p)})`],
+  };
+  const fxEls = [...document.querySelectorAll("[data-fx]")].map((el) => ({ el, fx: el.dataset.fx, a: +el.dataset.in, d: +el.dataset.dur }));
+  // Count-ups keep each value's own shape: "$1.19M", "3/3", "1 ea", "59".
+  const countEls = [...document.querySelectorAll("[data-count]")].map((el) => {
+    const raw = el.dataset.count, m = raw.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
+    return { el, raw, a: +el.dataset.in, pre: m ? m[1] : "", num: m ? parseFloat(m[2]) : null, dec: m && m[2].includes(".") ? m[2].split(".")[1].length : 0, post: m ? m[3] : "" };
+  });
+  const card = $("card"), holo = $("holo"), rays = $("rays");
+
+  let seed = 23; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const cols = { gold: ["#e8343b", "#f7b93e", "#ffde87", "#f7f1ee"], silver: ["#e8343b", "#eef2f6", "#cfd5dd", "#f7f1ee"], bronze: ["#e8343b", "#e5875a", "#ffc3a2", "#f7f1ee"] }[c.edition];
+  const conf = Array.from({ length: 200 }, () => { const a = -Math.PI / 2 + (rnd() - .5) * 2.6, sp = 900 + rnd() * 1500; return { vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, w: 12 + rnd() * 12, h: 18 + rnd() * 18, r: rnd() * 6, vr: (rnd() - .5) * 14, c: cols[(rnd() * cols.length) | 0] }; });
+  const stars = Array.from({ length: 90 }, () => ({ x: rnd() * 1080, y: rnd() * 1920, r: rnd() * 2 + .4, p: rnd() * 6.28 }));
+  const fx = $("fx").getContext("2d"), cf = $("conf").getContext("2d");
+  const CONF_T = 2600, OX = 540, OY = 900;
+
+  function seek(ms) {
+    for (const e of fxEls) { const [o, tr] = FX[e.fx](clamp((ms - e.a) / e.d)); e.el.style.opacity = o; e.el.style.transform = tr; }
+    // card flips in, settles at -3deg, then floats
+    const f = clamp((ms - 900) / 1100), fo = outBack(f);
+    const float = ms > 2000 ? Math.sin((ms - 2000) / 650) * 6 : 0;
+    card.style.opacity = clamp(f * 2.2);
+    card.style.transform = `translateY(${(1 - outCubic(f)) * 260 + float}px) rotateY(${(1 - fo) * 95}deg) rotate(${-3 * outCubic(f)}deg) scale(${0.85 + 0.15 * outCubic(f)})`;
+    // holo sweeps twice
+    const sweep = (t0) => clamp((ms - t0) / 1300);
+    const s1 = sweep(2000), s2 = sweep(4800);
+    holo.style.backgroundPosition = `${(s2 > 0 ? 1 - s2 : 1 - s1) * 260 - 80}% 0`;
+    rays.style.transform = `rotate(${ms * 0.004}deg)`;
+    for (const k of countEls) {
+      const p = outCubic(clamp((ms - k.a) / 1000));
+      k.el.textContent = k.num === null || p >= 1 ? k.raw : `${k.pre}${(k.num * p).toFixed(k.dec)}${k.post}`;
+    }
+    fx.clearRect(0, 0, 1080, 1920);
+    for (const s of stars) { fx.globalAlpha = .2 + .5 * (Math.sin(ms / 600 + s.p) + 1) / 2; fx.fillStyle = "#f7f1ee"; fx.beginPath(); fx.arc(s.x, s.y, s.r, 0, 6.283); fx.fill(); }
+    cf.clearRect(0, 0, 1080, 1920);
+    const ct = (ms - CONF_T) / 1000;
+    if (ct > 0 && ct < 2.4) for (const p of conf) {
+      const x = OX + p.vx * ct * Math.exp(-ct * .9) / 1.2, y = OY + p.vy * ct * Math.exp(-ct * .9) / 1.2 + 950 * ct * ct;
+      cf.save(); cf.globalAlpha = clamp((2.4 - ct) / .7); cf.translate(x, y); cf.rotate(p.r + p.vr * ct);
+      cf.fillStyle = p.c; cf.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos((p.r + p.vr * ct) * 1.7))); cf.restore();
+    }
+    $("progress").style.width = capture ? "0%" : (ms / DURATION) * 100 + "%";
+  }
+  const fit = () => document.getElementById("stage").style.setProperty("--k", Math.min(innerWidth / 1080, innerHeight / 1920));
+  fit(); addEventListener("resize", fit);
+  window.CARD = { seek, DURATION, still: 6400 };
+  if (!capture) { let t0 = null; const loop = (now) => { if (t0 === null) t0 = now; seek((now - t0) % DURATION); requestAnimationFrame(loop); }; document.fonts.ready.then(() => requestAnimationFrame(loop)); }
+  else seek(0);
+})();
+</script>
+</body>
+</html>
