@@ -298,7 +298,10 @@ Existing: FamilyMember, Post, TrackerItem, LifeEvent, Document, MediaItem, Newsl
 
 ## 15. Pre-launch checklist
 
-- [ ] **Change the Ford Inc. Drive folder from "Anyone with the link" to "Restricted."** (It is currently link-shared, which exposes every subfolder, including IDs, bank statements, and trust documents.)
+- [x] **Change the Ford Inc. Drive folder from "Anyone with the link" to "Restricted."** Done Nov 22, 2026; root folder and spot-checked files verified restricted.
+- [x] Base44 app set to invite-only (`private_with_login`), Google sign-in only.
+- [x] Builder pass 1 complete (Nov 22): design system, navigation, Ford Inc. parent/kid views, Protection cards, PIN vault, upload review queue, Admin, Calendar, new data models.
+- [x] Seeded property records corrected to match the Master sheet Properties tab.
 - [ ] Turn on Google 2-Step Verification for Orlando's and Timiesha's Google accounts.
 - [ ] Provide Google emails for Orlando Jr., Lennox, and Paxton.
 - [ ] Confirm the member focus corrections in §8.
@@ -306,3 +309,15 @@ Existing: FamilyMember, Post, TrackerItem, LifeEvent, Document, MediaItem, Newsl
 - [ ] Connect Drive, Sheets, and Calendar connectors in Base44.
 - [ ] Set the parent PIN.
 - [ ] Review the folder → tier map once after the first sync.
+
+## 16. Open build items (next builder pass)
+
+| Item | Status |
+|------|--------|
+| Home: Magazine cover and full-screen Command Center modes | Not built in pass 1 |
+| Monthly AI newsletter draft job + email alerts | Deferred by builder |
+| Studio smart albums & captions | Deferred by builder |
+| Approved uploads filed into Drive (currently filed to the in-app library) | Needs Drive connector |
+| `Reminder` records readable by every signed-in member | Move to `shared_with` RLS so parent-only deadlines stay private |
+| `Post`, `Newsletter`, `StudioProject`, `NewsletterRelease` readable by every signed-in member | Acceptable now that the app is invite-only; revisit if extended family is added |
+| Protection cards (12) | Placeholders until plan documents are in Drive |
