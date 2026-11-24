@@ -104,7 +104,6 @@ Manual stat edits are kept until Redfin shows numbers that differ from the last 
 ## Open items
 
 - Link Redfin profiles for Aubrey Myers Jr., Michele Lopez and Wilson Ho (no public profile
-  found under those names), and verify Adrienne Allen (the only match carried a non-California
-  license, so it was not used).
+  found under those names).
 - Add each agent's loyalty link (Roster → Edit) so QR codes point to it instead of the profile.
 - Add agent emails and use **Give edit access** so agents can save into their own vault folders.
